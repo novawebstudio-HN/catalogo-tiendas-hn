@@ -1,7 +1,7 @@
 // Normaliza los productos crudos de las 4 tiendas y agrupa los que son el mismo modelo.
 import { CATEGORIES, STORES, MIN_PRICE, ACCESSORY_RE } from './taxonomy.mjs';
 
-const STORE_ORDER = ['jetstereo', 'diunsa', 'curacao', 'elektra'];
+const STORE_ORDER = ['jetstereo', 'diunsa', 'curacao', 'elektra', 'ladylee', 'walmart'];
 
 const deaccent = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
 

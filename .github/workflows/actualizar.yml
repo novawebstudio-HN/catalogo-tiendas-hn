@@ -54,6 +54,8 @@ jobs:
   publicar:
     needs: actualizar
     runs-on: ubuntu-latest
+    # No marca la corrida como fallida mientras GitHub Pages no esté activado (repo privado).
+    continue-on-error: true
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}

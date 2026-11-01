@@ -1,6 +1,6 @@
 # Vitrina HN
 
-Catálogo unificado de las cuatro cadenas grandes de Honduras — **Jetstereo, Diunsa, La Curacao y Elektra** — en las categorías de compras grandes: celulares, laptops, tablets, televisores, audio, consolas, refrigeradoras, lavadoras, estufas, microondas, aires acondicionados, camas y freidoras de aire.
+Catálogo unificado de las cadenas grandes de Honduras — **Diunsa, La Curacao, Elektra, Lady Lee y Walmart** (Jetstereo listo, ver nota) — en las categorías de compras grandes: celulares, laptops, tablets, televisores, audio, consolas, refrigeradoras, lavadoras, estufas, microondas, aires acondicionados, camas y freidoras de aire.
 
 Cuando el mismo modelo está en varias tiendas, se muestra como un solo producto con el precio de cada una y el más bajo resaltado.
 
@@ -12,14 +12,16 @@ GitHub Actions (diario, 6:17 a. m. HN)
        ├─ stores/jetstereo.mjs  → api.jetstereo.com (paginado, 50 por página)
        ├─ stores/diunsa.mjs     → API del sitio de Diunsa (por código de categoría)
        ├─ stores/curacao.mjs    → HTML público de cada categoría (ver nota)
-       └─ stores/elektra.mjs    → API pública de catálogo VTEX
+       ├─ stores/elektra.mjs    → API pública de catálogo VTEX
+       ├─ stores/ladylee.mjs    → catálogo público de Shopify por colección
+       └─ stores/walmart.mjs    → API pública de catálogo VTEX (con código de barras)
   └─ src/build.mjs   → limpia, filtra accesorios/precios < L1,000 y agrupa por modelo
   └─ src/thumbs.mjs  → miniatura WebP de 220 px de cada producto (site/thumbs/)
   └─ site/catalog.json + data/raw/*.json  (se guardan en el repo)
   └─ GitHub Pages     → publica la carpeta site/
 ```
 
-- **Sin dependencias**: Node 22 y `fetch` nativo.
+- **Mínimas dependencias**: Node 22 y `fetch` nativo; `sharp` solo para las miniaturas.
 - **Tolerante a fallas**: si una tienda falla, se conservan sus últimos datos y la página la marca como "sin actualizar".
 - **Agrupación**: por código de barras (cuando existe) o por número de modelo del fabricante, con reglas para no mezclar capacidades distintas (GB) ni tamaños distintos (pulgadas).
 

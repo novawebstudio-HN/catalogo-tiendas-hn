@@ -20,6 +20,8 @@ export const STORES = {
   diunsa: { name: 'Diunsa', site: 'https://www.diunsa.hn' },
   curacao: { name: 'La Curacao', site: 'https://www.lacuracaonline.com/honduras' },
   elektra: { name: 'Elektra', site: 'https://www.elektra.com.hn' },
+  ladylee: { name: 'Lady Lee', site: 'https://ladylee.net' },
+  walmart: { name: 'Walmart', site: 'https://www.walmart.com.hn' },
 };
 
 // Filtro de alcance: solo compras grandes / reconocidas.

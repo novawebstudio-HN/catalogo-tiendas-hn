@@ -5,6 +5,8 @@ import { scrapeJetstereo } from './stores/jetstereo.mjs';
 import { scrapeDiunsa } from './stores/diunsa.mjs';
 import { scrapeCuracao } from './stores/curacao.mjs';
 import { scrapeElektra } from './stores/elektra.mjs';
+import { scrapeLadyLee } from './stores/ladylee.mjs';
+import { scrapeWalmart } from './stores/walmart.mjs';
 import { buildCatalog } from './build.mjs';
 
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
@@ -14,7 +16,10 @@ const politeFetch = (url, opts = {}) => fetch(url, {
   signal: AbortSignal.timeout(30000),
 });
 
-const SCRAPERS = { jetstereo: scrapeJetstereo, diunsa: scrapeDiunsa, curacao: scrapeCuracao, elektra: scrapeElektra };
+const SCRAPERS = {
+  jetstereo: scrapeJetstereo, diunsa: scrapeDiunsa, curacao: scrapeCuracao, elektra: scrapeElektra,
+  ladylee: scrapeLadyLee, walmart: scrapeWalmart,
+};
 const NOTES = {
   curacao: 'Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio).',
   jetstereo: 'Su servidor rechaza consultas automáticas desde la nube (HTTP 403), por eso no se actualiza a diario.',
