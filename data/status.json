@@ -2,35 +2,35 @@
   "jetstereo": {
     "ok": false,
     "error": "Jetstereo 26 HTTP 403",
-    "note": "Su servidor rechaza consultas automáticas desde la nube (HTTP 403), por eso no se actualiza a diario."
+    "note": "Su servidor rechaza consultas desde la nube; sus precios vienen de una captura hecha desde un navegador o computadora en Honduras."
   },
   "diunsa": {
     "ok": true,
-    "updated": "2026-11-01T19:04:02.761Z",
+    "updated": "2026-11-01T19:28:07.559Z",
     "count": 817,
     "note": ""
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-01T19:05:11.625Z",
+    "updated": "2026-11-01T19:29:14.977Z",
     "count": 226,
     "note": "Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio)."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-01T19:05:24.664Z",
+    "updated": "2026-11-01T19:29:26.504Z",
     "count": 243,
     "note": ""
   },
   "ladylee": {
     "ok": true,
-    "updated": "2026-11-01T19:05:34.585Z",
+    "updated": "2026-11-01T19:29:37.104Z",
     "count": 420,
     "note": ""
   },
   "walmart": {
     "ok": true,
-    "updated": "2026-11-01T19:05:49.786Z",
+    "updated": "2026-11-01T19:29:47.979Z",
     "count": 205,
     "note": ""
   }
