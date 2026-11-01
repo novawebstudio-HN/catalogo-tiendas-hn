@@ -38,7 +38,7 @@
   },
   "gallo": {
     "ok": false,
-    "error": "fetch failed",
+    "error": "fetch failed (UND_ERR_HEADERS_OVERFLOW Headers Overflow Error)",
     "note": ""
   },
   "radioshack": {
@@ -55,7 +55,7 @@
   },
   "acosa": {
     "ok": false,
-    "error": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+    "error": "Acosa 1735: respuesta no JSON (200, text/html, url final https://acosa.com.hn/bxVerify.html?rd=/API/wc/store/v1/products?category=1735&per_page=100&page=1): ACOSA",
     "note": ""
   },
   "gamestation": {
