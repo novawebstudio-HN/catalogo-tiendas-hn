@@ -8,49 +8,50 @@
   },
   "diunsa": {
     "ok": true,
-    "updated": "2026-11-01T21:46:55.334Z",
-    "count": 1520,
+    "updated": "2026-11-01T23:16:54.815Z",
+    "count": 1546,
     "note": ""
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-01T21:49:14.020Z",
+    "updated": "2026-11-01T23:18:59.745Z",
     "count": 429,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-01T21:49:53.372Z",
-    "count": 293,
+    "updated": "2026-11-01T23:19:08.895Z",
+    "count": 315,
     "note": ""
   },
   "ladylee": {
-    "ok": true,
+    "ok": false,
     "updated": "2026-11-01T21:50:13.150Z",
     "count": 644,
-    "note": ""
+    "note": "",
+    "error": "Lady Lee /products.json HTTP 429"
   },
   "walmart": {
     "ok": true,
-    "updated": "2026-11-01T21:50:34.163Z",
-    "count": 310,
+    "updated": "2026-11-01T23:20:12.795Z",
+    "count": 353,
     "note": ""
   },
   "gallo": {
     "ok": true,
-    "updated": "2026-11-01T21:53:06.937Z",
+    "updated": "2026-11-01T23:25:36.125Z",
     "count": 334,
     "note": ""
   },
   "radioshack": {
     "ok": true,
-    "updated": "2026-11-01T21:54:51.105Z",
+    "updated": "2026-11-01T23:27:06.619Z",
     "count": 241,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "tropigas": {
     "ok": true,
-    "updated": "2026-11-01T21:57:38.543Z",
+    "updated": "2026-11-01T23:29:12.359Z",
     "count": 331,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
@@ -63,8 +64,14 @@
   },
   "gamestation": {
     "ok": true,
-    "updated": "2026-11-01T21:59:11.764Z",
-    "count": 823,
+    "updated": "2026-11-01T23:33:43.142Z",
+    "count": 2708,
+    "note": ""
+  },
+  "sycom": {
+    "ok": true,
+    "updated": "2026-11-01T23:34:55.985Z",
+    "count": 452,
     "note": ""
   }
 }
