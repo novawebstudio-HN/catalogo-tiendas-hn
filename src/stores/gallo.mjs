@@ -21,14 +21,14 @@ const RULES = [
   [/televisor|pantalla|smart-tv/, 'televisores'],
   [/minicomponente|parlante|bocina|barra-de-sonido|soundbar|teatro-en-casa|equipo-de-sonido|sistema-de-audio/, 'audio'],
   [/refrigerad|congelador|freezer/, 'refrigeradoras'],
-  [/lavadora|secadora-de-ropa|secadora-\d|centro-de-lavado|^secadora/, 'lavadoras'],
+  [/lavadora|secadora-de-ropa|centro-de-lavado|^secadora-(?!.*(cabello|pelo|mano))/, 'lavadoras'],
   [/microondas/, 'microondas'],
   [/estufa|cocina-de-gas|cocina-electrica/, 'estufas'],
   [/aire-acondicionado|aire-inverter|minisplit|mini-split/, 'aires'],
   [/freidora/, 'freidoras'],
   [/licuadora|cafetera|batidora|percolador|procesador-de-alimento/, 'licuadoras'],
   [/motocicleta|cuatrimoto|^moto-/, 'motos'],
-  [/^(set-)?cama|colchon|set-de-cama|box-spring/, 'camas'],
+  [/^(set-)?cama(-|$)|colchon|set-de-cama|box-spring/, 'camas'],
 ];
 const classify = (slug) => RULES.find(([re]) => re.test(slug))?.[1] || '';
 const RELEVANT_CAT_PATH = /celulares|tablets|computadoras|smartwatch|audio|tv-y-entretenimiento|zona-gamer|refrigeradoras|lavadoras|estufas|hornos|aires|camas-y-colchones|freidoras|licuadoras|cafeteras|motos/;

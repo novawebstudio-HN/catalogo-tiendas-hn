@@ -122,6 +122,8 @@ const DROP_BY_CAT = {
   impresoras: /tinta|cartucho|toner|t[oó]ner|papel|cabezal|repuesto/i,
   motos: /casco|llanta|bater[ií]a|aceite|repuesto|guante|chaqueta|juguete/i,
   smartwatches: /correa|pulso|cargador|protector|funda/i,
+  lavadoras: /cabello|pelo|de mano|plancha/i,
+  camas: /camarote|litera|cuna|sof[aá] ?cama|almohada/i,
 };
 const CONSOLE_NAME = /\bconsola\b|console|playstation\s*5\s*(slim|pro|digital)|ps5\s*(slim|pro|digital)|switch\s*(2|oled|lite)\b|xbox series [xs]\b/i;
 const GAME_GEAR = /\bjuego\b|videojuego|\bcontrol(es)?\b|\bmando\b|dualsense|joy-?con|volante|headset/i;
