@@ -6,19 +6,19 @@
   },
   "diunsa": {
     "ok": true,
-    "updated": "2026-11-01T18:34:55.601Z",
+    "updated": "2026-11-01T18:36:30.092Z",
     "count": 817,
     "note": ""
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-01T18:35:23.997Z",
-    "count": 197,
+    "updated": "2026-11-01T18:37:56.538Z",
+    "count": 214,
     "note": "Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio)."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-01T18:35:41.087Z",
+    "updated": "2026-11-01T18:37:57.699Z",
     "count": 243,
     "note": ""
   }
