@@ -37,8 +37,9 @@
     "note": ""
   },
   "gallo": {
-    "ok": false,
-    "error": "fetch failed (UND_ERR_HEADERS_OVERFLOW Headers Overflow Error)",
+    "ok": true,
+    "updated": "2026-11-01T20:56:03.744Z",
+    "count": 334,
     "note": ""
   },
   "radioshack": {
