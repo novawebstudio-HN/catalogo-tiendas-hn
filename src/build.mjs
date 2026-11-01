@@ -10,9 +10,12 @@ export const brandKey = (b) => {
   const k = deaccent(b).toLowerCase().trim();
   return (BRAND_ALIASES[k] ?? k).replace(/[^a-z0-9+]/g, '');
 };
+const DISPLAY_ALIASES = { iphone: 'Apple', ipad: 'Apple', 'general electric': 'GE', 'black and decker': 'Black+Decker', 'black & decker': 'Black+Decker', 'samsung electronics': 'Samsung' };
 const titleBrand = (b) => {
-  const s = String(b || '').trim();
+  const s0 = String(b || '').trim();
+  const s = DISPLAY_ALIASES[deaccent(s0).toLowerCase()] || s0;
   if (!s || /sin marca/i.test(s)) return '';
+  if (s !== s0) return s;
   if (s.length <= 4) return s.toUpperCase();
   return s.toLowerCase().replace(/(^|[\s-])\p{L}/gu, (m) => m.toUpperCase());
 };
