@@ -177,8 +177,10 @@ export function group(items) {
       .sort((a, b) => (b.a - a.a) || (a.p - b.p));
     // Fotos candidatas de todas las tiendas del grupo; thumbs.mjs usa la primera que funcione.
     const pics = [...new Set(ps.flatMap((p) => [p.img, ...(p.alts || [])]).filter(Boolean))].slice(0, 8);
-    const cands = ps.flatMap((p) => p.models);
-    const model = cands.filter((m) => m.length >= 7).sort((a, b) => a.length - b.length)[0] || cands[0] || '';
+    // Modelo a mostrar: el código completo más repetido entre las tiendas (sin sufijo de región).
+    const freq = {};
+    for (const p of ps) for (const c of new Set((p.full || p.cores).map((c) => c.replace(REGION_SUFFIX, '')))) freq[c] = (freq[c] || 0) + 1;
+    const model = Object.entries(freq).sort((a, b) => (b[1] - a[1]) || (b[0].length - a[0].length))[0]?.[0] || ps.flatMap((p) => p.models)[0] || '';
     return {
       id: `${ps[0].store}-${ps[0].sku || ps[0].url}`.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 60),
       c: ps[0].cat, b: ps.find((p) => p.brand)?.brand || '', n: ps[0].name.replace(/\s+/g, ' ').trim(),
