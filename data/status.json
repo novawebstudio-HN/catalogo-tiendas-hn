@@ -1,0 +1,24 @@
+{
+  "jetstereo": {
+    "ok": false,
+    "error": "Jetstereo 26 HTTP 403",
+    "note": "Sin actualizar en la última corrida; se muestran los datos anteriores."
+  },
+  "diunsa": {
+    "ok": true,
+    "updated": "2026-11-01T18:29:57.621Z",
+    "count": 817,
+    "note": ""
+  },
+  "curacao": {
+    "ok": false,
+    "error": "Curacao colchones/camas HTTP 406",
+    "note": "Sin actualizar en la última corrida; se muestran los datos anteriores."
+  },
+  "elektra": {
+    "ok": true,
+    "updated": "2026-11-01T18:30:20.578Z",
+    "count": 243,
+    "note": ""
+  }
+}
