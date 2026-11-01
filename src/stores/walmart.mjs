@@ -25,7 +25,7 @@ const MAP = [
   ['/13/111/530/', [['lavadoras']]],
   ['/13/111/531/', [['estufas', /estufa|cocina/i]]],
   ['/13/111/532/', [['refrigeradoras']]],
-  ['/13/112/534/', [['aires', /aire/i]]],
+  ['/13/112/534/', [['aires', /aire|split|inverter|btu/i]]],
   ['/13/112/537/', [['freidoras', /freidora/i]]],
   ['/13/112/542/', [['microondas', /microond/i]]],
   ['/13/112/540/', [['licuadoras', /licuadora|batidora/i]]],

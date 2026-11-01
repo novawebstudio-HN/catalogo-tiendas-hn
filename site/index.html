@@ -6,6 +6,18 @@
 <meta name="theme-color" content="#FFFFFF">
 <title>Vitrina HN</title>
 <meta name="description" content="Compara precios de las tiendas grandes de Honduras en un solo lugar: celulares, televisores, línea blanca, consolas, motos y más, con historial de precios.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="site.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Vitrina HN">
+<meta property="og:title" content="Vitrina HN · ¿Dónde sale más barato?">
+<meta property="og:description" content="Compara precios de las tiendas grandes de Honduras en un solo lugar.">
+<meta property="og:image" content="https://novawebstudio-hn.github.io/catalogo-tiendas-hn/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
@@ -32,7 +44,8 @@ button,input,select{font:inherit;color:inherit}
 /* Encabezado */
 header.top .wrap{padding-block:18px 22px;display:grid;gap:14px}
 .brandline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.logo{font:800 24px/1 "Barlow Condensed",sans-serif;margin:0;letter-spacing:.01em;text-decoration:none}
+.logo{font:800 24px/1 "Barlow Condensed",sans-serif;margin:0;letter-spacing:.01em;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.logo svg{width:32px;height:32px;flex:0 0 auto}
 .logo span{display:inline-block;background:var(--tag);color:var(--tag-ink);padding:3px 7px 1px;border-radius:4px;margin-left:5px;transform:rotate(-2deg)}
 .top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .updated{color:var(--muted);font-size:14px;margin-right:6px}
@@ -53,7 +66,13 @@ h1.ask{font:700 clamp(36px,5.2vw,60px)/.95 "Barlow Condensed",sans-serif;margin:
 /* Pestañas de categoría */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:20;background:var(--paper)}
 nav.cats{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--paper);border-block:1px solid var(--line)}
-.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}
+.catwrap{position:relative}
+.tabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth}
+.tabarrow{position:absolute;top:0;bottom:0;width:52px;border:0;padding:0;cursor:pointer;display:grid;align-items:center;z-index:2;color:var(--ink)}
+.tabarrow svg{width:30px;height:30px;padding:6px;border-radius:50%;background:var(--paper);border:1px solid var(--line-2);box-shadow:0 2px 6px rgba(20,27,35,.08)}
+.tabarrow:hover svg{border-color:var(--ink)}
+.tabarrow.l{left:max(8px,env(safe-area-inset-left,0px));justify-items:start;background:linear-gradient(90deg,var(--paper) 50%,rgba(255,255,255,0))}
+.tabarrow.r{right:max(8px,env(safe-area-inset-right,0px));justify-items:end;background:linear-gradient(270deg,var(--paper) 50%,rgba(255,255,255,0))}
 .tabs::-webkit-scrollbar{display:none}
 .tab{flex:0 0 auto;border:0;background:none;padding:14px 12px 12px;cursor:pointer;font-weight:600;font-size:15px;color:var(--muted);border-bottom:3px solid transparent;white-space:nowrap}
 .tab small{font-weight:500;color:var(--faint);margin-left:5px}
@@ -100,7 +119,14 @@ aside.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 68px);max-hei
 .p .img{display:block;aspect-ratio:1/1;max-width:100%;padding:18px;background:#fff;cursor:pointer;text-decoration:none}
 .p .img img{width:100%;height:100%;object-fit:contain;display:block}
 .ph{display:grid;place-items:center;width:100%;height:100%;font:700 40px "Barlow Condensed";color:#C9D0D8;background:var(--soft);border-radius:8px}
-.p .body{padding:4px 14px 0;display:flex;flex-direction:column;gap:2px;flex:1}
+.p .body{padding:4px 14px 0;display:flex;flex-direction:column;gap:2px}
+.colors{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:8px 14px 0}
+.clabel{font-size:13px;color:var(--muted);margin-right:2px}
+.cdot{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--line-2);background:var(--c,#ccc);cursor:pointer;padding:0;flex:0 0 auto}
+.cdot[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.cdot:hover{box-shadow:0 0 0 2px var(--muted)}
+.cmore{font-size:12.5px;color:var(--muted)}
+.sh-info .colors{margin:12px 0 0}
 .p .b{font-size:13px;color:var(--muted);font-weight:600}
 .p .n{font-size:15px;font-weight:500;line-height:1.3;text-decoration:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
 .p a.n:hover{text-decoration:underline;text-underline-offset:2px}
@@ -286,7 +312,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 <header class="top">
   <div class="wrap">
     <div class="brandline">
-      <a class="logo" href="#">Vitrina<span>HN</span></a>
+      <a class="logo" href="#" aria-label="Vitrina HN, inicio"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#141B23"/><path d="M13 17.5A4.5 4.5 0 0 1 17.5 13h16.6a4.5 4.5 0 0 1 3.2 1.3l12.9 12.9a4.5 4.5 0 0 1 0 6.4L33.6 50.2a4.5 4.5 0 0 1-6.4 0L14.3 37.3a4.5 4.5 0 0 1-1.3-3.2Z" fill="#FFD84A"/><circle cx="22.5" cy="22.5" r="3.6" fill="#141B23"/><path d="M25 35.5l5.5 5.5 11-11" fill="none" stroke="#141B23" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Vitrina<span>HN</span></a>
       <div class="top-actions">
         <span class="updated" id="updated"></span>
         <a class="hbtn" href="#ofertas" id="navDeals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span class="lbl">Ofertas reales</span></a>
@@ -307,7 +333,11 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 </header>
 
 <nav class="cats" aria-label="Categorías">
-  <div class="wrap"><div class="tabs" id="tabs" role="tablist"></div></div>
+  <div class="wrap catwrap">
+    <button class="tabarrow l" id="tabL" aria-label="Ver categorías anteriores" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <div class="tabs" id="tabs" role="tablist"></div>
+    <button class="tabarrow r" id="tabR" aria-label="Ver más categorías" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg></button>
+  </div>
 </nav>
 
 <div class="wrap layout" id="layout">
@@ -440,7 +470,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     for (const o of p.o) if (o.k) byKey.set(o.k, p);
     byKey.set(p.id, p);
     p._n = norm(p.n);
-    p._t = norm(`${p.b} ${p.n} ${p.m} ${catName(p.c)}`);
+    p._t = norm(`${p.b} ${p.n} ${p.on || ''} ${p.m} ${catName(p.c)}`);
     p._f = {};
     for (const f of FACETS[p.c] || []) { const v = f.fn(p._n); if (v) p._f[f.id] = v; }
     for (const w of p._t.split(/[^a-z0-9]+/)) if (w.length >= 3) vocab.set(w, (vocab.get(w)||0) + 1);
@@ -488,6 +518,11 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     fuzzyCache.set(t, res);
     return res;
   }
+  // Coincidencia desde el inicio de una palabra; si el término tiene números, no puede seguir otro número
+  // (así "ps4" no coincide con el modelo "PS45100"). Lo escrito con números busca también dentro de códigos.
+  const reCache = new Map();
+  const wordRe = (a) => { if (!reCache.has(a)) reCache.set(a, new RegExp(`(^|[^a-z0-9])${a.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}${/\d/.test(a) ? '(?![0-9])' : ''}`)); return reCache.get(a); };
+  const hit = (text, a, typed) => typed && /\d/.test(a) && /[a-z]/.test(a) ? text.includes(a) : wordRe(a).test(text);
   // Convierte la búsqueda en términos; cada término acepta alternativas exactas y, si no hay, parecidas.
   function compileQuery(q){
     const toks = norm(q).replace(/(\d)\s?(gb|tb|kg|cc|hz)\b/g, '$1$2').split(/[^a-z0-9+"]+/).filter(t => t && !QSTOP.has(t));
@@ -496,16 +531,16 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
       if (t.length > 4 && t.endsWith('es')) base.push(t.slice(0, -2));
       if (t.length > 3 && t.endsWith('s')) base.push(t.slice(0, -1));
       const alts = [...new Set([...base, ...(SYN[t] || SYN[base.at(-1)] || [])])];
-      const exact = data.products.some(p => alts.some(a => p._t.includes(a)));
+      const exact = data.products.some(p => alts.some((a, i) => hit(p._t, a, i < base.length)));
       const fz = exact || /^\d+$/.test(t) ? [] : fuzzyWords(t);
-      return { t, alts, fuzzy: [...new Set([...fz, ...fz.flatMap(w => SYN[w] || [])])] };
+      return { t, alts, typed: base.length, fuzzy: [...new Set([...fz, ...fz.flatMap(w => SYN[w] || [])])] };
     });
   }
   function scoreQuery(p, terms){
     let s = 0;
     for (const term of terms) {
-      if (term.alts.some(a => p._t.includes(a))) s += 3;
-      else if (term.fuzzy.some(w => p._t.includes(w))) s += 1;
+      if (term.alts.some((a, i) => hit(p._t, a, i < term.typed))) s += 3;
+      else if (term.fuzzy.some(w => hit(p._t, w, false))) s += 1;
       else return 0;
     }
     if (terms[0] && p._n.startsWith(terms[0].t)) s += 1;
@@ -558,7 +593,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     if (state.terms.length && !p._qs) return false;
     return true;
   }
-  const countBy = (list, key) => { const c = {}; list.forEach(p => { const ks = [].concat(key(p)); ks.forEach(k => { if (k) c[k] = (c[k]||0)+1; }); }); return c; };
+  const countBy = (list, key) => { const c = {}, seen = {}; list.forEach(p => { const fid = p.v || p.key; [].concat(key(p)).forEach(k => { if (!k) return; const s = seen[k] ||= new Set(); if (!s.has(fid)) { s.add(fid); c[k] = (c[k]||0)+1; } }); }); return c; };
 
   function renderTabs(){
     const v = state.view; state.view = 'catalog';
@@ -567,7 +602,15 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     const counts = countBy(base, p => p.c);
     const tab = (id, name, n) => `<button class="tab" role="tab" aria-selected="${state.view==='catalog' && state.cat===id}" data-c="${id}">${esc(name)}<small>${fmt.format(n)}</small></button>`;
     $('#tabs').innerHTML = tab('', 'Todo', base.length) + data.categories.filter(c=>counts[c.id]).map(c=>tab(c.id, c.name, counts[c.id])).join('');
+    requestAnimationFrame(updateArrows);
   }
+  // Flechas para recorrer las categorías cuando no caben en pantalla.
+  const tabsEl = $('#tabs');
+  function updateArrows(){ const max = tabsEl.scrollWidth - tabsEl.clientWidth; $('#tabL').hidden = tabsEl.scrollLeft <= 4; $('#tabR').hidden = max <= 4 || tabsEl.scrollLeft >= max - 4; }
+  tabsEl.addEventListener('scroll', updateArrows, { passive: true });
+  window.addEventListener('resize', updateArrows);
+  $('#tabL').addEventListener('click', () => tabsEl.scrollBy({ left: -tabsEl.clientWidth * 0.7 }));
+  $('#tabR').addEventListener('click', () => tabsEl.scrollBy({ left: tabsEl.clientWidth * 0.7 }));
 
   const opt = (g, v, label, n, checked, type='checkbox', extra='') => `<label class="opt${!n && !checked ? ' zero' : ''}"><input type="${type}" name="${g}" data-g="${g}" value="${esc(v)}"${checked?' checked':''}>${extra}<span class="lbl">${esc(label)}</span>${n!=null?`<span class="n">${fmt.format(n)}</span>`:''}</label>`;
 
@@ -631,6 +674,18 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
   const imgTag = (src, initial, extra='') => src ? `<img src="${esc(src)}" alt="" ${extra} decoding="async" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;>${initial}</span>'">` : `<span class="ph">${initial}</span>`;
   const plink = (p) => '#p/' + encodeURIComponent(p.key);
 
+  // Colores: muestra de color por nombre.
+  const SWATCH = { 'Negro':'#16181b','Blanco':'#ffffff','Blanco estelar':'#f4efe6','Gris':'#9aa1a9','Grafito':'#4a4f55','Plata':'#c9cdd2','Azul':'#2563eb','Azul marino':'#1e3a8a','Azul cobalto':'#1d4ed8','Celeste':'#7dd3fc','Índigo':'#4338ca','Zafiro':'#1e40af','Rojo':'#dc2626','Rojo volcánico':'#b91c1c','Vino':'#7f1d1d','Rosado':'#f9a8d4','Fucsia':'#db2777','Coral':'#fb7185','Verde':'#16a34a','Menta':'#a7f3d0','Jade':'#10b981','Verde oliva':'#65743a','Oliva':'#65743a','Verde salvia':'#9caf88','Verde azulado':'#0f766e','Morado':'#7c3aed','Violeta':'#8b5cf6','Lila':'#c4b5fd','Lavanda':'#c7b9f0','Dorado':'#d4a72c','Champagne':'#e8d9b5','Bronce':'#a16207','Cobre':'#b45309','Amarillo':'#facc15','Naranja':'#f97316','Café':'#7c4a1e','Beige':'#e7d8c0','Crema':'#f3ead3','Arena':'#d6c4a0','Turquesa':'#2dd4bf','Aqua':'#67e8f9','Titanio':'#b8b2a7','Camuflaje':'#556b2f','Medianoche':'#1f2937','Cósmico':'#5b21b6','Galáctico':'#6d28d9','Neón':'#22d3ee','Acero inoxidable':'#c0c4c8' };
+  const swatch = (c) => SWATCH[String(c).split(' / ')[0]] || '#cbd2d9';
+  const famOf = new Map();       // familia -> integrantes visibles con los filtros actuales
+  function colorsHtml(p, fam, mode){
+    if (!fam || fam.length < 2) return '';
+    const max = 6, shown = fam.slice(0, max);
+    return `<div class="colors"><span class="clabel">${esc(p.cl || 'Color')}</span>${shown.map(m => mode === 'sheet'
+      ? `<a class="cdot" href="${plink(m)}" style="--c:${swatch(m.cl)}" aria-pressed="${m === p}" aria-label="${esc(m.cl)}" title="${esc(m.cl)}"></a>`
+      : `<button class="cdot" data-swap="${esc(m.key)}" style="--c:${swatch(m.cl)}" aria-pressed="${m === p}" aria-label="${esc(m.cl)}" title="${esc(m.cl)}"></button>`).join('')}${fam.length > max ? `<span class="cmore">+${fam.length - max}</span>` : ''}</div>`;
+  }
+
   function card(p){
     let offers = state.view === 'favs' ? allOffers(p) : offersOf(p);
     if (!offers.length) offers = allOffers(p);
@@ -650,6 +705,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
       <a class="img" href="${plink(p)}" tabindex="-1" aria-hidden="true">${imgTag(imgSrc(p), initial, 'loading="lazy"')}</a>
       <div class="body"><span class="b">${esc(p.b || catName(p.c))}</span><a class="n" href="${plink(p)}" title="${esc(p.n)}">${esc(p.n)}</a>${p.m?`<span class="m">Modelo ${esc(p.m)}</span>`:''}</div>
       <div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${was}</div><div class="where"><span class="sw" style="background:var(--s-${best.s})"></span>${offers.length>1?'Más barato en ':'En '}${esc(storeName(best.s))}${best.a?'':' (agotado)'}</div></div>
+      ${colorsHtml(p, famOf.get(p.v))}
       ${flagsHtml(flagsOf(p, best))}
       ${spread>0?`<div class="save">Ahorras ${plain(spread)} frente a la más cara</div>`:''}
       ${plan?`<div class="plan">${esc(plan)}</div>`:''}
@@ -668,7 +724,16 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     else if (state.sort === 'drop') list.sort((a,b)=>(dropOf(offersOf(b)[0]||{})/bestP(b))-(dropOf(offersOf(a)[0]||{})/bestP(a)) || bestP(a)-bestP(b));
     else if (state.sort === 'multi') list.sort((a,b)=>offersOf(b).length-offersOf(a).length || bestP(a)-bestP(b));
     else if (state.terms.length) list.sort((a,b)=>(b._qs-a._qs) || (offersOf(b).length-offersOf(a).length));
-    return list;
+    // Los colores de un mismo producto se muestran en una sola tarjeta (la mejor ubicada de la familia).
+    famOf.clear();
+    const out = [];
+    for (const p of list) {
+      if (!p.v) { out.push(p); continue; }
+      if (!famOf.has(p.v)) { famOf.set(p.v, []); out.push(p); }
+      famOf.get(p.v).push(p);
+    }
+    for (const f of famOf.values()) f.sort((a, b) => String(a.cl).localeCompare(String(b.cl), 'es'));
+    return out;
   }
   function renderGrid(append){
     const grid = $('#grid');
@@ -690,7 +755,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     $('#more').textContent = `Ver ${fmt.format(Math.min(48, left))} productos más (quedan ${fmt.format(left)})`;
   }
   function renderDidYou(){
-    const fixes = state.terms.filter(t => t.fuzzy.length && !data.products.some(p => p._qs && t.alts.some(a => p._t.includes(a))));
+    const fixes = state.terms.filter(t => t.fuzzy.length && !data.products.some(p => p._qs && t.alts.some((a, i) => hit(p._t, a, i < t.typed))));
     const el = $('#didyou');
     if (!fixes.length || !current.length) { el.hidden = true; return; }
     el.hidden = false;
@@ -854,6 +919,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
             ${flagsHtml(flagsOf(p, best))}
             ${spread > 0 ? `<div class="save">Ahorras ${plain(spread)} frente a la tienda más cara</div>` : ''}
             ${planText(offers.find(o=>o.q)) ? `<div class="plan">${esc(planText(offers.find(o=>o.q)))}</div>` : ''}
+            ${colorsHtml(p, (data.products.filter(x => p.v && x.v === p.v)).sort((a, b) => String(a.cl).localeCompare(String(b.cl), 'es')), 'sheet')}
             ${chips.length ? `<div class="chips">${chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}</div>` : ''}
             <div class="actions">
               <a class="abtn wa" id="shWa" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.6 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-5-4.3-5.1-4.5-.2-.2-1.2-1.6-1.2-3s.7-2.2 1-2.5c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>Compartir</a>
@@ -1016,6 +1082,8 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
   // Clic en tarjetas: favoritos, comparar y abrir la ficha
   document.querySelector('main').addEventListener('click', (e) => {
     const f = e.target.closest('[data-fav]'); if (f) { e.preventDefault(); toggleFav(byKey.get(f.dataset.fav)); return; }
+    const sw = e.target.closest('[data-swap]');
+    if (sw) { const art = sw.closest('article.p'); const np = byKey.get(sw.dataset.swap); if (art && np) art.outerHTML = card(np); return; }
     const a = e.target.closest('a[href^="#p/"]'); if (a) { sheetFromNav = true; }
   });
   document.querySelector('main').addEventListener('change', (e) => { const c = e.target.closest('[data-cmp]'); if (c) toggleCmp(byKey.get(c.dataset.cmp)); });

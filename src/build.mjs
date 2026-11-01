@@ -1,6 +1,7 @@
 // Normaliza los productos crudos de todas las tiendas y agrupa los que son el mismo modelo.
 import { createHash } from 'node:crypto';
 import { CATEGORIES, STORES, ACCESSORY_RE, CHARGER_RE, minPrice } from './taxonomy.mjs';
+import { displayName, brandFromName, phoneKey, canonicalBrand } from './names.mjs';
 
 const STORE_ORDER = Object.keys(STORES);
 // Clave estable de una oferta (tienda + código de la tienda); sirve para el historial y los links.
@@ -8,17 +9,18 @@ export const offerKey = (p) => `${p.store}:${String(p.sku || createHash('sha1').
 
 const deaccent = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-const BRAND_ALIASES = { 'general electric': 'ge', 'black and decker': 'black+decker', 'black & decker': 'black+decker', 'black + decker': 'black+decker', 'b&d': 'black+decker', 'bd': 'black+decker', 'sin marca': '' };
+const BRAND_ALIASES = { playstation: 'sony', 'sony interactive': 'sony', 'sony playstation': 'sony', xbox: 'microsoft', 'general electric': 'ge', 'black and decker': 'black+decker', 'black & decker': 'black+decker', 'black + decker': 'black+decker', 'b&d': 'black+decker', 'bd': 'black+decker', 'sin marca': '' };
 export const brandKey = (b) => {
   const k = deaccent(b).toLowerCase().trim();
   return (BRAND_ALIASES[k] ?? k).replace(/[^a-z0-9+]/g, '');
 };
-const DISPLAY_ALIASES = { iphone: 'Apple', ipad: 'Apple', 'general electric': 'GE', 'black and decker': 'Black+Decker', 'black & decker': 'Black+Decker', 'samsung electronics': 'Samsung' };
+const DISPLAY_ALIASES = { iphone: 'Apple', ipad: 'Apple', playstation: 'Sony', 'sony interactive': 'Sony', xbox: 'Xbox', 'general electric': 'GE', 'black and decker': 'Black+Decker', 'black & decker': 'Black+Decker', 'samsung electronics': 'Samsung' };
 const titleBrand = (b) => {
   const s0 = String(b || '').trim();
   const s = DISPLAY_ALIASES[deaccent(s0).toLowerCase()] || s0;
   if (!s || /sin marca/i.test(s)) return '';
   if (s !== s0) return s;
+  if (canonicalBrand(s)) return canonicalBrand(s);
   if (s.length <= 4) return s.toUpperCase();
   return s.toLowerCase().replace(/(^|[\s-])\p{L}/gu, (m) => m.toUpperCase());
 };
@@ -68,6 +70,8 @@ export function cores(models) {
   for (let m of models) {
     if (m.length < 7) continue;
     out.add(m);
+    // Algunas tiendas escriben la letra O donde el fabricante usa cero (MSM544LMLSSO = MSM544LMLSS0).
+    if (/O/.test(m.slice(2))) out.add(m.slice(0, 2) + m.slice(2).replace(/O/g, '0'));
     for (let k = 0; k < 2; k++) { const s = m.replace(REGION_SUFFIX, ''); if (s === m || s.length < 7) break; m = s; out.add(m); }
   }
   return [...out];
@@ -99,6 +103,8 @@ function linked(a, b) {
   if (conflict(a, b)) return false;
   if (a.barcode && b.barcode && a.barcode === b.barcode) return true;
   if (a.gk && a.gk === b.gk) return true;
+  if (a.ck && a.ck === b.ck && !a.ck.includes('bundle?')) return true;
+  if (a.nk && a.nk === b.nk) return true;
   const fa = a.full || a.cores, fb = b.full || b.cores;
   return fa.some((x) => fb.includes(x));
 }
@@ -126,6 +132,91 @@ export function cleanDesc(text) {
   }
   const d = keep.map((l) => l.split(/(?<=[.!?])\s+/).filter((x) => !STORE_WORDS.test(x)).join(' ').trim()).filter(Boolean).join('\n');
   return { d: d.replace(/\s+([.,;:!?])/g, '$1').slice(0, 1200), pairs: pairs.filter(([k, v]) => k && v && k.length <= 40 && v.length <= 120 && !STORE_WORDS.test(`${k} ${v}`)).slice(0, 16) };
+}
+
+// Consolas: "huella" = plataforma + edición + juegos incluidos + color, porque muchas tiendas no
+// publican el código de modelo (Diunsa "PS5/HW 2015/GT7/AB/DIGITAL" = Curacao "PS5 Bundle Digital con ASTRO BOT y Gran Turismo 7").
+const CONSOLE_COLORS = [[/blanc|white/, 'blanco'], [/negr|black/, 'negro'], [/ne[oó]n/, 'neon'], [/azul|blue/, 'azul'], [/coral/, 'coral'], [/amarill|yellow/, 'amarillo'], [/gris|gray|grey/, 'gris'], [/morad|purple/, 'morado'], [/hyrule/, 'hyrule'], [/roj|red/, 'rojo']];
+const BUNDLES = [[/astro ?bot|\bab\b/, 'astrobot'], [/gran turismo|\bgt ?7\b|\bgt\b/, 'gt7'], [/call of duty|black ops|\bcod\b/, 'cod'], [/mario kart|\bmk\b/, 'mariokart'], [/mario (bros\.? )?wonder/, 'mariowonder'], [/pok[eé]mon/, 'pokemon'], [/fortnite/, 'fortnite'], [/\bfc ?2\d|fifa/, 'fc'], [/spider/, 'spiderman'], [/zelda/, 'zelda'], [/donkey kong/, 'dk'], [/minecraft/, 'minecraft'], [/god of war/, 'gow'], [/choose one/, 'chooseone']];
+export function consoleKey(name) {
+  const n = deaccent(name).toLowerCase().replace(/[\/|,+]/g, ' ');
+  let plat = '';
+  if (/portal/.test(n)) plat = 'PSPORTAL';
+  else if (/ps5|playstation\s*5/.test(n)) plat = /\bpro\b/.test(n) ? 'PS5PRO' : 'PS5';
+  else if (/switch\s*2|\bns2\b/.test(n)) plat = 'NS2';
+  else if (/switch/.test(n)) plat = /oled/.test(n) ? 'NSWOLED' : /lite/.test(n) ? 'NSWLITE' : 'NSW';
+  else if (/xbox series x|\bxsx\b/.test(n)) plat = 'XSX';
+  else if (/xbox series s|\bxss\b/.test(n)) plat = 'XSS';
+  else if (/ally/.test(n)) plat = /ally x\b/.test(n) ? 'ALLYX' : 'ALLY';
+  if (!plat) return '';
+  const parts = [plat];
+  if (plat.startsWith('PS5')) parts.push(/digital/.test(n) ? 'digital' : 'disco');
+  const bundles = BUNDLES.filter(([re]) => re.test(n)).map(([, k]) => k).sort();
+  if (!bundles.length && /bundle|pack|\bcon\b|\+/.test(deaccent(name).toLowerCase())) parts.push('bundle?');
+  parts.push(bundles.join('+'));
+  if (plat.startsWith('NSW') || plat === 'NS2') parts.push(CONSOLE_COLORS.filter(([re]) => re.test(n)).map(([, c]) => c).sort().join('+'));
+  return parts.join('|');
+}
+
+// ---- Variantes de color: mismo producto en distintos colores (se muestran en una sola tarjeta) ----
+const COLOR_NAMES = {
+  negro: 'Negro', negra: 'Negro', black: 'Negro', bk: 'Negro', blk: 'Negro', ngr: 'Negro', mbk: 'Negro', onyx: 'Negro', obsidiana: 'Negro',
+  blanco: 'Blanco', blanca: 'Blanco', white: 'Blanco', wh: 'Blanco', wht: 'Blanco',
+  gris: 'Gris', gray: 'Gris', grey: 'Gris', gry: 'Gris', grafito: 'Grafito', graphite: 'Grafito',
+  plata: 'Plata', plateado: 'Plata', plateada: 'Plata', silver: 'Plata', slv: 'Plata',
+  azul: 'Azul', blue: 'Azul', celeste: 'Celeste', marino: 'Azul marino', cobalt: 'Azul cobalto', indigo: 'Índigo', zafiro: 'Zafiro', sapphire: 'Zafiro',
+  rojo: 'Rojo', roja: 'Rojo', red: 'Rojo', volcanic: 'Rojo volcánico', vino: 'Vino', burdeos: 'Vino',
+  rosado: 'Rosado', rosada: 'Rosado', rosa: 'Rosado', pink: 'Rosado', fucsia: 'Fucsia', coral: 'Coral',
+  verde: 'Verde', green: 'Verde', menta: 'Menta', mint: 'Menta', jade: 'Jade', olive: 'Oliva', sage: 'Verde salvia', teal: 'Verde azulado',
+  morado: 'Morado', morada: 'Morado', purple: 'Morado', violeta: 'Violeta', violet: 'Violeta', lila: 'Lila', lavanda: 'Lavanda', lavender: 'Lavanda',
+  dorado: 'Dorado', dorada: 'Dorado', oro: 'Dorado', gold: 'Dorado', gld: 'Dorado', champagne: 'Champagne', bronce: 'Bronce', cobre: 'Cobre',
+  amarillo: 'Amarillo', amarilla: 'Amarillo', yellow: 'Amarillo', naranja: 'Naranja', orange: 'Naranja',
+  cafe: 'Café', beige: 'Beige', crema: 'Crema', cream: 'Crema', arena: 'Arena', sand: 'Arena', turquesa: 'Turquesa', aqua: 'Aqua', cyan: 'Celeste',
+  titanio: 'Titanio', titanium: 'Titanio', camuflaje: 'Camuflaje', camouflaje: 'Camuflaje', camo: 'Camuflaje',
+  midnight: 'Medianoche', starlight: 'Blanco estelar', cosmic: 'Cósmico', galactic: 'Galáctico', sterling: 'Plata', neon: 'Neón',
+  inox: 'Acero inoxidable', inoxidable: 'Acero inoxidable', acero: 'Acero inoxidable',
+};
+const MODELISH = (t) => /\d/.test(t) && /[a-z]/.test(t) && t.length >= 6;
+export function colorFamily(p) {
+  const toks = deaccent(p.n).toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  const colors = [], rest = [];
+  for (const t of toks) { if (COLOR_NAMES[t]) { if (!colors.includes(COLOR_NAMES[t])) colors.push(COLOR_NAMES[t]); } else if (!MODELISH(t)) rest.push(t); }
+  return { key: `${p.c}|${brandKey(p.b)}|${rest.join(' ')}`, color: colors.join(' / ') };
+}
+
+// ---- Características que se leen del nombre, para productos cuya tienda no publica ficha ----
+export function nameSpecs(name, cat) {
+  const n = deaccent(name).toLowerCase().replace(/(\d),(\d{3})/g, '$1$2');
+  const out = [];
+  const add = (k, v) => { if (v && !out.some(([x]) => x === k)) out.push([k, v]); };
+  const gbs = [...n.matchAll(/(\d+)\s?(gb|tb)\b/g)].map((m) => Number(m[1]) * (m[2] === 'tb' ? 1024 : 1));
+  if (['celulares', 'tablets', 'laptops', 'consolas'].includes(cat) && gbs.length) {
+    const st = Math.max(...gbs); if (st >= 32) add('Almacenamiento', st >= 1024 ? `${st / 1024} TB` : `${st} GB`);
+    const ram = n.match(/(\d+)\s?gb\s?(de\s)?ram|ram\s?(\d+)\s?gb/); const rv = ram ? Number(ram[1] || ram[3]) : gbs.filter((v) => v <= 32 && v < st)[0];
+    if (rv) add('Memoria RAM', `${rv} GB`);
+  }
+  const inch = n.match(/(\d{2,3}(?:\.\d)?)\s?(?:"|”|''|pulgadas|pulg\b)/) || (['televisores', 'monitores'].includes(cat) && n.match(/\b(?:tv|televisor|pantalla|monitor)\D{0,20}?\b(\d{2,3})\b/));
+  if (inch && ['televisores', 'monitores', 'celulares', 'tablets', 'laptops'].includes(cat)) add('Pantalla', `${inch[1]}"`);
+  if (['televisores', 'monitores'].includes(cat)) {
+    const r = /\b8k\b/.test(n) ? '8K' : /\b4k\b|uhd/.test(n) ? '4K UHD' : /fhd|full hd|1080/.test(n) ? 'Full HD' : /\bhd\b/.test(n) ? 'HD' : '';
+    add('Resolución', r);
+    const panel = /oled/.test(n) ? 'OLED' : /qned/.test(n) ? 'QNED' : /qled/.test(n) ? 'QLED' : /mini ?led/.test(n) ? 'Mini LED' : /\bled\b/.test(n) ? 'LED' : '';
+    add('Panel', panel);
+    const hz = n.match(/(\d{2,3})\s?hz/); if (hz) add('Frecuencia', `${hz[1]} Hz`);
+  }
+  if (cat === 'aires') {
+    const b = n.match(/(\d{1,2})000\s?btu/) || n.match(/(\d{1,2})\s?(?:mil|k)\s?btu/) || n.match(/\b(\d{1,2})\s?btu/);
+    if (b) add('Capacidad', `${Number(b[1]).toLocaleString('en-US')},000 BTU`);
+    add('Tecnología', /inverter/.test(n) ? 'Inverter' : /on ?\/? ?off|convencional/.test(n) ? 'Convencional' : '');
+    add('Tipo', /portatil/.test(n) ? 'Portátil' : /ventana/.test(n) ? 'Ventana' : /split/.test(n) ? 'Minisplit' : '');
+  }
+  if (cat === 'refrigeradoras') { const f = n.match(/(\d{1,2}(?:\.\d)?)\s?(?:pies|pie\b|ft|cu|')/); if (f) add('Capacidad', `${f[1]} pies cúbicos`); if (/inverter/.test(n)) add('Tecnología', 'Inverter'); }
+  if (cat === 'lavadoras') { const k = n.match(/(\d{2})\s?(?:kg|kilos)\b/); const l = n.match(/(\d{2})\s?(?:lb|lbs|libras)\b/); if (k) add('Capacidad', `${k[1]} kg`); else if (l) add('Capacidad', `${l[1]} libras`); }
+  if (cat === 'estufas') { const q = n.match(/(\d)\s?quemador/); if (q) add('Quemadores', q[1]); add('Tipo', /electric|induccion|vitroceram/.test(n) ? 'Eléctrica' : /gas/.test(n) ? 'De gas' : ''); }
+  if (cat === 'microondas' || cat === 'freidoras') { const c = n.match(/(\d(?:\.\d)?)\s?(?:pies|ft|cu|')/) || n.match(/(\d(?:\.\d)?)\s?(?:l|lt|litros|qt)\b/); if (c) add('Capacidad', c[0].replace(/\s+/g, ' ')); }
+  if (cat === 'motos') { const c = n.match(/(\d{2,4})\s?cc\b/); if (c) add('Cilindraje', `${c[1]} cc`); const y = n.match(/\b(202\d)\b/); if (y) add('Año', y[1]); }
+  const w = n.match(/(\d{2,4})\s?w(?:atts?)?\b/); if (w && ['audio', 'licuadoras', 'microondas', 'freidoras'].includes(cat)) add('Potencia', `${w[1]} W`);
+  return out;
 }
 
 // Juegos: plataforma y título normalizado para emparejar el mismo juego entre tiendas.
@@ -161,6 +252,8 @@ export function clean(items) {
     const name = deaccent(p.name);
     // Precios marcador (99999, 999999…) que algunas tiendas usan para productos no a la venta.
     if (/^9{5,}(\.0+)?$/.test(String(p.price))) continue;
+    // Covers, bases, discos y otros accesorios que vienen dentro de "consolas".
+    if (p.cat === 'consolas' && (/\b(cover|covers|carcasa|tapa|faceplate|placa|skin|funda|estuche|soporte|base|estaci[oó]n|dock|cargador|cable|ssd|memoria|disco duro|lector|ventilador|enfriador|c[aá]mara|vr ?2|volante|mochila|maleta)\b/i.test(name) || p.price < 3000)) p.cat = 'videojuegos';
     // Juegos y controles que vienen dentro de "consolas".
     if (p.cat === 'consolas' && !/\bconsola\b/i.test(name) && (GAME_GEAR.test(name) || (p.price < 4000 && !CONSOLE_NAME.test(name)))) p.cat = 'videojuegos';
     // Baterías portátiles y power banks que algunas tiendas ponen en celulares o audio.
@@ -177,14 +270,30 @@ export function clean(items) {
     if (/\bcombo\b/i.test(name) && /\+/.test(name) && p.cat !== 'consolas') continue;
     if (p.price < minPrice(p.cat)) continue;
     let brand = titleBrand(p.brand);
+    const nb = brandFromName(p.name);
+    if (nb && (!brand || (!deaccent(p.name).toLowerCase().includes(deaccent(brand).toLowerCase()) && brandKey(nb) !== brandKey(brand)))) brand = nb;
+    // Consolas, juegos y controles: la marca sale de la plataforma si la tienda no la dice.
+    if (!brand && ['consolas', 'videojuegos'].includes(p.cat)) brand = /switch|nintendo|joy-?con|amiibo/i.test(name) ? 'Nintendo' : /ps5|ps4|playstation|dualsense|dualshock/i.test(name) ? 'Sony' : /xbox/i.test(name) ? 'Xbox' : '';
     if (!brand) {
-      const first = String(p.name).split(/\s+/).find((w) => /^[A-Z][A-Za-z]+$/.test(w) && w.length > 2 && !/^(Cama|Colchon|Colchón|Televisor|Refrigeradora|Lavadora|Estufa|Aire|Bocina|Horno|Microondas|Freidora|Celular|Laptop|Tablet|Consola|Secadora|Congelador|Minicomponente|Individual|Matrimonial|Queen|King|Juego|Control|Cargador|Cable|Monitor|Impresora|Licuadora|Cafetera|Batidora|Motocicleta|Moto|Reloj|Smartwatch|Audifonos|Audífonos|Parlante|Switch|Xbox|Memoria|Adaptador|Power)$/i.test(w));
+      const first = String(p.name).split(/\s+/).find((w) => /^[A-Z][A-Za-z]+$/.test(w) && w.length > 2 && !/^(Cama|Colchon|Colchón|Televisor|Refrigeradora|Lavadora|Estufa|Aire|Bocina|Horno|Microondas|Freidora|Celular|Laptop|Tablet|Consola|Secadora|Congelador|Minicomponente|Individual|Matrimonial|Queen|King|Juego|Control|Cargador|Cable|Monitor|Impresora|Licuadora|Cafetera|Batidora|Motocicleta|Moto|Reloj|Smartwatch|Audifonos|Audífonos|Parlante|Switch|Xbox|Memoria|Adaptador|Power|Joycon|JoyCon|Choose|Pack|Bundle|Edition|Edicion|Edición)$/i.test(w));
       brand = first && p.cat !== 'videojuegos' ? titleBrand(first) : '';
     }
     const models = modelCandidates(p);
-    out.push({ ...p, brand, bk: brandKey(brand), models, cores: cores(models), barcode: (p.barcode || '').replace(/^0+/, ''), gk: p.cat === 'videojuegos' ? gameKey(p.name) : '' });
+    out.push({ ...p, brand, bk: brandKey(brand), models, cores: cores(models), barcode: (p.barcode || '').replace(/^0+/, ''), gk: p.cat === 'videojuegos' ? gameKey(p.name) : '', ck: p.cat === 'consolas' ? consoleKey(p.name) : '', nk: ['celulares', 'tablets'].includes(p.cat) ? phoneKey(p.name, brand) : '' });
   }
   return out;
+}
+
+// Nombre uniforme: el primero que se pueda armar con la estructura de la categoría; si no, el original limpio.
+function bestName(ps) {
+  const brand = ps.find((p) => p.brand)?.brand || '';
+  let fallback = '';
+  for (const p of ps) {
+    const d = displayName(p.name, p.cat, brand);
+    if (d.includes(' · ') || /^(Televisor|Aire acondicionado|Refrigeradora|Congelador|Frigobar|Lavadora|Secadora|Centro de lavado|Laptop) /.test(d)) return d;
+    fallback ||= d;
+  }
+  return fallback;
 }
 
 export function group(items) {
@@ -214,6 +323,8 @@ export function group(items) {
     for (const i of idxs) for (const c of items[i].full) (buckets[`m:${c}`] ||= []).push(i);
     for (const i of idxs) if (items[i].barcode) (buckets[`b:${items[i].barcode}`] ||= []).push(i);
     for (const i of idxs) if (items[i].gk) (buckets[`g:${items[i].gk}`] ||= []).push(i);
+    for (const i of idxs) if (items[i].ck && !items[i].ck.includes('bundle?')) (buckets[`c:${items[i].ck}`] ||= []).push(i);
+    for (const i of idxs) if (items[i].nk) (buckets[`n:${items[i].nk}`] ||= []).push(i);
     for (const arr of Object.values(buckets)) {
       for (let x = 0; x < arr.length; x++) for (let y = x + 1; y < arr.length; y++) {
         if (linked(items[arr[x]], items[arr[y]])) union(arr[x], arr[y]);
@@ -221,16 +332,21 @@ export function group(items) {
     }
     // 2) Códigos incompletos (ej. "UN58U8000" sin la letra del año): se unen solo si
     //    existe una única versión completa posible en la misma categoría y marca.
+    //    La extensión puede ser de color o región (JBLSB580 → JBLSB580BLKAM), un dígito de revisión
+    //    (LMA78113CBAB → LMA78113CBAB0) o un sufijo corto tipo A01X.
+    const EXT_OK = (x) => /^[A-Z]{1,6}$/.test(x) || /^\d{1,2}$/.test(x) || /^[A-Z]\d{1,3}[A-Z]?$/.test(x);
     for (const i of idxs) {
       for (const c of items[i].cores) {
         if (c.length < 8) continue;
         const roots = new Set();
         for (const j of idxs) {
           if (i === j || find(i) === find(j)) continue;
-          if (items[j].cores.some((d) => d.length - c.length >= 1 && d.length - c.length <= 2 && d.startsWith(c) && /^[A-Z]{1,2}$/.test(d.slice(c.length))) && !conflict(items[i], items[j])) roots.add(find(j));
+          if (items[j].cores.some((d) => d.length > c.length && d.length - c.length <= 6 && d.startsWith(c) && EXT_OK(d.slice(c.length))) && !conflict(items[i], items[j])) roots.add(find(j));
         }
-        const exts = new Set([...roots].flatMap((r) => members[r].flatMap((k) => items[k].cores.filter((d) => d.startsWith(c) && d.length - c.length <= 2 && d.length > c.length).map((d) => d.replace(REGION_SUFFIX, '')))));
-        if (roots.size === 1 && exts.size === 1) union(i, [...roots][0]);
+        // Todas las versiones completas de ese código en la categoría (si hay más de una, es ambiguo).
+        const exts = new Set(idxs.filter((k) => find(k) !== find(i)).flatMap((k) => items[k].cores.filter((d) => d.length > c.length && d.length - c.length <= 6 && d.startsWith(c) && EXT_OK(d.slice(c.length))).map((d) => d.replace(REGION_SUFFIX, '').replace(/O/g, '0'))));
+        const longest = [...exts].filter((d) => ![...exts].some((e) => e !== d && e.startsWith(d)));
+        if (roots.size === 1 && longest.length === 1) union(i, [...roots][0]);
       }
     }
   }
@@ -275,11 +391,13 @@ export function group(items) {
     const desc = descs[0]?.d || '';
     const specs = [...(ps.map((p) => p.specs || []).sort((a, b) => b.length - a.length)[0] || [])].map(([k, v]) => [String(k).replace(EMOJI, '').trim(), String(v).replace(EMOJI, '').trim()]);
     for (const pr of descs.flatMap((x) => x.pairs)) if (specs.length < 18 && !specs.some(([k]) => k.toLowerCase() === pr[0].toLowerCase())) specs.push(pr);
+    // Si la tienda no publica ficha, se completan con lo que dice el nombre del producto.
+    if (specs.length < 4) for (const pr of nameSpecs(ps[0].name, ps[0].cat)) if (!specs.some(([k]) => k.toLowerCase() === pr[0].toLowerCase())) specs.push(pr);
     // Características cortas y concretas; las frases largas no son una característica.
     for (let i = specs.length - 1; i >= 0; i--) { const [k, v] = specs[i]; if (!k || !v || k.length > 32 || v.length > 90 || (/[.!]$/.test(v) && v.length > 40)) specs.splice(i, 1); }
     const product = {
       id: `${ps[0].store}-${ps[0].sku || ps[0].url}`.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 60),
-      c: ps[0].cat, b: ps.find((p) => p.brand)?.brand || '', n: ps[0].name.replace(/\s+/g, ' ').trim(),
+      c: ps[0].cat, b: ps.find((p) => p.brand)?.brand || '', n: bestName(ps), on: [...new Set(ps.map((p) => p.name.replace(/\s+/g, ' ').trim()))].join(' | ').slice(0, 240),
       m: model, i: pics[0] || '', ii: pics, o: offers,
     };
     Object.defineProperty(product, 'det', { value: { d: desc, s: specs, g: pics }, enumerable: false });
@@ -291,6 +409,18 @@ export function buildCatalog(rawByStore, status) {
   const all = clean(Object.values(rawByStore).flat());
   const used = new Set(all.map((p) => p.cat));
   const products = group(all).sort((a, b) => (b.o.length - a.o.length) || a.c.localeCompare(b.c) || a.n.localeCompare(b.n));
+  // Familias de color: mismo nombre salvo el color, colores todos distintos y precios parecidos.
+  const fam = {};
+  for (const p of products) { const f = colorFamily(p); if (f.color) (fam[f.key] ||= []).push([p, f.color]); }
+  for (const [key, list] of Object.entries(fam)) {
+    if (list.length < 2) continue;
+    const colors = list.map(([, c]) => c);
+    if (new Set(colors).size !== colors.length) continue;
+    const prices = list.map(([p]) => Math.min(...p.o.map((o) => o.p)));
+    if (Math.max(...prices) / Math.min(...prices) > 1.3) continue;
+    const v = createHash('sha1').update(key).digest('hex').slice(0, 10);
+    for (const [p, c] of list) { p.v = v; p.cl = c; }
+  }
   return {
     updated: new Date().toISOString(),
     stores: Object.fromEntries(Object.entries(STORES).map(([id, s]) => [id, {
