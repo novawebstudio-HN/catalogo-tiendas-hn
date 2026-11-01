@@ -14,7 +14,9 @@ GitHub Actions (diario, 6:17 a. m. HN)
        ├─ stores/curacao.mjs    → HTML público de cada categoría (ver nota)
        └─ stores/elektra.mjs    → API pública de catálogo VTEX
   └─ src/build.mjs   → limpia, filtra accesorios/precios < L1,000 y agrupa por modelo
+  └─ src/thumbs.mjs  → miniatura WebP de 220 px de cada producto (site/thumbs/)
   └─ site/catalog.json + data/raw/*.json  (se guardan en el repo)
+  └─ GitHub Pages     → publica la carpeta site/
 ```
 
 - **Sin dependencias**: Node 22 y `fetch` nativo.
@@ -32,15 +34,16 @@ Su API de listado responde solo a su propio sitio, así que se respeta esa restr
 ## Correr local
 
 ```bash
+npm install
 node src/scrape.mjs              # todas las tiendas
 node src/scrape.mjs diunsa       # solo una
+node src/thumbs.mjs              # miniaturas
 npx serve site                   # abrir la página
-node src/make-artifact.mjs       # dist/vitrina.html con el catálogo incrustado
 ```
 
 ## Publicar la página
 
-El repo es privado. Para publicarla gratis con GitHub Pages hay que hacerlo público y activar Pages (Settings → Pages → Deploy from branch → `main` / carpeta `/site`). También funciona en Vercel o Netlify apuntando a la carpeta `site`.
+La página se publica sola en GitHub Pages en cada corrida del workflow (diaria, o al cambiar el código). Requisito único: en *Settings → Pages*, la fuente debe ser **GitHub Actions**.
 
 ## Agregar o cambiar categorías
 

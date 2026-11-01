@@ -32,7 +32,7 @@ for (const [id, fn] of Object.entries(SCRAPERS)) {
   if (only.length && !only.includes(id)) { raw[id] = await readJson(file, []); continue; }
   const t0 = Date.now();
   try {
-    const items = await fn({ fetch: politeFetch });
+    const items = await fn({ fetch: politeFetch, prev: await readJson(file, []) });
     if (!items.length) throw new Error('0 productos');
     raw[id] = items;
     await writeFile(file, JSON.stringify(items));

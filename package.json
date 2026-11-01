@@ -1,0 +1,13 @@
+{
+  "name": "catalogo-tiendas-hn",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "scrape": "node src/scrape.mjs",
+    "thumbs": "node src/thumbs.mjs",
+    "artifact": "node src/make-artifact.mjs"
+  },
+  "dependencies": {
+    "sharp": "0.33.5"
+  }
+}

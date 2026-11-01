@@ -11,10 +11,12 @@ on:
         default: ''
   push:
     branches: [main]
-    paths: ['src/**', '.github/workflows/actualizar.yml']
+    paths: ['src/**', 'site/index.html', 'package.json', '.github/workflows/actualizar.yml']
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: actualizar-catalogo
@@ -29,14 +31,33 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+      - name: Instalar dependencias
+        run: npm install --no-audit --no-fund
       - name: Extraer productos de las tiendas
         run: node src/scrape.mjs ${{ github.event.inputs.tiendas }}
+      - name: Miniaturas de los productos
+        run: node src/thumbs.mjs
       - name: Guardar cambios
         run: |
           git config user.name "vitrina-bot"
           git config user.email "vitrina-bot@users.noreply.github.com"
-          git add data site/catalog.json
+          git add data site/catalog.json site/thumbs
           if git diff --cached --quiet; then echo "Sin cambios"; exit 0; fi
           git commit -m "Catálogo actualizado $(date -u +'%Y-%m-%d %H:%M') UTC"
           git pull --rebase origin main
           git push
+      - name: Preparar la página
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  publicar:
+    needs: actualizar
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: Publicar en GitHub Pages
+        id: deploy
+        uses: actions/deploy-pages@v4

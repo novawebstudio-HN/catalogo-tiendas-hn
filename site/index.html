@@ -2,30 +2,21 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#FFFFFF">
 <title>Vitrina HN</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Todo lo de Jetstereo, Diunsa, La Curacao y Elektra en un solo lugar, con el precio más bajo resaltado.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#F2F4F7; --card:#FFFFFF; --ink:#15202B; --muted:#5B6672; --line:#D9DEE5;
-  --tag:#FFD23F; --tag-ink:#1A1400; --act:#0F6E6E; --act-soft:#E0F0EF; --down:#0E7A3E;
+  /* Tema claro único: fondo blanco, superficies grises muy suaves, etiqueta de precio amarilla */
+  --paper:#FFFFFF; --card:#FFFFFF; --soft:#F6F8FA; --ink:#18212B; --muted:#5E6A76; --line:#E4E8ED;
+  --tag:#FFDA4D; --tag-ink:#1E1700; --act:#0B6BCB; --act-soft:#EAF3FD; --down:#12854A;
   --s-jetstereo:#1F4FD8; --s-diunsa:#E07B12; --s-curacao:#C8102E; --s-elektra:#6B3FA0;
-  --shadow:0 1px 0 rgba(21,32,43,.06);
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#0F161D; --card:#17212B; --ink:#E8EDF2; --muted:#9AA7B4; --line:#2A3743;
-    --tag:#FFD23F; --tag-ink:#1A1400; --act:#5CC8C2; --act-soft:#163332; --down:#4CC98A;
-    --shadow:none; color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#0F161D; --card:#17212B; --ink:#E8EDF2; --muted:#9AA7B4; --line:#2A3743;
-  --act:#5CC8C2; --act-soft:#163332; --down:#4CC98A; --shadow:none; color-scheme:dark;
+  --shadow:0 1px 2px rgba(24,33,43,.05);
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -56,7 +47,7 @@ h1.ask{font:700 clamp(34px,6vw,58px)/.95 "Barlow Condensed",sans-serif;margin:18
 
 /* Categorías y filtros */
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
-.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--soft) 94%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .cats{display:flex;gap:6px;overflow-x:auto;padding:12px 0 10px;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cat{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:500;white-space:nowrap}
@@ -70,13 +61,13 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .count{margin-left:auto;color:var(--muted);font-size:14px}
 
 /* Resultados */
-main{padding-block:18px 40px}
+main{padding-block:20px 40px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px}
 @media (max-width:520px){.grid{grid-template-columns:1fr 1fr;gap:10px}}
-.p{background:var(--card);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow)}
-.p .img{aspect-ratio:4/3;background:#fff;display:grid;place-items:center;padding:12px;border-bottom:1px solid var(--line)}
+.p{background:var(--card);border:1px solid var(--line);border-radius:12px;transition:border-color .15s;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow)}
+.p:hover{border-color:#C9D2DC}
+.p .img{aspect-ratio:1/1;max-width:100%;background:#fff;display:grid;place-items:center;padding:12px;border-bottom:1px solid var(--line)}
 .p .img img{max-width:100%;max-height:100%;object-fit:contain}
-.p.noimg .img{display:none}
 .p .img .ph{font:700 34px "Barlow Condensed";color:#C5CCD5}
 .p .body{padding:12px 12px 4px;display:flex;flex-direction:column;gap:3px;flex:1}
 .p .b{font-size:13px;color:var(--muted);font-weight:600}
@@ -219,14 +210,15 @@ footer p{max-width:75ch;margin:0 0 8px}
     const offers = offersOf(p);
     const best = offers[0];
     const cat = data.categories.find(c=>c.id===p.c);
-    const img = p.i ? `<img src="${esc(p.i)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph',textContent:'${esc((p.b||cat?.name||'').slice(0,1))}'}))">` : `<span class="ph">${esc((p.b||'·').slice(0,1))}</span>`;
+    const src = p.t ? `thumbs/${p.t}.webp` : p.i;
+    const img = src ? `<img src="${esc(src)}" width="220" height="220" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph',textContent:'${esc((p.b||cat?.name||'').slice(0,1))}'}))">` : `<span class="ph">${esc((p.b||'·').slice(0,1))}</span>`;
     const was = best.r > best.p ? `<span class="was">${plain(best.r)}</span>` : '';
     const top = offers.length > 1 ? offers[offers.length-1].p - best.p : 0;
     const rows = offers.map((o,i) => {
       const diff = i === 0 ? (offers.length>1 ? 'el más bajo' : '') : '+' + plain(o.p - best.p);
       return `<li class="${i===0?'best':''}"><a href="${esc(o.u)}" target="_blank" rel="noopener"><span class="sw" style="background:var(--s-${o.s})"></span><span class="st">${esc(data.stores[o.s].name)}${o.a?'':' (agotado)'}</span><span class="pr">${plain(o.p)}</span><span class="diff">${diff}</span></a></li>`;
     }).join('');
-    return `<article class="p${window.__NOIMG__?' noimg':''}">
+    return `<article class="p">
       <div class="img">${img}</div>
       <div class="body"><span class="b">${esc(p.b || cat?.name || '')}</span><span class="n" title="${esc(p.n)}">${esc(p.n)}</span>${p.m?`<span class="m">Modelo ${esc(p.m)}</span>`:''}</div>
       <div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${was}</div><div class="where"><span class="sw" style="background:var(--s-${best.s})"></span>${offers.length>1?'Más barato en ':'En '}${esc(data.stores[best.s].name)}</div></div>

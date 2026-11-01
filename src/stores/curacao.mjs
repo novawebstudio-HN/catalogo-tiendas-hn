@@ -49,12 +49,20 @@ const brandFromName = (name) => {
   return KNOWN.find((b) => n.includes(` ${b.toLowerCase()} `)) || '';
 };
 
-export async function scrapeCuracao({ fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) }) {
+export async function scrapeCuracao({ fetch, prev = [], sleep = (ms) => new Promise((r) => setTimeout(r, ms)) }) {
   const out = [];
   const failed = [];
+  const get = () => (path) => fetch(`${SITE}/honduras/c/${path}`, { headers: { Accept: 'text/html,application/xhtml+xml' } });
   for (const [path, cat] of Object.entries(MAP)) {
-    const res = await fetch(`${SITE}/honduras/c/${path}`, { headers: { Accept: 'text/html,application/xhtml+xml' } });
-    if (!res.ok) { failed.push(`${path} (${res.status})`); await sleep(2000); continue; }
+    let res = await get()(path);
+    if (!res.ok) { await sleep(15000); res = await get()(path); }
+    if (!res.ok) {
+      // Se conservan los productos de la corrida anterior para esta categoría.
+      const kept = prev.filter((p) => p.src === path);
+      out.push(...kept);
+      failed.push(`${path} (${res.status}, ${kept.length} anteriores)`);
+      await sleep(5000); continue;
+    }
     const sr = extractSearchResponse(await res.text());
     const items = sr?.data?.productSearch?.items || [];
     for (const { product: p } of items) {
@@ -64,10 +72,10 @@ export async function scrapeCuracao({ fetch, sleep = (ms) => new Promise((r) => 
         store: 'curacao', cat, brand: brandFromName(p.name || ''), name: p.name || '',
         price, regular: Number(p?.price_range?.minimum_price?.regular_price?.value ?? price),
         available: true, url: abs(p.canonical_url), img: abs(p.image?.url),
-        sku: String(p.sku || ''), model: '',
+        sku: String(p.sku || ''), model: '', src: path,
       });
     }
-    await sleep(1500);
+    await sleep(3000);
   }
   if (failed.length) console.log(`  Curacao: categorías sin respuesta: ${failed.join(', ')}`);
   if (!out.length) throw new Error(`Curacao sin productos (${failed.join(', ')})`);
