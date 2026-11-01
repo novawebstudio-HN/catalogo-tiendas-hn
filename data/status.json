@@ -25,11 +25,10 @@
     "note": ""
   },
   "ladylee": {
-    "ok": false,
-    "updated": "2026-11-01T21:50:13.150Z",
-    "count": 644,
-    "note": "",
-    "error": "Lady Lee /products.json HTTP 429"
+    "ok": true,
+    "updated": "2026-11-01T23:41:51.129Z",
+    "count": 948,
+    "note": ""
   },
   "walmart": {
     "ok": true,
