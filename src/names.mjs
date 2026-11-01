@@ -93,7 +93,7 @@ function modelWords(name, brand, extraStop = []) {
   s = s.split(/\s*[\/|,]\s*|\s+[-+]\s+|\+(?=\s)/)[0] || '';
   let toks = s.split(/\s+/).filter(Boolean);
   const b = deaccent(brand).toLowerCase();
-  const bi = toks.findIndex((t) => t.toLowerCase() === b || BRAND_CANON[t.toLowerCase()] === brand);
+  const bi = toks.findIndex((t) => { const low = t.toLowerCase().replace(/-$/, ''); return low === b || BRAND_CANON[low] === brand; });
   if (bi >= 0) toks = toks.slice(bi + 1);
   const out = [];
   for (const t of toks) {
@@ -121,7 +121,9 @@ function phoneName(name, brand, cat = 'celulares') {
   if (brand === 'Samsung' && cat === 'tablets') m = `Galaxy Tab ${m.replace(/^(Galaxy\s+)?(Tab(let)?\s+)?/i, '')}`;
   else if (brand === 'Samsung' && /^[ASMZ]\d{2}/i.test(m)) m = `Galaxy ${m}`;
   if (brand === 'Apple' && !/^i/i.test(m) && /^\d/.test(m)) m = `iPhone ${m}`;
-  const color = colorOf(name.split(/\s\|\s|\s-\s/)[0]) || colorOf(name);
+  // La marca no cuenta como color ("Blu" no es azul).
+  const noBrand = (t) => t.replace(new RegExp(`\\b${deaccent(brand).replace(/[^a-z0-9]/gi, '')}-?\\b`, 'ig'), ' ');
+  const color = colorOf(noBrand(name.split(/\s\|\s|\s-\s/)[0])) || colorOf(noBrand(name));
   const inch = cat === 'tablets' ? n.match(/(\d{1,2}(?:\.\d)?)\s?(?:"|”|''|pulgadas|pulg\b)/) : null;
   const lte = cat === 'tablets' && /\b(lte|5g|4g|celular|cel|cellular|celluar)\b/.test(n) ? 'LTE' : '';
   // Apple no publica la RAM de sus equipos; lo que ponen las tiendas suele estar mal.
