@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vitrina HN</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="Todo lo de Jetstereo, Diunsa, La Curacao y Elektra en un solo lugar, con el precio más bajo resaltado.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,12 +20,12 @@
   :root:not([data-theme="light"]){
     --paper:#0F161D; --card:#17212B; --ink:#E8EDF2; --muted:#9AA7B4; --line:#2A3743;
     --tag:#FFD23F; --tag-ink:#1A1400; --act:#5CC8C2; --act-soft:#163332; --down:#4CC98A;
-    --shadow:none;
+    --shadow:none; color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --paper:#0F161D; --card:#17212B; --ink:#E8EDF2; --muted:#9AA7B4; --line:#2A3743;
-  --act:#5CC8C2; --act-soft:#163332; --down:#4CC98A; --shadow:none;
+  --act:#5CC8C2; --act-soft:#163332; --down:#4CC98A; --shadow:none; color-scheme:dark;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
@@ -32,11 +33,11 @@ body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.45 Barlow
 a{color:inherit}
 button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--act);outline-offset:2px;border-radius:6px}
-.wrap{max-width:1240px;margin:0 auto;padding:0 16px}
+.wrap{max-width:1240px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
 /* Encabezado: la búsqueda es la portada */
 header.top{background:var(--card);border-bottom:1px solid var(--line)}
-.top .wrap{padding-top:22px;padding-bottom:18px}
+.top .wrap{padding-block:22px 18px}
 .brandline{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .logo{font:800 22px/1 "Barlow Condensed",sans-serif;letter-spacing:.01em;margin:0}
 .logo span{display:inline-block;background:var(--tag);color:var(--tag-ink);padding:2px 7px 1px;border-radius:3px;margin-left:4px;transform:rotate(-2deg)}
@@ -54,7 +55,8 @@ h1.ask{font:700 clamp(34px,6vw,58px)/.95 "Barlow Condensed",sans-serif;margin:18
 .storechip.warn small{color:#B45309}
 
 /* Categorías y filtros */
-.bar{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--paper)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
 .cats{display:flex;gap:6px;overflow-x:auto;padding:12px 0 10px;scrollbar-width:none}
 .cats::-webkit-scrollbar{display:none}
 .cat{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;cursor:pointer;font-weight:500;white-space:nowrap}
@@ -68,12 +70,13 @@ h1.ask{font:700 clamp(34px,6vw,58px)/.95 "Barlow Condensed",sans-serif;margin:18
 .count{margin-left:auto;color:var(--muted);font-size:14px}
 
 /* Resultados */
-main{padding:18px 0 40px}
+main{padding-block:18px 40px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px}
 @media (max-width:520px){.grid{grid-template-columns:1fr 1fr;gap:10px}}
 .p{background:var(--card);border:1px solid var(--line);border-radius:12px;display:flex;flex-direction:column;overflow:hidden;box-shadow:var(--shadow)}
 .p .img{aspect-ratio:4/3;background:#fff;display:grid;place-items:center;padding:12px;border-bottom:1px solid var(--line)}
 .p .img img{max-width:100%;max-height:100%;object-fit:contain}
+.p.noimg .img{display:none}
 .p .img .ph{font:700 34px "Barlow Condensed";color:#C5CCD5}
 .p .body{padding:12px 12px 4px;display:flex;flex-direction:column;gap:3px;flex:1}
 .p .b{font-size:13px;color:var(--muted);font-weight:600}
@@ -102,7 +105,7 @@ main{padding:18px 0 40px}
 .more{display:block;margin:26px auto 0;height:46px;padding:0 26px;border-radius:10px;border:2px solid var(--ink);background:transparent;font-weight:600;cursor:pointer}
 .empty{padding:50px 0;text-align:center;color:var(--muted)}
 .empty strong{display:block;color:var(--ink);font:700 26px "Barlow Condensed";margin-bottom:6px}
-footer{border-top:1px solid var(--line);padding:22px 0 40px;color:var(--muted);font-size:14px}
+footer{border-top:1px solid var(--line);padding-block:22px 40px;color:var(--muted);font-size:14px}
 footer p{max-width:75ch;margin:0 0 8px}
 @media (prefers-reduced-motion:no-preference){.logo span{transition:transform .3s}.logo:hover span{transform:rotate(2deg)}}
 </style>
@@ -162,7 +165,8 @@ footer p{max-width:75ch;margin:0 0 8px}
     try { data = await (await fetch('catalog.json', {cache:'no-cache'})).json(); }
     catch (e) { $('#grid').innerHTML = '<div class="empty"><strong>No se pudo cargar el catálogo</strong>Recarga la página. Si sigue igual, el archivo catalog.json no está publicado.</div>'; return; }
   }
-  const STORE_IDS = Object.keys(data.stores);
+  const STORE_IDS = Object.keys(data.stores).filter(id => data.stores[id].count > 0);
+  const storeList = (ids) => { const n = ids.map(id => data.stores[id].name); return n.length > 1 ? n.slice(0,-1).join(', ') + ' y ' + n.at(-1) : n[0]; };
   const fmt = new Intl.NumberFormat('es-HN', {minimumFractionDigits:0, maximumFractionDigits:2});
   const norm = (s) => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
   const esc = (s) => String(s??'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -178,9 +182,9 @@ footer p{max-width:75ch;margin:0 0 8px}
   const up = new Date(data.updated);
   $('#updated').textContent = 'Actualizado ' + up.toLocaleString('es-HN', {weekday:'long', day:'numeric', month:'long', hour:'numeric', minute:'2-digit'});
   const multiCount = data.products.filter(p=>p.o.length>1).length;
-  $('#sub').textContent = `${fmt.format(data.products.length)} productos de Jetstereo, Diunsa, La Curacao y Elektra; ${fmt.format(multiCount)} se pueden comparar entre tiendas.`;
+  $('#sub').textContent = `${fmt.format(data.products.length)} productos de ${storeList(STORE_IDS)}; ${fmt.format(multiCount)} se pueden comparar entre tiendas.`;
   $('#stores').innerHTML = STORE_IDS.map(id => { const s=data.stores[id]; return `<button class="storechip${s.ok?'':' warn'}" aria-pressed="true" data-s="${id}"><span class="sw" style="background:var(--s-${id})"></span>${esc(s.name)} <small>${fmt.format(s.count)}${s.ok?'':' · sin actualizar'}</small></button>`; }).join('');
-  $('#notes').textContent = STORE_IDS.map(id=>data.stores[id]).filter(s=>s.note).map(s=>`${s.name}: ${s.note}`).join(' ');
+  $('#notes').textContent = Object.values(data.stores).filter(s=>s.note).map(s=>`${s.name}: ${s.note}`).join(' ');
 
   function filtered(ignoreCat){
     const toks = norm(state.q).split(/\s+/).filter(Boolean);
@@ -222,7 +226,7 @@ footer p{max-width:75ch;margin:0 0 8px}
       const diff = i === 0 ? (offers.length>1 ? 'el más bajo' : '') : '+' + plain(o.p - best.p);
       return `<li class="${i===0?'best':''}"><a href="${esc(o.u)}" target="_blank" rel="noopener"><span class="sw" style="background:var(--s-${o.s})"></span><span class="st">${esc(data.stores[o.s].name)}${o.a?'':' (agotado)'}</span><span class="pr">${plain(o.p)}</span><span class="diff">${diff}</span></a></li>`;
     }).join('');
-    return `<article class="p">
+    return `<article class="p${window.__NOIMG__?' noimg':''}">
       <div class="img">${img}</div>
       <div class="body"><span class="b">${esc(p.b || cat?.name || '')}</span><span class="n" title="${esc(p.n)}">${esc(p.n)}</span>${p.m?`<span class="m">Modelo ${esc(p.m)}</span>`:''}</div>
       <div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${was}</div><div class="where"><span class="sw" style="background:var(--s-${best.s})"></span>${offers.length>1?'Más barato en ':'En '}${esc(data.stores[best.s].name)}</div></div>
