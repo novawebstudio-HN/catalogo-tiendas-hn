@@ -2,66 +2,68 @@
   "jetstereo": {
     "ok": true,
     "manual": true,
-    "updated": "2026-11-01T19:28:33.569Z",
-    "count": 633,
+    "updated": "2026-11-01T21:27:48.508Z",
+    "count": 1167,
     "note": "Precios de una captura manual desde Honduras."
   },
   "diunsa": {
     "ok": true,
-    "updated": "2026-11-01T20:31:35.552Z",
-    "count": 1442,
+    "updated": "2026-11-01T21:46:55.334Z",
+    "count": 1520,
     "note": ""
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-01T20:33:55.329Z",
+    "updated": "2026-11-01T21:49:14.020Z",
     "count": 429,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-01T20:34:02.550Z",
+    "updated": "2026-11-01T21:49:53.372Z",
     "count": 293,
     "note": ""
   },
   "ladylee": {
     "ok": true,
-    "updated": "2026-11-01T20:34:22.185Z",
+    "updated": "2026-11-01T21:50:13.150Z",
     "count": 644,
     "note": ""
   },
   "walmart": {
     "ok": true,
-    "updated": "2026-11-01T20:34:32.599Z",
-    "count": 312,
+    "updated": "2026-11-01T21:50:34.163Z",
+    "count": 310,
     "note": ""
   },
   "gallo": {
     "ok": true,
-    "updated": "2026-11-01T20:56:03.744Z",
+    "updated": "2026-11-01T21:53:06.937Z",
     "count": 334,
     "note": ""
   },
   "radioshack": {
     "ok": true,
-    "updated": "2026-11-01T20:36:29.462Z",
+    "updated": "2026-11-01T21:54:51.105Z",
     "count": 241,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "tropigas": {
     "ok": true,
-    "updated": "2026-11-01T20:39:12.508Z",
+    "updated": "2026-11-01T21:57:38.543Z",
     "count": 331,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "acosa": {
-    "ok": false,
-    "error": "Acosa 1735: respuesta no JSON (200, text/html, url final https://acosa.com.hn/bxVerify.html?rd=/API/wc/store/v1/products?category=1735&per_page=100&page=1): ACOSA",
-    "note": ""
+    "ok": true,
+    "manual": true,
+    "updated": "2026-11-01T21:28:17.287Z",
+    "count": 605,
+    "note": "Precios de una captura manual desde Honduras."
   },
   "gamestation": {
     "ok": true,
-    "updated": "2026-11-01T20:41:06.631Z",
+    "updated": "2026-11-01T21:59:11.764Z",
     "count": 823,
     "note": ""
   }
