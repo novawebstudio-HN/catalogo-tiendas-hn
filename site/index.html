@@ -303,6 +303,9 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
   .allbtn{font-size:13px;margin:2px 2px 0;width:calc(100% - 4px)}
   .cardfoot{padding:6px 10px 10px}
   .favbtn{width:32px;height:32px;top:6px;right:6px}
+  .p .clabel{display:none}
+  .colors{margin-left:10px;margin-right:10px;gap:5px}
+  .cdot{width:20px;height:20px}
   .hbtn .lbl{display:none}
 }
 @media (prefers-reduced-motion:reduce){aside.side,.scrim,.p{transition:none}}
@@ -668,7 +671,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     return out;
   }
   const flagsHtml = (fl) => fl.length ? `<div class="flags">${fl.map(([c, t, tip]) => `<span class="flag ${c}"${tip ? ` title="${esc(tip)}"` : ''}>${esc(t)}</span>`).join('')}</div>` : '';
-  const planText = (o) => o?.q ? `o ${o.q.n} cuotas de ${plain(o.p / o.q.n)} ${o.q.t} (${storeName(o.s)})` : '';
+  const planText = (o) => o?.q ? `o ${o.q.n} cuotas de ${plain(o.p / o.q.n)} sin intereses en ${storeName(o.s)}` : '';
 
   const imgSrc = (p) => p.t ? `thumbs/${p.t}.webp` : p.i;
   const imgTag = (src, initial, extra='') => src ? `<img src="${esc(src)}" alt="" ${extra} decoding="async" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;>${initial}</span>'">` : `<span class="ph">${initial}</span>`;
