@@ -51,9 +51,10 @@ const brandFromName = (name) => {
 
 export async function scrapeCuracao({ fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) }) {
   const out = [];
+  const failed = [];
   for (const [path, cat] of Object.entries(MAP)) {
-    const res = await fetch(`${SITE}/honduras/c/${path}`);
-    if (!res.ok) throw new Error(`Curacao ${path} HTTP ${res.status}`);
+    const res = await fetch(`${SITE}/honduras/c/${path}`, { headers: { Accept: 'text/html,application/xhtml+xml' } });
+    if (!res.ok) { failed.push(`${path} (${res.status})`); await sleep(2000); continue; }
     const sr = extractSearchResponse(await res.text());
     const items = sr?.data?.productSearch?.items || [];
     for (const { product: p } of items) {
@@ -66,7 +67,9 @@ export async function scrapeCuracao({ fetch, sleep = (ms) => new Promise((r) => 
         sku: String(p.sku || ''), model: '',
       });
     }
-    await sleep(600);
+    await sleep(1500);
   }
+  if (failed.length) console.log(`  Curacao: categorías sin respuesta: ${failed.join(', ')}`);
+  if (!out.length) throw new Error(`Curacao sin productos (${failed.join(', ')})`);
   return out;
 }

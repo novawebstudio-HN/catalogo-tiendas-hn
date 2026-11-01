@@ -25,6 +25,10 @@ GitHub Actions (diario, 6:17 a. m. HN)
 
 Su API de listado responde solo a su propio sitio, así que se respeta esa restricción: se toma lo que la página pública de cada categoría entrega en el HTML (los primeros ~20 productos en existencia). En categorías grandes (celulares, televisores, camas) la cobertura es parcial.
 
+### Nota sobre Jetstereo
+
+`api.jetstereo.com` responde **403** a las consultas que salen de servidores en la nube (como GitHub Actions): es una protección anti-bots y no se intenta burlar. El extractor está listo y funciona desde un navegador normal, pero la actualización automática diaria no puede incluir a Jetstereo mientras ellos mantengan ese bloqueo. La vía limpia es pedirle a Jetstereo un feed de productos o acceso a su API.
+
 ## Correr local
 
 ```bash

@@ -15,7 +15,10 @@ const politeFetch = (url, opts = {}) => fetch(url, {
 });
 
 const SCRAPERS = { jetstereo: scrapeJetstereo, diunsa: scrapeDiunsa, curacao: scrapeCuracao, elektra: scrapeElektra };
-const NOTES = { curacao: 'Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio).' };
+const NOTES = {
+  curacao: 'Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio).',
+  jetstereo: 'Su servidor rechaza consultas automáticas desde la nube (HTTP 403), por eso no se actualiza a diario.',
+};
 
 const readJson = async (p, fallback) => { try { return JSON.parse(await readFile(p, 'utf8')); } catch { return fallback; } };
 
@@ -37,7 +40,7 @@ for (const [id, fn] of Object.entries(SCRAPERS)) {
     console.log(`✓ ${id}: ${items.length} productos en ${((Date.now() - t0) / 1000).toFixed(0)}s`);
   } catch (e) {
     raw[id] = await readJson(file, []);
-    status[id] = { ...(status[id] || {}), ok: false, error: String(e.message || e), note: 'Sin actualizar en la última corrida; se muestran los datos anteriores.' };
+    status[id] = { ...(status[id] || {}), ok: false, error: String(e.message || e), note: NOTES[id] || 'Sin actualizar en la última corrida; se muestran los datos anteriores.' };
     console.log(`✗ ${id}: ${e.message || e} (se conservan ${raw[id].length} productos anteriores)`);
   }
 }
