@@ -72,6 +72,7 @@ export function clean(items) {
     .filter((p) => p && p.name && p.price >= MIN_PRICE && !ACCESSORY_RE.test(deaccent(p.name)))
     // Precios marcador (99999, 999999…) que algunas tiendas usan para productos no a la venta.
     .filter((p) => !/^9{5,}(\.0+)?$/.test(String(p.price)))
+    .filter((p) => !(p.cat === 'aires' && /enfriador|ventilador/i.test(p.name)))
     .filter((p) => !(p.cat === 'laptops' && /monitor|impresora|desktop|escritorio|all in one|\baio\b|mouse|teclado|mochila/i.test(p.name)))
     .map((p) => {
       let brand = titleBrand(p.brand);

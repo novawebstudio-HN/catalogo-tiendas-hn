@@ -54,11 +54,31 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .cat small{color:var(--muted);margin-left:4px;font-weight:400}
 .cat[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .cat[aria-pressed="true"] small{color:inherit;opacity:.7}
+.facets{display:flex;flex-direction:column;gap:8px;padding:0 0 10px}
+.fg{display:flex;align-items:center;gap:8px;min-width:0}
+.fg > span{flex:0 0 auto;font-size:13px;font-weight:600;color:var(--muted);width:92px}
+.fg .chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;min-width:0;padding:1px}
+.fg .chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 11px;cursor:pointer;font-size:14px;white-space:nowrap}
+.chip small{color:var(--muted);margin-left:4px}
+.chip[aria-pressed="true"]{background:var(--act);border-color:var(--act);color:#fff}
+.chip[aria-pressed="true"] small{color:#fff;opacity:.8}
+.chip.more-b{border-style:dashed;color:var(--act)}
+.hint{font-size:14px;color:var(--muted);margin:0}
 .filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:0 0 12px}
 .filters select{height:38px;border:1px solid var(--line);border-radius:8px;background:var(--card);padding:0 10px;max-width:200px}
 .toggle{display:inline-flex;align-items:center;gap:7px;font-size:15px;cursor:pointer;user-select:none}
 .toggle input{width:18px;height:18px;accent-color:var(--act)}
+.clear{border:0;background:none;color:var(--act);font-weight:600;cursor:pointer;padding:6px 4px;text-decoration:underline;text-underline-offset:3px}
 .count{margin-left:auto;color:var(--muted);font-size:14px}
+.ftoggle{display:none;height:38px;border:1px solid var(--ink);border-radius:8px;background:var(--card);padding:0 12px;font-weight:600;cursor:pointer}
+@media (max-width:640px){
+  .fg > span{width:auto}
+  .fg{flex-direction:column;align-items:stretch;gap:4px}
+  .ftoggle{display:inline-block}
+  .facets.closed{display:none}
+  .filters .toggle{font-size:14px}
+}
 
 /* Resultados */
 main{padding-block:20px 40px}
@@ -71,7 +91,8 @@ main{padding-block:20px 40px}
 .p .img .ph{font:700 34px "Barlow Condensed";color:#C5CCD5}
 .p .body{padding:12px 12px 4px;display:flex;flex-direction:column;gap:3px;flex:1}
 .p .b{font-size:13px;color:var(--muted);font-weight:600}
-.p .n{font-weight:500;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
+.p a.n:hover{text-decoration:underline}
+.p .n{font-weight:500;text-decoration:none;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.5em}
 .p .m{font-size:12px;color:var(--muted)}
 
 /* La etiqueta de precio: el elemento memorable */
@@ -121,8 +142,9 @@ footer p{max-width:75ch;margin:0 0 8px}
 <div class="bar">
   <div class="wrap">
     <div class="cats" id="cats" role="toolbar" aria-label="Categorías"></div>
+    <div class="facets" id="facets" aria-label="Filtros"></div>
     <div class="filters">
-      <select id="brand" aria-label="Marca"><option value="">Todas las marcas</option></select>
+      <button class="ftoggle" id="ftoggle" aria-controls="facets" aria-expanded="false">Filtros</button>
       <select id="sort" aria-label="Ordenar">
         <option value="rel">Más relevantes</option>
         <option value="asc">Menor precio</option>
@@ -130,8 +152,9 @@ footer p{max-width:75ch;margin:0 0 8px}
         <option value="off">Mayor descuento</option>
         <option value="multi">En más tiendas</option>
       </select>
-      <label class="toggle"><input type="checkbox" id="multi"> Solo los que están en 2 o más tiendas</label>
+      <label class="toggle"><input type="checkbox" id="multi"> Solo en 2 o más tiendas</label>
       <label class="toggle"><input type="checkbox" id="stock" checked> Solo disponibles</label>
+      <button class="clear" id="clear" hidden>Quitar filtros</button>
       <span class="count" id="count" aria-live="polite"></span>
     </div>
   </div>
@@ -163,55 +186,133 @@ footer p{max-width:75ch;margin:0 0 8px}
   const esc = (s) => String(s??'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = (n) => { const [i, d] = Number(n).toFixed(2).split('.'); return `<span class="cur">L</span>${fmt.format(Number(i))}${d !== '00' ? `<span class="dec">.${d}</span>` : ''}`; };
   const plain = (n) => 'L ' + fmt.format(Math.round(n));
+  const catName = (id) => data.categories.find(c=>c.id===id)?.name || '';
 
-  // Índice de búsqueda por producto
-  for (const p of data.products) p._t = norm(`${p.b} ${p.n} ${p.m} ${data.categories.find(c=>c.id===p.c)?.name||''}`);
+  // ---- Características que se leen del nombre del producto, por categoría ----
+  const num = (x) => Number(String(x).replace(',', '.'));
+  const storage = (n) => { const m=[...n.matchAll(/(\d+)\s?(gb|tb)\b/g)].map(x=>Number(x[1])*(x[2]==='tb'?1024:1)).filter(v=>v>=32); if(!m.length) return null; const v=Math.max(...m); return v>=1024?'1 TB o más':v+' GB'; };
+  const ram = (n) => { const m=[...n.matchAll(/(\d+)\s?gb/g)].map(x=>Number(x[1])).filter(v=>v>=4&&v<=64); if(!m.length) return null; const v=Math.min(...m); return v<=8?(v<8?'Menos de 8 GB':'8 GB'):v<=16?'16 GB':'32 GB o más'; };
+  const inches = (n) => { const m=n.match(/(\d{2,3})\s?(?:"|”|''|pulgadas|pulg\b|in\b|\s?p\b)/) || n.match(/\b(?:tv|televisor|pantalla)\D{0,25}?\b(\d{2,3})\b/); if(!m) return null; const v=Number(m[1]); if(v<19||v>120) return null; return v<=32?'32" o menos':v<=43?'40" a 43"':v<=55?'50" a 55"':v<=65?'58" a 65"':'70" o más'; };
+  const btu = (n) => { let v=null; const ton=n.match(/(\d(?:[.,]\d)?)\s?(?:toneladas?|ton)\b/); const x=n.match(/(\d{4,5})\s?btu/);
+    const m=n.match(/(\d{1,2})[,.]?000\s?btu/)||n.match(/(\d{1,2})\s?(?:mil|k)\s?btu/)||n.match(/\b(\d{1,2})\s?btu/)||n.match(/\b(\d{1,2})k\b/);
+    if (m) v=Number(m[1]); else if (x) v=Math.round(Number(x[1])/1000); else if (ton) v=num(ton[1])*12; if(!v) return null; return v<=10?'9,000 BTU':v<=13?'12,000 BTU':v<=19?'18,000 BTU':v<=25?'24,000 BTU':'30,000 BTU o más'; };
+  const feet = (n) => { const m=n.match(/(\d{1,2}(?:[.,]\d)?)\s?(?:pies|pie\b|ft|cu|')/); if(!m) return null; const v=num(m[1]); if(v<2||v>40) return null; return v<=10?'Hasta 10 pies':v<=14?'11 a 14 pies':v<=20?'15 a 20 pies':'21 pies o más'; };
+  const kilos = (n) => { let m=n.match(/(\d{2})\s?(?:kg|kilos)\b/); let v=m?Number(m[1]):null; if(!v){const l=n.match(/(\d{2})\s?(?:lb|lbs|libras)\b/); if(l) v=Math.round(Number(l[1])/2.2);} if(!v||v<5) return null; return v<=15?'Hasta 15 kg':v<=20?'16 a 20 kg':v<=25?'21 a 25 kg':'26 kg o más'; };
+  const pick = (pairs) => (n) => { for (const [re, label] of pairs) if (re.test(n)) return label; return null; };
+  const FACETS = {
+    celulares: [{ id:'cap', label:'Almacenamiento', fn:storage, order:['64 GB','128 GB','256 GB','512 GB','1 TB o más'] }],
+    tablets:   [{ id:'cap', label:'Almacenamiento', fn:storage, order:['64 GB','128 GB','256 GB','512 GB','1 TB o más'] }],
+    laptops:   [{ id:'ram', label:'Memoria RAM', fn:ram, order:['Menos de 8 GB','8 GB','16 GB','32 GB o más'] }],
+    televisores: [
+      { id:'size', label:'Tamaño', fn:inches, order:['32" o menos','40" a 43"','50" a 55"','58" a 65"','70" o más'] },
+      { id:'res', label:'Resolución', fn:pick([[/\b8k\b/,'8K'],[/\b4k\b|uhd/,'4K'],[/fhd|full hd|1080/,'Full HD'],[/\bhd\b/,'HD']]), order:['HD','Full HD','4K','8K'] },
+    ],
+    audio: [{ id:'tipo', label:'Tipo', fn:pick([[/barra/,'Barras de sonido'],[/minicomponente|mini componente|equipo de sonido|sistema de (audio|sonido)|teatro|home theater/,'Equipos de sonido'],[/parlante|bocina|altavoz|speaker|partybox/,'Bocinas']]), order:['Bocinas','Barras de sonido','Equipos de sonido'] }],
+    consolas: [{ id:'plat', label:'Plataforma', fn:pick([[/playstation|ps5|ps4/,'PlayStation'],[/nintendo|switch/,'Nintendo'],[/xbox/,'Xbox']]), order:['PlayStation','Nintendo','Xbox'] }],
+    refrigeradoras: [
+      { id:'tipo', label:'Tipo', fn:pick([[/congelador|freezer/,'Congeladores'],[/side by side|sbs|french door|cross door/,'Dos puertas laterales'],[/frigobar|minibar|compact/,'Frigobares'],[/refri/,'Refrigeradoras']]), order:['Refrigeradoras','Dos puertas laterales','Congeladores','Frigobares'] },
+      { id:'size', label:'Tamaño', fn:feet, order:['Hasta 10 pies','11 a 14 pies','15 a 20 pies','21 pies o más'] },
+    ],
+    lavadoras: [
+      { id:'tipo', label:'Tipo', fn:pick([[/centro de lavado|lavadora.*secadora|torre/,'Centros de lavado'],[/secadora/,'Secadoras'],[/lavadora/,'Lavadoras']]), order:['Lavadoras','Secadoras','Centros de lavado'] },
+      { id:'kg', label:'Capacidad', fn:kilos, order:['Hasta 15 kg','16 a 20 kg','21 a 25 kg','26 kg o más'] },
+    ],
+    estufas: [{ id:'tipo', label:'Tipo', fn:pick([[/electric|vitroceram|induccion/,'Eléctricas'],[/gas/,'De gas']]), order:['De gas','Eléctricas'] }],
+    aires: [
+      { id:'btu', label:'Capacidad', fn:btu, order:['9,000 BTU','12,000 BTU','18,000 BTU','24,000 BTU','30,000 BTU o más'] },
+      { id:'inv', label:'Tecnología', fn:pick([[/inverter/,'Inverter'],[/portatil/,'Portátil'],[/./,'Convencional']]), order:['Inverter','Convencional','Portátil'] },
+    ],
+    camas: [{ id:'size', label:'Tamaño', fn:pick([[/king/,'King'],[/queen/,'Queen'],[/matrimonial|full/,'Matrimonial'],[/individual|twin|imperial|semi/,'Individual']]), order:['Individual','Matrimonial','Queen','King'] }],
+  };
 
-  const state = { q:'', cat:'', brand:'', sort:'rel', multi:false, stock:true, stores:new Set(STORE_IDS), shown:48 };
+  // Índice por producto: texto de búsqueda, mejor precio y características
+  for (const p of data.products) {
+    p._n = norm(p.n);
+    p._t = norm(`${p.b} ${p.n} ${p.m} ${catName(p.c)}`);
+    p._f = {};
+    for (const f of FACETS[p.c] || []) { const v = f.fn(p._n); if (v) p._f[f.id] = v; }
+  }
+
+  const state = { q:'', cat:'', brands:new Set(), facets:{}, price:'', sort:'rel', multi:false, stock:true, stores:new Set(STORE_IDS), shown:48, allBrands:false };
 
   // Encabezado
   const up = new Date(data.updated);
   $('#updated').textContent = 'Actualizado ' + up.toLocaleString('es-HN', {weekday:'long', day:'numeric', month:'long', hour:'numeric', minute:'2-digit'});
   const multiCount = data.products.filter(p=>p.o.length>1).length;
   $('#sub').textContent = `${fmt.format(data.products.length)} productos de ${storeList(STORE_IDS)}; ${fmt.format(multiCount)} se pueden comparar entre tiendas.`;
-  $('#stores').innerHTML = STORE_IDS.map(id => { const s=data.stores[id]; return `<button class="storechip${s.ok?'':' warn'}" aria-pressed="true" data-s="${id}"><span class="sw" style="background:var(--s-${id})"></span>${esc(s.name)} <small>${fmt.format(s.count)}${s.manual ? ' · captura del ' + new Date(s.updated).toLocaleDateString('es-HN',{day:'numeric',month:'short'}) + (Date.now()-new Date(s.updated) > 14*864e5 ? ' (vieja)' : '') : (s.ok?'':' · sin actualizar')}</small></button>`; }).join('');
+  $('#stores').innerHTML = STORE_IDS.map(id => { const s=data.stores[id]; const age = s.manual ? (Date.now()-new Date(s.updated))/864e5 : 0;
+    return `<button class="storechip${s.ok?'':' warn'}" aria-pressed="true" data-s="${id}"><span class="sw" style="background:var(--s-${id})"></span>${esc(s.name)} <small>${fmt.format(s.count)}${s.manual ? ' · captura del ' + new Date(s.updated).toLocaleDateString('es-HN',{day:'numeric',month:'short'}) + (age > 14 ? ' (vieja)' : '') : (s.ok?'':' · sin actualizar')}</small></button>`; }).join('');
   $('#notes').textContent = Object.values(data.stores).filter(s=>s.note).map(s=>`${s.name}: ${s.note}`).join(' ');
 
-  function filtered(ignoreCat){
-    const toks = norm(state.q).split(/\s+/).filter(Boolean);
-    return data.products.filter(p => {
-      if (!ignoreCat && state.cat && p.c !== state.cat) return false;
-      if (state.brand && p.b !== state.brand) return false;
-      const offers = p.o.filter(o => state.stores.has(o.s) && (!state.stock || o.a));
-      if (!offers.length) return false;
-      if (state.multi && offers.length < 2) return false;
-      for (const t of toks) if (!p._t.includes(t)) return false;
-      return true;
-    });
-  }
   const offersOf = (p) => p.o.filter(o => state.stores.has(o.s) && (!state.stock || o.a)).sort((a,b)=>(b.a-a.a)||(a.p-b.p));
-  const discount = (o) => o.r > o.p ? (o.r - o.p) / o.r : 0;
+  const bestP = (p) => offersOf(p)[0]?.p ?? Infinity;
+  const discount = (o) => o && o.r > o.p ? (o.r - o.p) / o.r : 0;
+
+  // Rangos de precio: cuartiles de la categoría actual, redondeados
+  function priceBuckets(list){
+    const ps = list.map(bestP).filter(Number.isFinite).sort((a,b)=>a-b);
+    if (ps.length < 8) return [];
+    const r = (v) => { const step = v > 20000 ? 5000 : v > 5000 ? 1000 : 500; return Math.max(step, Math.round(v/step)*step); };
+    const cuts = [...new Set([0.25,0.5,0.75].map(q => r(ps[Math.floor(q*(ps.length-1))])))];
+    const out = []; let lo = 0;
+    cuts.forEach((c,i) => { out.push({ id:`${lo}-${c}`, label: i===0 ? `Hasta ${plain(c)}` : `${plain(lo)} a ${plain(c)}`, lo, hi:c }); lo = c; });
+    out.push({ id:`${lo}-`, label:`Más de ${plain(lo)}`, lo, hi:Infinity });
+    return out;
+  }
+
+  // Filtro con opción de ignorar un grupo (para contar cuántos quedan en cada chip)
+  function matches(p, skip){
+    if (skip !== 'cat' && state.cat && p.c !== state.cat) return false;
+    if (skip !== 'brand' && state.brands.size && !state.brands.has(p.b)) return false;
+    for (const [fid, vals] of Object.entries(state.facets)) if (skip !== fid && vals.size && !vals.has(p._f[fid])) return false;
+    const offers = offersOf(p);
+    if (!offers.length) return false;
+    if (state.multi && offers.length < 2) return false;
+    if (skip !== 'price' && state.price) { const [lo, hi] = state.price.split('-').map(x => x === '' ? Infinity : Number(x)); const v = offers[0].p; if (v <= lo || v > hi) return false; }
+    if (state.q) for (const t of norm(state.q).split(/\s+/).filter(Boolean)) if (!p._t.includes(t)) return false;
+    return true;
+  }
+  const countBy = (list, key) => { const c = {}; list.forEach(p => { const k = key(p); if (k) c[k] = (c[k]||0)+1; }); return c; };
 
   function renderCats(){
-    const base = filtered(true);
-    const counts = {}; base.forEach(p => counts[p.c] = (counts[p.c]||0)+1);
+    const base = data.products.filter(p => matches(p, 'cat'));
+    const counts = countBy(base, p => p.c);
     const btn = (id, name, n) => `<button class="cat" aria-pressed="${state.cat===id}" data-c="${id}">${esc(name)}<small>${fmt.format(n)}</small></button>`;
     $('#cats').innerHTML = btn('', 'Todo', base.length) + data.categories.filter(c=>counts[c.id]).map(c=>btn(c.id, c.name, counts[c.id])).join('');
   }
-  function renderBrands(){
-    const base = data.products.filter(p => !state.cat || p.c === state.cat);
-    const counts = {}; base.forEach(p => { if (p.b) counts[p.b]=(counts[p.b]||0)+1; });
-    const list = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
-    if (state.brand && !counts[state.brand]) state.brand = '';
-    $('#brand').innerHTML = '<option value="">Todas las marcas</option>' + list.map(([b,n])=>`<option value="${esc(b)}"${b===state.brand?' selected':''}>${esc(b)} (${n})</option>`).join('');
+
+  function renderFacets(){
+    const groups = [];
+    // Marcas de la categoría elegida (las más comunes primero)
+    const bBase = data.products.filter(p => matches(p, 'brand'));
+    const bCount = countBy(bBase, p => p.b);
+    for (const b of state.brands) if (!bCount[b]) bCount[b] = 0;
+    const brands = Object.entries(bCount).sort((a,b)=>b[1]-a[1]);
+    const LIMIT = 10;
+    const shownB = state.allBrands ? brands : brands.slice(0, LIMIT).concat(brands.slice(LIMIT).filter(([b]) => state.brands.has(b)));
+    if (brands.length > 1) groups.push(`<div class="fg"><span>Marca</span><div class="chips">${shownB.map(([b,n]) => `<button class="chip" data-g="brand" data-v="${esc(b)}" aria-pressed="${state.brands.has(b)}">${esc(b)}<small>${n}</small></button>`).join('')}${brands.length > LIMIT ? `<button class="chip more-b" data-more="1">${state.allBrands ? 'Ver menos' : `+${brands.length - LIMIT} marcas`}</button>` : ''}</div></div>`);
+    // Características propias de la categoría
+    for (const f of FACETS[state.cat] || []) {
+      const c = countBy(data.products.filter(p => matches(p, f.id)), p => p._f[f.id]);
+      const vals = f.order.filter(v => c[v] || state.facets[f.id]?.has(v));
+      if (vals.length < 2) continue;
+      groups.push(`<div class="fg"><span>${esc(f.label)}</span><div class="chips">${vals.map(v => `<button class="chip" data-g="${f.id}" data-v="${esc(v)}" aria-pressed="${!!state.facets[f.id]?.has(v)}">${esc(v)}<small>${c[v]||0}</small></button>`).join('')}</div></div>`);
+    }
+    // Precio
+    const pb = priceBuckets(data.products.filter(p => matches(p, 'price')));
+    if (pb.length) groups.push(`<div class="fg"><span>Precio</span><div class="chips">${pb.map(b => `<button class="chip" data-g="price" data-v="${b.id}" aria-pressed="${state.price===b.id}">${esc(b.label)}</button>`).join('')}</div></div>`);
+    if (!state.cat) groups.push(`<p class="hint">Elige una categoría para filtrar por tamaño, capacidad o almacenamiento.</p>`);
+    $('#facets').innerHTML = groups.join('');
+    const active = state.brands.size + Object.values(state.facets).reduce((a,s)=>a+s.size,0) + (state.price?1:0);
+    $('#clear').hidden = !active && !state.multi;
+    $('#ftoggle').textContent = active ? `Filtros (${active})` : 'Filtros';
   }
 
   function card(p){
     const offers = offersOf(p);
     const best = offers[0];
-    const cat = data.categories.find(c=>c.id===p.c);
     const src = p.t ? `thumbs/${p.t}.webp` : p.i;
-    const img = src ? `<img src="${esc(src)}" width="220" height="220" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph',textContent:'${esc((p.b||cat?.name||'').slice(0,1))}'}))">` : `<span class="ph">${esc((p.b||'·').slice(0,1))}</span>`;
+    const img = src ? `<img src="${esc(src)}" width="220" height="220" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'ph',textContent:'${esc((p.b||catName(p.c)).slice(0,1))}'}))">` : `<span class="ph">${esc((p.b||'·').slice(0,1))}</span>`;
     const was = best.r > best.p ? `<span class="was">${plain(best.r)}</span>` : '';
     const top = offers.length > 1 ? offers[offers.length-1].p - best.p : 0;
     const rows = offers.map((o,i) => {
@@ -219,8 +320,8 @@ footer p{max-width:75ch;margin:0 0 8px}
       return `<li class="${i===0?'best':''}"><a href="${esc(o.u)}" target="_blank" rel="noopener"><span class="sw" style="background:var(--s-${o.s})"></span><span class="st">${esc(data.stores[o.s].name)}${o.a?'':' (agotado)'}</span><span class="pr">${plain(o.p)}</span><span class="diff">${diff}</span></a></li>`;
     }).join('');
     return `<article class="p">
-      <div class="img">${img}</div>
-      <div class="body"><span class="b">${esc(p.b || cat?.name || '')}</span><span class="n" title="${esc(p.n)}">${esc(p.n)}</span>${p.m?`<span class="m">Modelo ${esc(p.m)}</span>`:''}</div>
+      <a class="img" href="${esc(best.u)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${img}</a>
+      <div class="body"><span class="b">${esc(p.b || catName(p.c))}</span><a class="n" href="${esc(best.u)}" target="_blank" rel="noopener" title="${esc(p.n)}">${esc(p.n)}</a>${p.m?`<span class="m">Modelo ${esc(p.m)}</span>`:''}</div>
       <div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${was}</div><div class="where"><span class="sw" style="background:var(--s-${best.s})"></span>${offers.length>1?'Más barato en ':'En '}${esc(data.stores[best.s].name)}</div></div>
       ${top>0?`<div class="save">Ahorras ${plain(top)} frente a la más cara</div>`:''}
       <ul class="offers">${rows}</ul>
@@ -228,30 +329,45 @@ footer p{max-width:75ch;margin:0 0 8px}
   }
 
   function render(){
-    let list = filtered(false);
+    let list = data.products.filter(p => matches(p));
     const toks = norm(state.q).split(/\s+/).filter(Boolean);
-    const bestP = (p) => offersOf(p)[0]?.p ?? Infinity;
     if (state.sort === 'asc') list.sort((a,b)=>bestP(a)-bestP(b));
     else if (state.sort === 'desc') list.sort((a,b)=>bestP(b)-bestP(a));
     else if (state.sort === 'off') list.sort((a,b)=>discount(offersOf(b)[0])-discount(offersOf(a)[0]));
     else if (state.sort === 'multi') list.sort((a,b)=>offersOf(b).length-offersOf(a).length || bestP(a)-bestP(b));
-    else if (toks.length) list.sort((a,b)=>(norm(b.n).startsWith(toks[0])-norm(a.n).startsWith(toks[0])) || (offersOf(b).length-offersOf(a).length));
+    else if (toks.length) list.sort((a,b)=>(b._n.startsWith(toks[0])-a._n.startsWith(toks[0])) || (offersOf(b).length-offersOf(a).length));
     $('#count').textContent = `${fmt.format(list.length)} producto${list.length===1?'':'s'}`;
     const grid = $('#grid');
     if (!list.length) {
-      grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><strong>Sin resultados</strong>Prueba con otra palabra, quita un filtro o activa más tiendas.</div>`;
+      grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><strong>Sin resultados</strong>Prueba con otra palabra o quita algún filtro.</div>`;
       $('#more').hidden = true; return;
     }
     grid.innerHTML = list.slice(0, state.shown).map(card).join('');
     $('#more').hidden = list.length <= state.shown;
     $('#more').textContent = `Ver más productos (${fmt.format(list.length - state.shown)} restantes)`;
   }
-  const refresh = (resetPage=true) => { if (resetPage) state.shown = 48; renderCats(); render(); };
+
+  const refresh = (resetPage=true) => { if (resetPage) state.shown = 48; renderCats(); renderFacets(); render(); };
+  const resetFilters = () => { state.brands.clear(); state.facets = {}; state.price = ''; state.allBrands = false; };
+
+  // La categoría vive en la dirección (#celulares) para poder compartirla o volver atrás
+  const fromHash = () => { const h = decodeURIComponent(location.hash.slice(1)); const ok = data.categories.some(c => c.id === h); if ((ok ? h : '') !== state.cat) { state.cat = ok ? h : ''; resetFilters(); } };
 
   // Eventos
   let tmr; $('#q').addEventListener('input', (e) => { clearTimeout(tmr); tmr = setTimeout(()=>{ state.q = e.target.value; refresh(); }, 120); });
-  $('#cats').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (!b) return; state.cat = b.dataset.c; renderBrands(); refresh(); });
-  $('#brand').addEventListener('change', (e) => { state.brand = e.target.value; refresh(); });
+  $('#cats').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (!b) return; const id = b.dataset.c; history.replaceState(null, '', id ? '#'+id : location.pathname); if (id !== state.cat) { state.cat = id; resetFilters(); } refresh(); });
+  window.addEventListener('hashchange', () => { fromHash(); refresh(); });
+  $('#facets').addEventListener('click', (e) => {
+    if (e.target.closest('[data-more]')) { state.allBrands = !state.allBrands; renderFacets(); return; }
+    const b = e.target.closest('[data-g]'); if (!b) return;
+    const g = b.dataset.g, v = b.dataset.v;
+    if (g === 'brand') { state.brands.has(v) ? state.brands.delete(v) : state.brands.add(v); }
+    else if (g === 'price') { state.price = state.price === v ? '' : v; }
+    else { const s = state.facets[g] ||= new Set(); s.has(v) ? s.delete(v) : s.add(v); }
+    refresh();
+  });
+  $('#clear').addEventListener('click', () => { resetFilters(); state.multi = false; $('#multi').checked = false; refresh(); });
+  $('#ftoggle').addEventListener('click', (e) => { const f = $('#facets'); const open = f.classList.toggle('closed') === false; e.currentTarget.setAttribute('aria-expanded', open); });
   $('#sort').addEventListener('change', (e) => { state.sort = e.target.value; refresh(); });
   $('#multi').addEventListener('change', (e) => { state.multi = e.target.checked; refresh(); });
   $('#stock').addEventListener('change', (e) => { state.stock = e.target.checked; refresh(); });
@@ -264,7 +380,8 @@ footer p{max-width:75ch;margin:0 0 8px}
   });
   $('#more').addEventListener('click', () => { state.shown += 48; render(); });
 
-  renderBrands(); refresh();
+  if (matchMedia('(max-width:640px)').matches) $('#facets').classList.add('closed');
+  fromHash(); refresh();
 })();
 </script>
 </body>
