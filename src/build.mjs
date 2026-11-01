@@ -234,6 +234,24 @@ export function group(items) {
       }
     }
   }
+  // 3) Juegos y controles: un título contiene al otro (misma plataforma) y lo que sobra no cambia el
+  //    producto (editora, "videojuego"…). No se aceptan diferencias de edición, versión, color ni secuela.
+  const EXTRA_BLOCK = /^(\d+|ii|iii|iv|vi|deluxe|gold|ultimate|complete|completa|goty|premium|collector|coleccionista|bundle|edge|pro|elite|slim|lite|oled|portal|chroma|negro|black|blanco|white|rojo|red|azul|blue|gris|gray|grey|verde|green|morado|purple|rosa|pink|camo|cosmic|midnight|galactic|starlight|nova|indigo|volcanic|sterling|cobalt|edicion|edition|remastered|remake|definitive|director|cut|plus|season|pass|vr|vr2|dlc|pack|digital|code|codigo|tarjeta|card|amiibo|figura)$/;
+  const games = items.map((p, i) => [p, i]).filter(([p]) => p.cat === 'videojuegos' && p.gk);
+  const parsed = games.map(([p, i]) => { const [plat, t] = p.gk.split('|'); return { i, plat, toks: new Set(t.split(' ')) }; });
+  for (let x = 0; x < parsed.length; x++) for (let y = x + 1; y < parsed.length; y++) {
+    const A = parsed[x], B = parsed[y];
+    if (A.plat !== B.plat || find(A.i) === find(B.i)) continue;
+    const [small, big] = A.toks.size <= B.toks.size ? [A, B] : [B, A];
+    if (small.toks.size < 2 || [...small.toks].join('').length < 6) continue;
+    if (![...small.toks].every((t) => big.toks.has(t))) continue;
+    const extra = [...big.toks].filter((t) => !small.toks.has(t));
+    if (extra.length > 3 || extra.some((t) => EXTRA_BLOCK.test(t))) continue;
+    const pa = items[A.i].price, pb = items[B.i].price;
+    if (Math.max(pa, pb) / Math.min(pa, pb) > 3.5) continue;
+    union(A.i, B.i);
+  }
+
   const groups = {};
   items.forEach((p, i) => (groups[find(i)] ||= []).push(p));
 
