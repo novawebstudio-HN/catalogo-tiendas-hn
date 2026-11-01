@@ -29,9 +29,23 @@ GitHub Actions (diario, 6:17 a. m. HN)
 
 Su API de listado responde solo a su propio sitio, así que se respeta esa restricción: se toma lo que la página pública de cada categoría entrega en el HTML (los primeros ~20 productos en existencia). En categorías grandes (celulares, televisores, camas) la cobertura es parcial.
 
-### Nota sobre Jetstereo
+### Jetstereo: captura desde Honduras
 
-`api.jetstereo.com` responde **403** a las consultas que salen de servidores en la nube (como GitHub Actions): es una protección anti-bots y no se intenta burlar. El extractor está listo y funciona desde un navegador normal, pero la actualización automática diaria no puede incluir a Jetstereo mientras ellos mantengan ese bloqueo. La vía limpia es pedirle a Jetstereo un feed de productos o acceso a su API.
+`api.jetstereo.com` rechaza (HTTP 403) las consultas que salen de servidores en la nube como GitHub Actions. No se intenta burlar ese bloqueo. En su lugar, los precios de Jetstereo vienen de `data/manual/jetstereo.json`, una captura hecha desde una conexión normal en Honduras, y la actualización diaria la usa automáticamente. La página muestra la fecha de la captura y la marca como "vieja" si tiene más de 14 días.
+
+Dos formas de hacer la captura (las dos usan el mismo código que `src/stores/jetstereo.mjs`):
+
+**A. Botón en el navegador**
+1. Crea un marcador nuevo y pega como URL el contenido de `tools/bookmarklet-jetstereo.txt`.
+2. Abre www.jetstereo.com y haz clic en el marcador. En ~1 minuto se descarga `jetstereo.json`.
+3. Súbelo en GitHub a la carpeta `data/manual/` (*Add file → Upload files*).
+
+**B. Automático desde la Mac (una vez por semana)**
+1. `git clone` del repo y `npm install` (requiere Node 22).
+2. Prueba manual: `bash tools/jetstereo-mac.sh` (captura, hace commit y push).
+3. Programarlo: edita la ruta en `tools/com.novawebstudio.vitrina-jetstereo.plist`, cópialo a `~/Library/LaunchAgents/` y ejecuta `launchctl load` (instrucciones dentro del archivo).
+
+La captura se identifica como `VitrinaHN/1.0` y va a ritmo pausado. Es una zona gris frente a los términos de Jetstereo: lo ideal sigue siendo pedirles un feed o permiso (`docs/carta-jetstereo.md`).
 
 ## Correr local
 

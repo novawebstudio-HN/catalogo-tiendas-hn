@@ -22,7 +22,7 @@ const SCRAPERS = {
 };
 const NOTES = {
   curacao: 'Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio).',
-  jetstereo: 'Su servidor rechaza consultas automáticas desde la nube (HTTP 403), por eso no se actualiza a diario.',
+  jetstereo: 'Su servidor rechaza consultas desde la nube; sus precios vienen de una captura hecha desde un navegador o computadora en Honduras.',
 };
 
 const readJson = async (p, fallback) => { try { return JSON.parse(await readFile(p, 'utf8')); } catch { return fallback; } };
@@ -44,9 +44,17 @@ for (const [id, fn] of Object.entries(SCRAPERS)) {
     status[id] = { ok: true, updated: new Date().toISOString(), count: items.length, note: NOTES[id] || '' };
     console.log(`✓ ${id}: ${items.length} productos en ${((Date.now() - t0) / 1000).toFixed(0)}s`);
   } catch (e) {
-    raw[id] = await readJson(file, []);
-    status[id] = { ...(status[id] || {}), ok: false, error: String(e.message || e), note: NOTES[id] || 'Sin actualizar en la última corrida; se muestran los datos anteriores.' };
-    console.log(`✗ ${id}: ${e.message || e} (se conservan ${raw[id].length} productos anteriores)`);
+    // Captura manual (data/manual/<tienda>.json): se usa cuando la tienda bloquea la consulta automática.
+    const manual = await readJson(`data/manual/${id}.json`, null);
+    if (manual?.items?.length) {
+      raw[id] = manual.items.map((p) => ({ ...p, store: id }));
+      status[id] = { ok: true, manual: true, updated: manual.captured, count: raw[id].length, note: NOTES[id] || '' };
+      console.log(`↺ ${id}: ${e.message || e}; se usa la captura manual del ${manual.captured} (${raw[id].length} productos)`);
+    } else {
+      raw[id] = await readJson(file, []);
+      status[id] = { ...(status[id] || {}), ok: false, error: String(e.message || e), note: NOTES[id] || 'Sin actualizar en la última corrida; se muestran los datos anteriores.' };
+      console.log(`✗ ${id}: ${e.message || e} (se conservan ${raw[id].length} productos anteriores)`);
+    }
   }
 }
 

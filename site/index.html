@@ -174,7 +174,7 @@ footer p{max-width:75ch;margin:0 0 8px}
   $('#updated').textContent = 'Actualizado ' + up.toLocaleString('es-HN', {weekday:'long', day:'numeric', month:'long', hour:'numeric', minute:'2-digit'});
   const multiCount = data.products.filter(p=>p.o.length>1).length;
   $('#sub').textContent = `${fmt.format(data.products.length)} productos de ${storeList(STORE_IDS)}; ${fmt.format(multiCount)} se pueden comparar entre tiendas.`;
-  $('#stores').innerHTML = STORE_IDS.map(id => { const s=data.stores[id]; return `<button class="storechip${s.ok?'':' warn'}" aria-pressed="true" data-s="${id}"><span class="sw" style="background:var(--s-${id})"></span>${esc(s.name)} <small>${fmt.format(s.count)}${s.ok?'':' · sin actualizar'}</small></button>`; }).join('');
+  $('#stores').innerHTML = STORE_IDS.map(id => { const s=data.stores[id]; return `<button class="storechip${s.ok?'':' warn'}" aria-pressed="true" data-s="${id}"><span class="sw" style="background:var(--s-${id})"></span>${esc(s.name)} <small>${fmt.format(s.count)}${s.manual ? ' · captura del ' + new Date(s.updated).toLocaleDateString('es-HN',{day:'numeric',month:'short'}) + (Date.now()-new Date(s.updated) > 14*864e5 ? ' (vieja)' : '') : (s.ok?'':' · sin actualizar')}</small></button>`; }).join('');
   $('#notes').textContent = Object.values(data.stores).filter(s=>s.note).map(s=>`${s.name}: ${s.note}`).join(' ');
 
   function filtered(ignoreCat){

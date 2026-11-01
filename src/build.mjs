@@ -129,7 +129,7 @@ export function buildCatalog(rawByStore, status) {
     updated: new Date().toISOString(),
     stores: Object.fromEntries(Object.entries(STORES).map(([id, s]) => [id, {
       name: s.name, site: s.site, count: all.filter((p) => p.store === id).length,
-      ok: status[id]?.ok ?? false, updated: status[id]?.updated || null, note: status[id]?.note || '',
+      ok: status[id]?.ok ?? false, manual: !!status[id]?.manual, updated: status[id]?.updated || null, note: status[id]?.note || '',
     }])),
     categories: CATEGORIES,
     products,
