@@ -217,7 +217,7 @@ export function group(items) {
     const best = {};
     for (const p of ps) if (!best[p.store] || p.price < best[p.store].price) best[p.store] = p;
     const offers = Object.values(best)
-      .map((p) => ({ s: p.store, k: offerKey(p), p: p.price, r: Math.max(p.regular || p.price, p.price), u: p.url, a: p.available ? 1 : 0, ...(p.plan ? { q: p.plan } : {}) }))
+      .map((p) => ({ s: p.store, k: offerKey(p), p: p.price, r: Math.max(p.regular || p.price, p.price), u: p.url, a: p.available ? 1 : 0, ...(p.plan ? { q: { ...p.plan, t: String(p.plan.t).replace(/^meses\s+/, '') } } : {}) }))
       .sort((a, b) => (b.a - a.a) || (a.p - b.p));
     // Fotos candidatas de todas las tiendas del grupo; thumbs.mjs usa la primera que funcione.
     const pics = [...new Set(ps.flatMap((p) => [p.img, ...(p.alts || [])]).filter(Boolean))].slice(0, 8);

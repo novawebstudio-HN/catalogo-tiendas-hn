@@ -1,6 +1,6 @@
 (async()=>{
 if(!/jetstereo\.com$/.test(location.hostname)){alert('Abre www.jetstereo.com y vuelve a hacer clic.');return;}
-const box=document.createElement('div');box.style.cssText='position:fixed;right:16px;bottom:16px;z-index:99999;background:#FFDA4D;color:#1E1700;padding:12px 16px;border-radius:8px;font:600 14px system-ui;box-shadow:0 2px 8px rgba(0,0,0,.2)';box.textContent='Vitrina HN: capturando Jetstereo…';document.body.appendChild(box);
+const box=document.createElement('div');box.style.cssText='position:fixed;right:16px;bottom:16px;z-index:99999;background:#FFDA4D;color:#1E1700;padding:12px 16px;border-radius:8px;font:600 14px system-ui;box-shadow:0 2px 8px rgba(0,0,0,.2)';box.textContent='Vitrina HN: capturando jetstereo…';document.body.appendChild(box);
 // Jetstereo — API propia (api.jetstereo.com), paginada de 50 en 50.
 const API = 'https://api.jetstereo.com';
 const SITE = 'https://www.jetstereo.com';

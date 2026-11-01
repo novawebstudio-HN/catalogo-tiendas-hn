@@ -34,6 +34,7 @@ const NOTES = {
   radioshack: 'Cobertura parcial: primeros productos de cada categoría.',
   tropigas: 'Cobertura parcial: primeros productos de cada categoría.',
   jetstereo: 'Precios de una captura manual desde Honduras.',
+  acosa: 'Precios de una captura manual desde Honduras.',
 };
 
 const readJson = async (p, fallback) => { try { return JSON.parse(await readFile(p, 'utf8')); } catch { return fallback; } };

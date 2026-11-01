@@ -806,12 +806,13 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 
   function verdicts(p, h){
     const out = [];
+    const pending = [];
     for (const o of allOffers(p)) {
       const e = h?.[o.s];
       const days = e?.length ? TODAY - e[0][0] : 0;
       const name = storeName(o.s);
       if (!days) {
-        if (o.r > o.p * 1.01) out.push(['', `${name} anuncia ${Math.round(discount(o)*100)}% de descuento (antes ${plain(o.r)}). Empezamos a seguir este precio hoy; pronto podremos confirmar si la rebaja es real.`]);
+        if (o.r > o.p * 1.01) pending.push(`${name} (${Math.round(discount(o)*100)}%)`);
         continue;
       }
       const prices = e.map(x=>x[1]);
@@ -823,6 +824,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
       else out.push(['', `${name}: ${plain(o.p)}, sin cambios desde el ${dayDate(lastChange)}.`]);
       if (o.r > o.p * 1.01 && days >= 14 && Math.max(...prices) < o.r - 1) out.push(['bad', `${name}: el precio “antes” de ${plain(o.r)} no se cobró en ningún día desde el ${dayDate(e[0][0])}.`]);
     }
+    if (pending.length) out.push(['', `${pending.length === 1 ? 'Anuncia descuento' : 'Anuncian descuento'}: ${pending.join(', ')}. Empezamos a seguir ${pending.length === 1 ? 'este precio' : 'estos precios'} hace poco; en unos días podremos confirmar si la rebaja es real.`]);
     return out;
   }
 

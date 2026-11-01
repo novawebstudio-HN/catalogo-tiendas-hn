@@ -1,4 +1,6 @@
 // Acosa Honduras — WooCommerce. API pública de tienda (Store API) bajo el prefijo /API/.
+// Desde la nube su sitio pide verificación de navegador (no se intenta burlar): sus precios
+// vienen de data/manual/acosa.json, capturado desde un navegador (tools/bookmarklet-acosa.txt).
 const SITE = 'https://acosa.com.hn';
 
 // id de categoría WooCommerce -> categoría propia (incluye subcategorías)
@@ -23,6 +25,7 @@ export async function scrapeAcosa({ fetch, sleep = (ms) => new Promise((r) => se
     for (let page = 1; page <= 20; page++) {
       const res = await fetch(`${SITE}/API/wc/store/v1/products?category=${id}&per_page=100&page=${page}`);
       if (!res.ok) throw new Error(`Acosa ${id} HTTP ${res.status}`);
+      if (/bxVerify/i.test(res.url)) throw new Error('Acosa pide verificación de navegador a las consultas desde la nube; se usa la captura manual');
       const body = await res.text();
       if (!/^\s*\[/.test(body)) {
         const title = body.match(/<title>([^<]*)<\/title>/i)?.[1] || body.slice(0, 120).replace(/\s+/g, ' ');
