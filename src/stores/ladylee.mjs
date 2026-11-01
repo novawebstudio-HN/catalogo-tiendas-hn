@@ -1,4 +1,6 @@
 // Almacenes Lady Lee — Shopify. Catálogo público por colección (/collections/{handle}/products.json).
+import { htmlToText } from './acosa.mjs';
+
 const SITE = 'https://ladylee.net';
 
 const MAP = {
@@ -7,6 +9,11 @@ const MAP = {
   refrigeracion: 'refrigeradoras', lavadora: 'lavadoras', secadora: 'lavadoras', 'centro-de-lavado': 'lavadoras',
   'estufas-gas': 'estufas', 'estufas-electricas': 'estufas', microondas: 'microondas',
   'aires-acondicionados': 'aires', camas: 'camas', freidoras: 'freidoras',
+  'monitores-p-compu': 'monitores', impresoras: 'impresoras',
+  'audifonos-microfonos': 'audifonos', 'audifonos-in-ear': 'audifonos', 'audifonos-on-ear': 'audifonos', 'audifonos-over-ear': 'audifonos', 'audifonos-open-ear': 'audifonos',
+  'controles-p-consolas': 'videojuegos', 'juegos-de-consola': 'videojuegos',
+  'cargadores-para-celulares': 'accesorios', licuadoras: 'licuadoras', cafeteras: 'licuadoras',
+  motocicletas: 'motos', mensajera: 'motos', 'motos-forza': 'motos', 'forza-motors': 'motos', cuatrimoto: 'motos',
 };
 
 export async function scrapeLadyLee({ fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) }) {
@@ -29,8 +36,10 @@ export async function scrapeLadyLee({ fetch, sleep = (ms) => new Promise((r) => 
           price, regular: Math.max(price, Number(v.compare_at_price || 0)),
           available: (p.variants || []).some((x) => x.available),
           url: `${SITE}/products/${p.handle}`,
-          img: (p.images?.[0]?.src || '').split('?')[0],
+          img: (p.images?.[0]?.src || '').split('?')[0], alts: (p.images || []).slice(1, 5).map((i) => i.src.split('?')[0]),
           sku: String(v.sku || p.id), model: '', barcode: String(v.barcode || ''),
+          desc: htmlToText(p.body_html).slice(0, 900),
+          specs: [p.product_type ? ['Tipo', p.product_type] : null, ...(p.options || []).filter((o) => o.name !== 'Title' && o.values?.length).map((o) => [o.name, o.values.join(', ')])].filter(Boolean).slice(0, 8),
         });
       }
       if (products.length < 250) break;

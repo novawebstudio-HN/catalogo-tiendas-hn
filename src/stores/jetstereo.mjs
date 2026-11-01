@@ -7,10 +7,14 @@ const MAP = {
   47: 'audio', 48: 'audio', 212: 'audio', 52: 'consolas',
   74: 'refrigeradoras', 195: 'refrigeradoras', 77: 'lavadoras', 78: 'lavadoras',
   75: 'estufas', 76: 'microondas', 79: 'aires', 204: 'freidoras',
+  91: 'monitores', 331: 'monitores', 33: 'impresoras', 89: 'smartwatches', 132: 'audifonos', 219: 'audifonos',
+  147: 'videojuegos', 341: 'videojuegos', 166: 'accesorios', 284: 'accesorios',
+  193: 'licuadoras', 189: 'licuadoras', 191: 'licuadoras',
 };
 
 export async function scrapeJetstereo({ fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) }) {
   const out = [];
+  const seen = new Set();
   for (const [id, cat] of Object.entries(MAP)) {
     for (let page = 1; page <= 40; page++) {
       const res = await fetch(`${API}/categories/${id}/products-optimized?per-page=50&page=${page}`);
@@ -18,7 +22,8 @@ export async function scrapeJetstereo({ fetch, sleep = (ms) => new Promise((r) =
       const j = await res.json();
       for (const p of j.content || []) {
         const sale = Number(p.price?.sale ?? 0);
-        if (!sale) continue;
+        if (!sale || seen.has(p.sku || p.slug)) continue;
+        seen.add(p.sku || p.slug);
         out.push({
           store: 'jetstereo', cat,
           brand: typeof p.brand === 'object' ? (p.brand?.name || '') : (p.brand || ''),
