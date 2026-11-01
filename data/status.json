@@ -2,22 +2,23 @@
   "jetstereo": {
     "ok": false,
     "error": "Jetstereo 26 HTTP 403",
-    "note": "Sin actualizar en la última corrida; se muestran los datos anteriores."
+    "note": "Su servidor rechaza consultas automáticas desde la nube (HTTP 403), por eso no se actualiza a diario."
   },
   "diunsa": {
     "ok": true,
-    "updated": "2026-11-01T18:29:57.621Z",
+    "updated": "2026-11-01T18:31:45.338Z",
     "count": 817,
     "note": ""
   },
   "curacao": {
-    "ok": false,
-    "error": "Curacao colchones/camas HTTP 406",
-    "note": "Sin actualizar en la última corrida; se muestran los datos anteriores."
+    "ok": true,
+    "updated": "2026-11-01T18:32:13.920Z",
+    "count": 197,
+    "note": "Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio)."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-01T18:30:20.578Z",
+    "updated": "2026-11-01T18:32:21.064Z",
     "count": 243,
     "note": ""
   }
