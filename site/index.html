@@ -20,7 +20,7 @@
 <meta name="twitter:card" content="summary_large_image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root{
   /* Tema claro: fondo blanco, grises fríos muy suaves, etiqueta de precio amarilla como único acento fuerte */
@@ -309,28 +309,96 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
   .hbtn .lbl{display:none}
 }
 @media (prefers-reduced-motion:reduce){aside.side,.scrim,.p{transition:none}}
+
+/* ===== Diseño verde: encabezado compacto, filtros en fila, precio limpio ===== */
+:root{--ink:#0B1F17;--muted:#5B6B64;--faint:#8A9690;--line:#E3EAE6;--line-2:#D3DDD8;--soft:#F4F8F6;--act:#059669;--act-soft:#E8F7F0;--down:#047857;--down-soft:#E8F7F0;--tag:#059669;--tag-ink:#fff}
+body{font-family:Inter,system-ui,sans-serif;font-size:15px}
+.logo,.toolbar h2,.tag .price,.empty strong,.dsec h3,.sh-info h2,.sh-sec h3,.ctbl .cp{font-family:Inter,system-ui,sans-serif;letter-spacing:-.02em}
+.logo{font-size:20px;font-weight:800;gap:9px}.logo svg{width:30px;height:30px}
+.logo span{background:none;color:var(--act);transform:none;padding:0;margin-left:-3px;border-radius:0}
+header.top .wrap.topbar{display:flex;align-items:center;gap:20px;padding-block:12px}
+.topbar .search{flex:1;max-width:640px}
+.topbar .search input{height:44px;border-radius:12px;background:var(--soft);border:1px solid var(--line);font-size:15px;padding:0 14px 0 42px;box-shadow:none}
+.topbar .search input:focus{background:#fff;border-color:var(--act);box-shadow:0 0 0 3px var(--act-soft)}
+.topbar .search svg{left:14px;width:18px;height:18px;stroke:var(--muted)}
+.top-actions{margin-left:auto;gap:4px}
+.hbtn{border:0;background:none;height:38px;padding:0 10px;font-size:14px;border-radius:10px}
+.hbtn:hover{background:var(--soft)}
+.hbtn[aria-current="page"]{background:var(--act-soft);color:var(--act)}
+.hbtn .badge{background:var(--act);color:#fff}
+nav.cats{border-top:1px solid var(--line)}
+.tabs{gap:6px;padding:9px 0}
+.tab{padding:7px 14px;border-radius:999px;border-bottom:0;font-size:14px;font-weight:600}
+.tab:hover{background:var(--soft)}
+.tab[aria-selected="true"]{background:var(--act);color:#fff}
+.tab[aria-selected="true"] small{color:rgba(255,255,255,.82)}
+.layout,.layout.solo{display:block;padding-block:16px 48px}
+.fbar{display:flex;align-items:flex-start;gap:10px;margin-bottom:16px}
+.fchips{display:flex;gap:8px;flex-wrap:wrap;flex:1;min-width:0}
+.fdrop{position:relative}
+.fchip{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border:1px solid var(--line-2);border-radius:999px;background:#fff;font-weight:500;font-size:14px;cursor:pointer;white-space:nowrap;color:var(--ink)}
+.fchip svg{width:14px;height:14px;color:var(--muted)}
+.fchip:hover{border-color:var(--ink)}
+.fchip.on{border-color:var(--act);color:var(--act);background:var(--act-soft)}
+.fchip.on svg{color:var(--act)}
+.fpanel{display:none;position:absolute;top:calc(100% + 6px);left:0;z-index:30;min-width:250px;max-height:380px;overflow:auto;background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 14px 34px rgba(11,31,23,.16);padding:10px 16px 12px}
+.fdrop.open .fpanel{display:block}
+.ptitle{font-weight:700;margin:2px 0 6px;font-size:14px}
+.fpanel .fdone{display:none}
+.opt input{accent-color:var(--act)}
+.sort{height:36px;border-radius:999px;font-size:14px;flex:0 0 auto}
+.toolbar{margin-bottom:12px}.toolbar h2{font-size:22px;font-weight:700}
+.p{border-radius:14px}
+.p .b{text-transform:uppercase;letter-spacing:.05em;font-size:11.5px}
+.p .n{font-size:14.5px}
+.tag,.sh-info .tag{background:none;color:var(--ink);padding:0;margin:10px 14px 0;border-radius:0;min-width:0}
+.sh-info .tag{margin:14px 0 0}
+.tag .price{font-weight:800;font-size:26px;gap:8px}.sh-info .tag .price{font-size:34px}
+.tag .price .cur{font-size:.72em;margin-right:3px;font-weight:700}
+.tag .price .dec{font-size:.55em}
+.tag .was{font:400 13px Inter,sans-serif;color:var(--faint)}
+.tag .where{font-weight:400;color:var(--muted);margin-top:3px;font-size:13px;display:block}
+.tag .where b{color:var(--ink);font-weight:600}
+.tag.out .price{color:var(--muted)}
+.save{display:inline-block;align-self:flex-start;background:var(--act-soft);color:var(--act);border-radius:6px;padding:2px 8px;margin:7px 14px 0;font-size:13px}
+.sh-info .save{margin-left:0}
+.allbtn{color:var(--act)}
+.offers li a:hover{background:var(--soft)}
+.more{border-color:var(--act);color:var(--act)}.more:hover{background:var(--act);color:#fff}
+.cbar .go{background:var(--act);color:#fff}
+.toast button{background:var(--act);color:#fff}
+.bar i{background:var(--act)}
+.callout{border-left-color:var(--act)}
+.otable tr.best td{background:var(--act-soft)}
+.ctbl .cp{background:var(--act-soft);color:var(--ink)}
+footer .wrap{padding-block:20px 90px}
+@media (max-width:760px){
+  header.top .wrap.topbar{flex-wrap:wrap;gap:10px;padding-block:10px}
+  .topbar .search{order:3;flex-basis:100%;max-width:none}
+  .fbar{flex-direction:column;align-items:stretch;gap:8px}
+  .fchips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 12px}
+  .fchips::-webkit-scrollbar{display:none}
+  .sort{align-self:flex-start}
+  .fpanel{position:fixed;left:0;right:0;bottom:0;top:auto;max-height:72vh;min-width:0;border-radius:18px 18px 0 0;padding:18px 20px calc(16px + env(safe-area-inset-bottom,0px));z-index:61}
+  .fdrop.open::before{content:"";position:fixed;inset:0;background:rgba(11,31,23,.35);z-index:60}
+  .fpanel .fdone{display:block;width:100%;height:46px;margin-top:12px;border:0;border-radius:12px;background:var(--act);color:#fff;font-weight:700;font-size:15px}
+  .tag .price{font-size:22px}
+  .toolbar h2{width:auto;font-size:20px}
+}
+@media (max-width:420px){.tag{margin:8px 10px 0}.save{margin-left:10px}}
 </style>
 </head>
 <body>
 <header class="top">
-  <div class="wrap">
-    <div class="brandline">
-      <a class="logo" href="#" aria-label="Vitrina HN, inicio"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#141B23"/><path d="M13 17.5A4.5 4.5 0 0 1 17.5 13h16.6a4.5 4.5 0 0 1 3.2 1.3l12.9 12.9a4.5 4.5 0 0 1 0 6.4L33.6 50.2a4.5 4.5 0 0 1-6.4 0L14.3 37.3a4.5 4.5 0 0 1-1.3-3.2Z" fill="#FFD84A"/><circle cx="22.5" cy="22.5" r="3.6" fill="#141B23"/><path d="M25 35.5l5.5 5.5 11-11" fill="none" stroke="#141B23" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Vitrina<span>HN</span></a>
-      <div class="top-actions">
-        <span class="updated" id="updated"></span>
-        <a class="hbtn" href="#ofertas" id="navDeals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span class="lbl">Ofertas reales</span></a>
-        <a class="hbtn" href="#favoritos" id="navFavs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.7 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg><span class="lbl">Favoritos</span><span class="badge" id="favCount" hidden></span></a>
-      </div>
+  <div class="wrap topbar">
+    <a class="logo" href="#" aria-label="Vitrina HN, inicio"><svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="15" fill="#059669"/><path d="M13 17.5A4.5 4.5 0 0 1 17.5 13h16.6a4.5 4.5 0 0 1 3.2 1.3l12.9 12.9a4.5 4.5 0 0 1 0 6.4L33.6 50.2a4.5 4.5 0 0 1-6.4 0L14.3 37.3a4.5 4.5 0 0 1-1.3-3.2Z" fill="#fff"/><circle cx="22.5" cy="22.5" r="3.6" fill="#059669"/><path d="M25 35.5l5.5 5.5 11-11" fill="none" stroke="#059669" stroke-width="4.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Vitrina<span>HN</span></a>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Busca producto, marca o modelo" autocomplete="off" aria-label="Buscar productos">
     </div>
-    <div class="hero">
-      <div>
-        <h1 class="ask">¿Dónde sale más barato?</h1>
-        <p class="sub" id="sub">Celulares, televisores, línea blanca, consolas, motos y más de las tiendas grandes de Honduras, en un solo lugar.</p>
-      </div>
-      <div class="search">
-        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="search" placeholder="Busca producto, marca o modelo: refri 18 pies, Galaxy A56…" autocomplete="off" aria-label="Buscar productos">
-      </div>
+    <div class="top-actions">
+      <a class="hbtn" href="#ofertas" id="navDeals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span class="lbl">Ofertas</span></a>
+      <a class="hbtn" href="#favoritos" id="navFavs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.7 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg><span class="lbl">Favoritos</span><span class="badge" id="favCount" hidden></span></a>
     </div>
   </div>
 </header>
@@ -344,19 +412,9 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 </nav>
 
 <div class="wrap layout" id="layout">
-  <aside class="side" id="side" aria-label="Filtros">
-    <div class="side-head"><h2>Filtros</h2><button id="closeSide" aria-label="Cerrar filtros"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
-    <div id="filters"></div>
-    <div class="side-foot"><button id="applySide">Ver productos</button></div>
-  </aside>
-  <div class="scrim" id="scrim"></div>
-
   <main>
-    <div class="toolbar" id="toolbar">
-      <h2 id="title">Todos los productos</h2>
-      <span class="count" id="count" aria-live="polite"></span>
-      <span class="spacer"></span>
-      <button class="fbtn" id="openSide"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span id="fbtnLabel">Filtros</span></button>
+    <div class="fbar" id="fbar">
+      <div class="fchips" id="filters"></div>
       <select class="sort" id="sort" aria-label="Ordenar">
         <option value="rel">Más relevantes</option>
         <option value="asc">Menor precio</option>
@@ -365,6 +423,10 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
         <option value="drop">Bajaron de precio</option>
         <option value="multi">En más tiendas</option>
       </select>
+    </div>
+    <div class="toolbar" id="toolbar">
+      <h2 id="title">Todos los productos</h2>
+      <span class="count" id="count" aria-live="polite"></span>
     </div>
     <p class="didyou" id="didyou" hidden></p>
     <div class="pills" id="pills" hidden></div>
@@ -375,7 +437,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 </div>
 
 <footer>
-  <div class="wrap"><p>Vitrina HN no está afiliada a ninguna de las tiendas.</p></div>
+  <div class="wrap"><p><span id="updated"></span> · Vitrina HN no está afiliada a ninguna de las tiendas.</p></div>
 </footer>
 
 <dialog class="sheet" id="sheet" aria-labelledby="shTitle"></dialog>
@@ -561,7 +623,6 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
   // Encabezado
   $('#updated').textContent = 'Actualizado ' + new Date(data.updated).toLocaleString('es-HN', {weekday:'long', day:'numeric', month:'long', hour:'numeric', minute:'2-digit'});
   const multiCount = data.products.filter(p=>p.o.length>1).length;
-  $('#sub').textContent = `${fmt.format(data.products.length)} productos de ${STORE_IDS.length} tiendas: ${storeList(STORE_IDS)}. ${fmt.format(multiCount)} están en más de una tienda.`;
 
   const offersOf = (p) => p.o.filter(o => (!state.stores.size || state.stores.has(o.s)) && (!state.stock || o.a)).sort((a,b)=>(b.a-a.a)||(a.p-b.p));
   const allOffers = (p) => [...p.o].sort((a,b)=>(b.a-a.a)||(a.p-b.p));
@@ -617,28 +678,29 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 
   const opt = (g, v, label, n, checked, type='checkbox', extra='') => `<label class="opt${!n && !checked ? ' zero' : ''}"><input type="${type}" name="${g}" data-g="${g}" value="${esc(v)}"${checked?' checked':''}>${extra}<span class="lbl">${esc(label)}</span>${n!=null?`<span class="n">${fmt.format(n)}</span>`:''}</label>`;
 
+  const CARET = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>';
+  function drop(id, label, sel, body){
+    const txt = !sel.length ? label : sel.length === 1 ? `${label}: ${sel[0]}` : `${label} (${sel.length})`;
+    return `<div class="fdrop${state.openDrop === id ? ' open' : ''}" data-drop="${id}"><button class="fchip${sel.length ? ' on' : ''}" data-toggle="${id}" aria-expanded="${state.openDrop === id}">${esc(txt)}${CARET}</button><div class="fpanel"><p class="ptitle">${esc(label)}</p>${body}<button class="fdone" data-close-drop>Ver ${fmt.format(current.length)} productos</button></div></div>`;
+  }
   function renderFilters(){
     const out = [];
     for (const f of FACETS[state.cat] || []) {
       const c = countBy(data.products.filter(p => matches(p, f.id)), p => p._f[f.id]);
       const vals = f.order.filter(v => c[v] || state.facets[f.id]?.has(v));
       if (vals.length < 2) continue;
-      out.push(`<section class="fsec"><h3>${esc(f.label)}</h3>${vals.map(v => opt(f.id, v, v, c[v]||0, !!state.facets[f.id]?.has(v))).join('')}</section>`);
+      out.push(drop(f.id, f.label, [...(state.facets[f.id] || [])], vals.map(v => opt(f.id, v, v, c[v]||0, !!state.facets[f.id]?.has(v))).join('')));
     }
     const bc = countBy(data.products.filter(p => matches(p, 'brand')), p => p.b);
     for (const b of state.brands) bc[b] ??= 0;
     const brands = Object.entries(bc).sort((a,b)=>b[1]-a[1]);
-    const LIMIT = 8;
-    if (brands.length > 1) {
-      const shown = state.allBrands ? brands : brands.slice(0, LIMIT).concat(brands.slice(LIMIT).filter(([b]) => state.brands.has(b)));
-      out.push(`<section class="fsec"><h3>Marca</h3>${shown.map(([b,n]) => opt('brand', b, b, n, state.brands.has(b))).join('')}${brands.length > LIMIT ? `<button class="linkbtn" data-more="1">${state.allBrands ? 'Ver menos' : `Ver las ${brands.length} marcas`}</button>` : ''}</section>`);
-    }
+    if (brands.length > 1) out.push(drop('brand', 'Marca', [...state.brands], brands.map(([b,n]) => opt('brand', b, b, n, state.brands.has(b))).join('')));
     const pb = priceBuckets(data.products.filter(p => matches(p, 'price')));
-    if (pb.length) out.push(`<section class="fsec"><h3>Precio</h3>${opt('price', '', 'Cualquier precio', null, !state.price, 'radio')}${pb.map(b => opt('price', b.id, b.label, null, state.price===b.id, 'radio')).join('')}</section>`);
+    if (pb.length) out.push(drop('price', 'Precio', state.price ? [priceLabel(state.price)] : [], opt('price', '', 'Cualquier precio', null, !state.price, 'radio') + pb.map(b => opt('price', b.id, b.label, null, state.price===b.id, 'radio')).join('')));
     const sc = countBy(data.products.filter(p => matches(p, 'store')), p => p.o.filter(o=>!state.stock||o.a).map(o=>o.s));
-    out.push(`<section class="fsec"><h3>Tienda</h3>${STORE_IDS.map(id => { const s = data.stores[id];
-      return opt('store', id, s.name, sc[id]||0, state.stores.has(id), 'checkbox', `<span class="dot" style="background:var(--s-${id})"></span>`); }).join('')}</section>`);
-    out.push(`<section class="fsec"><h3>Mostrar</h3>${opt('multi','1','Solo los que están en 2 o más tiendas',null,state.multi)}${opt('stock','1','Solo disponibles',null,state.stock)}</section>`);
+    out.push(drop('store', 'Tienda', [...state.stores].map(storeName), STORE_IDS.map(id => opt('store', id, data.stores[id].name, sc[id]||0, state.stores.has(id), 'checkbox', `<span class="dot" style="background:var(--s-${id})"></span>`)).join('')));
+    out.push(`<button class="fchip${state.multi ? ' on' : ''}" data-quick="multi">En 2 o más tiendas</button>`);
+    out.push(`<button class="fchip${!state.stock ? ' on' : ''}" data-quick="stock">Incluir agotados</button>`);
     $('#filters').innerHTML = out.join('');
   }
 
@@ -655,7 +717,6 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     const a = state.view === 'catalog' ? activeFilters() : [];
     $('#pills').hidden = !a.length;
     $('#pills').innerHTML = a.map(f => `<button class="pill" data-g="${f.g}" data-v="${esc(f.v)}" aria-label="Quitar ${esc(f.label)}">${esc(f.label)}${X}</button>`).join('') + (a.length > 1 ? '<button class="clear" id="clearAll">Quitar todo</button>' : '');
-    $('#fbtnLabel').textContent = a.length ? `Filtros (${a.length})` : 'Filtros';
   }
 
   // ---- Señales de precio (historial) ----
@@ -707,10 +768,10 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
       <button class="favbtn" data-fav="${esc(p.key)}" aria-pressed="${isFav(p)}" aria-label="${isFav(p)?'Quitar de':'Guardar en'} favoritos">${HEART}</button>
       <a class="img" href="${plink(p)}" tabindex="-1" aria-hidden="true">${imgTag(imgSrc(p), initial, 'loading="lazy"')}</a>
       <div class="body"><span class="b">${esc(p.b || catName(p.c))}</span><a class="n" href="${plink(p)}" title="${esc(p.n)}">${esc(p.n)}</a>${p.m?`<span class="m">Modelo ${esc(p.m)}</span>`:''}</div>
-      <div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${was}</div><div class="where"><span class="sw" style="background:var(--s-${best.s})"></span>${offers.length>1?'Más barato en ':'En '}${esc(storeName(best.s))}${best.a?'':' (agotado)'}</div></div>
+      <div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${was}</div><div class="where">${offers.length>1?'Más barato en ':'En '}<b>${esc(storeName(best.s))}</b>${best.a?'':' (agotado)'}</div></div>
       ${colorsHtml(p, famOf.get(p.v))}
       ${flagsHtml(flagsOf(p, best))}
-      ${spread>0?`<div class="save">Ahorras ${plain(spread)} frente a la más cara</div>`:''}
+      ${spread>0?`<div class="save">Ahorras ${plain(spread)}</div>`:''}
       ${plan?`<div class="plan">${esc(plan)}</div>`:''}
       ${offers.length > 1 ? `<ul class="offers">${rows}</ul>` : ''}
       ${rest > 0 ? `<a class="allbtn" href="${plink(p)}">Ver las ${p.o.length} tiendas<span aria-hidden="true">›</span></a>` : ''}
@@ -743,7 +804,6 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     const n = current.length;
     $('#title').textContent = state.view === 'favs' ? 'Tus favoritos' : state.cat ? catName(state.cat) : (state.q ? 'Resultados' : 'Todos los productos');
     $('#count').textContent = `${fmt.format(n)} producto${n===1?'':'s'}`;
-    $('#applySide').textContent = `Ver ${fmt.format(n)} producto${n===1?'':'s'}`;
     if (!n) {
       grid.innerHTML = state.view === 'favs'
         ? `<div class="empty"><strong>Aún no tienes favoritos</strong>Toca el corazón de un producto para guardarlo aquí. Te avisaremos cuando baje de precio.</div>`
@@ -779,7 +839,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     if (state.view === 'deals') $('#navDeals').setAttribute('aria-current', 'page');
     if (state.view === 'favs') $('#navFavs').setAttribute('aria-current', 'page');
     const deals = state.view === 'deals';
-    $('#deals').hidden = !deals; $('#grid').hidden = deals; $('#toolbar').hidden = deals; $('#pills').hidden = true;
+    $('#deals').hidden = !deals; $('#grid').hidden = deals; $('#toolbar').hidden = deals; $('#pills').hidden = true; $('#fbar').hidden = solo;
     renderTabs();
     if (deals) { $('#more').hidden = true; $('#didyou').hidden = true; renderDeals(); return; }
     state.shown = 48; current = computeList();
@@ -918,7 +978,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
             <span class="b">${esc(p.b || catName(p.c))}</span>
             <h2 id="shTitle">${esc(p.n)}</h2>
             ${p.m ? `<span class="m">Modelo ${esc(p.m)}</span>` : ''}
-            <div><div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${best.r > best.p ? `<span class="was">${plain(best.r)}</span>` : ''}</div><div class="where"><span class="sw" style="background:var(--s-${best.s})"></span>${offers.length>1?'Más barato en ':'En '}${esc(storeName(best.s))}</div></div></div>
+            <div><div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${best.r > best.p ? `<span class="was">${plain(best.r)}</span>` : ''}</div><div class="where">${offers.length>1?'Más barato en ':'En '}<b>${esc(storeName(best.s))}</b></div></div></div>
             ${flagsHtml(flagsOf(p, best))}
             ${spread > 0 ? `<div class="save">Ahorras ${plain(spread)} frente a la tienda más cara</div>` : ''}
             ${planText(offers.find(o=>o.q)) ? `<div class="plan">${esc(planText(offers.find(o=>o.q)))}</div>` : ''}
@@ -1075,7 +1135,13 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
   let tmr; $('#q').addEventListener('input', (e) => { clearTimeout(tmr); tmr = setTimeout(()=>{ state.q = e.target.value; applyQuery(); if (state.view !== 'catalog') { state.view = 'catalog'; history.replaceState(null, '', viewHash()); } refresh(); }, 160); });
   $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (!b) return; const id = b.dataset.c; if (state.view === 'catalog' && id === state.cat) return; resetFilters(); state.view = 'catalog'; state.cat = id; history.replaceState(null, '', viewHash()); refresh(); b.scrollIntoView({inline:'nearest', block:'nearest'}); });
   $('#filters').addEventListener('change', (e) => { const i = e.target.closest('input[data-g]'); if (!i) return; toggle(i.dataset.g, i.value, i.type === 'radio' ? i.value !== '' : i.checked); refresh(); });
-  $('#filters').addEventListener('click', (e) => { if (e.target.closest('[data-more]')) { state.allBrands = !state.allBrands; renderFilters(); } });
+  $('#filters').addEventListener('click', (e) => {
+    const t = e.target.closest('[data-toggle]');
+    if (t) { const id = t.dataset.toggle; state.openDrop = state.openDrop === id ? '' : id; document.querySelectorAll('.fdrop').forEach(d => d.classList.toggle('open', d.dataset.drop === state.openDrop)); return; }
+    if (e.target.closest('[data-close-drop]')) { state.openDrop = ''; document.querySelectorAll('.fdrop.open').forEach(d => d.classList.remove('open')); return; }
+    const q = e.target.closest('[data-quick]');
+    if (q) { if (q.dataset.quick === 'multi') state.multi = !state.multi; else state.stock = !state.stock; refresh(); }
+  });
   $('#pills').addEventListener('click', (e) => {
     if (e.target.closest('#clearAll')) { resetFilters(); state.stores.clear(); state.multi = false; refresh(); return; }
     const b = e.target.closest('[data-g]'); if (!b) return; toggle(b.dataset.g, b.dataset.v, false); refresh();
@@ -1090,13 +1156,9 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     const a = e.target.closest('a[href^="#p/"]'); if (a) { sheetFromNav = true; }
   });
   document.querySelector('main').addEventListener('change', (e) => { const c = e.target.closest('[data-cmp]'); if (c) toggleCmp(byKey.get(c.dataset.cmp)); });
-  const side = $('#side'), scrim = $('#scrim');
-  const openSide = (on) => { side.classList.toggle('open', on); scrim.classList.toggle('open', on); document.body.style.overflow = on ? 'hidden' : ''; };
-  $('#openSide').addEventListener('click', () => openSide(true));
-  $('#closeSide').addEventListener('click', () => openSide(false));
-  $('#applySide').addEventListener('click', () => openSide(false));
-  scrim.addEventListener('click', () => openSide(false));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') openSide(false); });
+  // Filtros desplegables: se abre uno a la vez y se cierra al tocar fuera.
+  document.addEventListener('click', (e) => { if (state.openDrop && !e.target.closest('.fdrop')) { state.openDrop = ''; document.querySelectorAll('.fdrop.open').forEach(d => d.classList.remove('open')); } });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.openDrop) { state.openDrop = ''; document.querySelectorAll('.fdrop.open').forEach(d => d.classList.remove('open')); } });
 
   // ---- Inicio ----
   updateFavCount(); updateCbar();
