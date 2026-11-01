@@ -40,16 +40,25 @@ export async function scrapeLadyLee({ fetch, sleep = (ms) => new Promise((r) => 
       specs: (p.options || []).filter((o) => o.name !== 'Title' && o.values?.length).map((o) => [o.name, o.values.join(', ')]).slice(0, 8),
     });
   };
+  // Shopify limita el ritmo (HTTP 429): se espera y se reintenta.
+  const get = async (url) => {
+    for (let i = 0; i < 4; i++) {
+      const res = await fetch(url);
+      if (res.status !== 429) return res;
+      await sleep(8000 * (i + 1));
+    }
+    return fetch(url);
+  };
   const pages = async (path, onList) => {
     for (let page = 1; page <= 60; page++) {
-      const res = await fetch(`${SITE}${path}?limit=250&page=${page}`);
+      const res = await get(`${SITE}${path}?limit=250&page=${page}`);
       if (!res.ok) throw new Error(`Lady Lee ${path} HTTP ${res.status}`);
       const { products = [] } = await res.json();
       onList(products);
       if (products.length < 250) break;
-      await sleep(500);
+      await sleep(900);
     }
-    await sleep(300);
+    await sleep(600);
   };
   for (const [handle, cat] of Object.entries(MAP)) {
     await pages(`/collections/${handle}/products.json`, (products) => {
