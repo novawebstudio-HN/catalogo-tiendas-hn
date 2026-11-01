@@ -2,7 +2,7 @@
 
 Buenos días, equipo de e-commerce de Jetstereo:
 
-Mi nombre es Eduardo Corrales y desarrollo **Vitrina HN**, un catálogo que reúne en un solo lugar los productos de tecnología, línea blanca y hogar de las principales cadenas de Honduras, para que los compradores encuentren rápido dónde comprar.
+Mi nombre es [Tu nombre] y desarrollo **Vitrina HN**, un catálogo que reúne en un solo lugar los productos de tecnología, línea blanca y hogar de las principales cadenas de Honduras, para que los compradores encuentren rápido dónde comprar.
 
 Cada producto enlaza directamente a la página de la tienda, así que el sitio funciona como una fuente de tráfico calificado hacia su tienda en línea, sin costo para ustedes.
 
@@ -16,6 +16,6 @@ Con gusto me ajusto a sus condiciones de uso de marca, frecuencia de actualizaci
 Quedo atento a sus comentarios.
 
 Saludos cordiales,
-Eduardo Corrales
+[Tu nombre]
 Nova Web Studio
 [teléfono] · [correo]
