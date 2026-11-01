@@ -6,10 +6,11 @@ import { createHash } from 'node:crypto';
 import sharp from 'sharp';
 
 const DIR = 'site/thumbs';
-const SIZE = 220;
+const SIZE = 520;
+const VERSION = 'v2-520'; // cambiar si cambia el tamaño o la calidad, para regenerar todas
 const UA = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
-const key = (url) => createHash('sha1').update(url).digest('hex').slice(0, 16);
+const key = (url) => createHash('sha1').update(`${VERSION}|${url}`).digest('hex').slice(0, 16);
 
 await mkdir(DIR, { recursive: true });
 const catalog = JSON.parse(await readFile('site/catalog.json', 'utf8'));
@@ -22,8 +23,9 @@ async function download(url) {
       if (res.status === 404 || res.status === 403) return null;
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const buf = Buffer.from(await res.arrayBuffer());
-      return await sharp(buf).resize(SIZE, SIZE, { fit: 'contain', background: '#ffffff' })
-        .flatten({ background: '#ffffff' }).webp({ quality: 62 }).toBuffer();
+      // withoutEnlargement: no se agrandan fotos chicas (se verían borrosas); solo se reducen las grandes.
+      return await sharp(buf).resize(SIZE, SIZE, { fit: 'contain', background: '#ffffff', withoutEnlargement: true })
+        .flatten({ background: '#ffffff' }).webp({ quality: 82, effort: 5 }).toBuffer();
     } catch {
       await sleep(1500 * (attempt + 1));
     }

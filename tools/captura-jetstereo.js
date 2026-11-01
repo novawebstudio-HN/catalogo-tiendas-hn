@@ -31,7 +31,7 @@ async function scrapeJetstereo({ fetch, sleep = (ms) => new Promise((r) => setTi
           // saleStatus: AVAILABLE | STORE_AVAILABLE | OUT_OF_STOCK
           available: !/OUT_OF_STOCK|agotado/i.test(String(p.saleStatus || '')),
           url: `${SITE}/product/${p.slug}`,
-          img: p.mainImage?.size350 || p.mainImage?.full || '',
+          img: p.mainImage?.full || p.mainImage?.size500 || p.mainImage?.size350 || '',
           sku: String(p.sku || ''), model: String(p.model || ''),
         });
       }

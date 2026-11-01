@@ -47,7 +47,9 @@ for (const [id, fn] of Object.entries(SCRAPERS)) {
     // Captura manual (data/manual/<tienda>.json): se usa cuando la tienda bloquea la consulta automática.
     const manual = await readJson(`data/manual/${id}.json`, null);
     if (manual?.items?.length) {
-      raw[id] = manual.items.map((p) => ({ ...p, store: id }));
+      // Jetstereo: usar la foto en tamaño completo en vez de la versión reducida de 350 px.
+      const fullImg = (u) => String(u || '').replace(/\/images\/cache\/(.+?)-\d+x\d+(\.\w+)$/, '/images/$1$2');
+      raw[id] = manual.items.map((p) => ({ ...p, store: id, img: fullImg(p.img) }));
       status[id] = { ok: true, manual: true, updated: manual.captured, count: raw[id].length, note: NOTES[id] || '' };
       console.log(`↺ ${id}: ${e.message || e}; se usa la captura manual del ${manual.captured} (${raw[id].length} productos)`);
     } else {
