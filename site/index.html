@@ -759,7 +759,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
         <h3>Etiquetas de descuento por tienda</h3>
         <p>Cuántos productos muestran un precio “antes” tachado y, cuando ya hay historial, cuántos de esos bajaron de verdad.</p>
         <div class="tscroll"><table class="stbl"><thead><tr><th>Tienda</th><th>Productos</th><th>Con etiqueta de descuento</th><th>Descuento anunciado promedio</th><th>Bajaron de verdad</th></tr></thead><tbody>
-        ${stores.map(([id, s]) => { const share = s.adv / s.n; return `<tr><td><span class="sw" style="background:var(--s-${id})"></span> ${esc(storeName(id))}</td><td class="num">${fmt.format(s.n)}</td><td class="num">${fmt.format(s.adv)} (${Math.round(share*100)}%)<div class="bar"><i style="width:${Math.round(share*100)}%"></i></div></td><td class="num">${s.adv ? Math.round(s.sum / s.adv * 100) + '%' : '—'}</td><td class="num">${s.tr ? `${fmt.format(s.real)} de ${fmt.format(s.tr)}` : '<span class="muted">Falta historial</span>'}</td></tr>`; }).join('')}
+        ${stores.map(([id, s]) => { const share = s.adv / s.n; return `<tr><td><span class="sw" style="background:var(--s-${id})"></span> ${esc(storeName(id))}</td><td class="num">${fmt.format(s.n)}</td>${s.adv ? `<td class="num">${fmt.format(s.adv)} (${Math.round(share*100)}%)<div class="bar"><i style="width:${Math.round(share*100)}%"></i></div></td><td class="num">${Math.round(s.sum / s.adv * 100)}%</td><td class="num">${s.tr ? `${fmt.format(s.real)} de ${fmt.format(s.tr)}` : '<span class="muted">Falta historial</span>'}</td>` : `<td colspan="3" class="muted">Su listado no muestra precio “antes”; solo se sigue el precio actual.</td>`}</tr>`; }).join('')}
         </tbody></table></div>
       </section>
       <section class="dsec">
