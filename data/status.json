@@ -4,36 +4,64 @@
     "manual": true,
     "updated": "2026-11-01T19:28:33.569Z",
     "count": 633,
-    "note": "Su servidor rechaza consultas desde la nube; sus precios vienen de una captura hecha desde un navegador o computadora en Honduras."
+    "note": "Precios de una captura manual desde Honduras."
   },
   "diunsa": {
     "ok": true,
-    "updated": "2026-11-01T19:56:22.268Z",
-    "count": 817,
+    "updated": "2026-11-01T20:31:35.552Z",
+    "count": 1442,
     "note": ""
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-01T19:57:29.674Z",
-    "count": 226,
-    "note": "Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio)."
+    "updated": "2026-11-01T20:33:55.329Z",
+    "count": 429,
+    "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-01T19:57:37.319Z",
-    "count": 243,
+    "updated": "2026-11-01T20:34:02.550Z",
+    "count": 293,
     "note": ""
   },
   "ladylee": {
     "ok": true,
-    "updated": "2026-11-01T19:57:46.063Z",
-    "count": 420,
+    "updated": "2026-11-01T20:34:22.185Z",
+    "count": 644,
     "note": ""
   },
   "walmart": {
     "ok": true,
-    "updated": "2026-11-01T19:57:53.570Z",
-    "count": 205,
+    "updated": "2026-11-01T20:34:32.599Z",
+    "count": 312,
+    "note": ""
+  },
+  "gallo": {
+    "ok": false,
+    "error": "fetch failed",
+    "note": ""
+  },
+  "radioshack": {
+    "ok": true,
+    "updated": "2026-11-01T20:36:29.462Z",
+    "count": 241,
+    "note": "Cobertura parcial: primeros productos de cada categoría."
+  },
+  "tropigas": {
+    "ok": true,
+    "updated": "2026-11-01T20:39:12.508Z",
+    "count": 331,
+    "note": "Cobertura parcial: primeros productos de cada categoría."
+  },
+  "acosa": {
+    "ok": false,
+    "error": "Unexpected token '<', \"<!doctype \"... is not valid JSON",
+    "note": ""
+  },
+  "gamestation": {
+    "ok": true,
+    "updated": "2026-11-01T20:41:06.631Z",
+    "count": 823,
     "note": ""
   }
 }
