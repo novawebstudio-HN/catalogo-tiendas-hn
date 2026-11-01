@@ -28,6 +28,8 @@ jobs:
     timeout-minutes: 50
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main   # siempre la versión más reciente (otra corrida pudo publicar datos mientras esta esperaba)
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -51,7 +53,7 @@ jobs:
           git add data site/catalog.json site/thumbs site/details
           if git diff --cached --quiet; then echo "Sin cambios"; exit 0; fi
           git commit -m "Catálogo actualizado $(date -u +'%Y-%m-%d %H:%M') UTC"
-          git pull --rebase origin main
+          git pull --rebase -X theirs origin main   # si chocan archivos generados, gana el catálogo de esta corrida
           git push
       - name: Preparar la página
         uses: actions/upload-pages-artifact@v3

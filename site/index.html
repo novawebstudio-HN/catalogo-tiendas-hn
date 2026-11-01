@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FFFFFF">
 <title>Vitrina HN</title>
-<meta name="description" content="Jetstereo, Diunsa, La Curacao, Elektra, Lady Lee y Walmart en un solo lugar, con el precio más bajo resaltado.">
+<meta name="description" content="Compara precios de las tiendas grandes de Honduras en un solo lugar: celulares, televisores, línea blanca, consolas, motos y más, con historial de precios.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
@@ -13,8 +13,9 @@
 :root{
   /* Tema claro: fondo blanco, grises fríos muy suaves, etiqueta de precio amarilla como único acento fuerte */
   --paper:#FFFFFF; --soft:#F5F7F9; --ink:#141B23; --muted:#5D6873; --faint:#8A949E; --line:#E6EAEE; --line-2:#D5DBE1;
-  --tag:#FFD84A; --tag-ink:#1E1700; --act:#0B5FB8; --act-soft:#EEF5FD; --down:#127A45;
+  --tag:#FFD84A; --tag-ink:#1E1700; --act:#0B5FB8; --act-soft:#EEF5FD; --down:#127A45; --down-soft:#E7F5EE; --warn:#9A4A0B; --warn-soft:#FDF1E6; --heart:#E11D48;
   --s-jetstereo:#1F4FD8; --s-diunsa:#E07B12; --s-curacao:#C8102E; --s-elektra:#6B3FA0; --s-ladylee:#D6337A; --s-walmart:#0A7FD6;
+  --s-gallo:#CA8A04; --s-radioshack:#334155; --s-tropigas:#0E7490; --s-acosa:#92400E; --s-gamestation:#16A34A;
   --r:12px;
   color-scheme:light;
 }
@@ -26,13 +27,20 @@ a{color:inherit}
 button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--act);outline-offset:2px;border-radius:6px}
 .wrap{max-width:1320px;margin:0 auto;padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
 /* Encabezado */
-header.top .wrap{padding-block:20px 22px;display:grid;gap:14px}
+header.top .wrap{padding-block:18px 22px;display:grid;gap:14px}
 .brandline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.logo{font:800 24px/1 "Barlow Condensed",sans-serif;margin:0;letter-spacing:.01em}
+.logo{font:800 24px/1 "Barlow Condensed",sans-serif;margin:0;letter-spacing:.01em;text-decoration:none}
 .logo span{display:inline-block;background:var(--tag);color:var(--tag-ink);padding:3px 7px 1px;border-radius:4px;margin-left:5px;transform:rotate(-2deg)}
-.updated{color:var(--muted);font-size:14px}
+.top-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.updated{color:var(--muted);font-size:14px;margin-right:6px}
+.hbtn{height:38px;border:1px solid var(--line-2);border-radius:10px;background:var(--paper);padding:0 12px;font-weight:600;font-size:15px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-decoration:none;white-space:nowrap}
+.hbtn svg{width:17px;height:17px}
+.hbtn:hover{border-color:var(--ink)}
+.hbtn[aria-current="page"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.hbtn .badge{background:var(--tag);color:var(--tag-ink);border-radius:999px;font-size:12px;line-height:18px;padding:0 7px;font-weight:700}
 .hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,560px);gap:28px;align-items:end}
 h1.ask{font:700 clamp(36px,5.2vw,60px)/.95 "Barlow Condensed",sans-serif;margin:6px 0 8px;letter-spacing:-.01em;text-wrap:balance}
 .sub{color:var(--muted);margin:0;max-width:56ch}
@@ -54,6 +62,8 @@ nav.cats{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:
 
 /* Diseño principal: filtros a la izquierda, productos a la derecha */
 .layout{display:grid;grid-template-columns:250px minmax(0,1fr);gap:36px;padding-block:24px 48px;align-items:start}
+.layout.solo{grid-template-columns:minmax(0,1fr)}
+.layout.solo aside.side{display:none}
 aside.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 68px);max-height:calc(100vh - 88px);overflow:auto;padding-right:6px;scrollbar-width:thin}
 .side-head{display:none}
 .fsec{border-bottom:1px solid var(--line);padding-block:14px}
@@ -75,24 +85,30 @@ aside.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 68px);max-hei
 .toolbar .spacer{flex:1}
 .sort{height:40px;border:1px solid var(--line-2);border-radius:10px;background:var(--paper);padding:0 34px 0 12px;font-size:15px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23141B23' stroke-width='1.6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
 .fbtn{display:none;height:40px;border:1px solid var(--ink);border-radius:10px;background:var(--paper);padding:0 14px;font-weight:600;cursor:pointer}
+.didyou{margin:-4px 0 12px;color:var(--muted);font-size:15px}
+.didyou b{color:var(--ink)}
 .pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
 .pill{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line-2);background:var(--soft);border-radius:999px;padding:4px 6px 4px 12px;font-size:14px;cursor:pointer}
 .pill svg{width:16px;height:16px;stroke:var(--muted)}
 .pill:hover{border-color:var(--ink)}
 .pills .clear{border:0;background:none;color:var(--act);font-weight:600;cursor:pointer;font-size:14px;padding:4px 6px}
 
-/* Productos */
+/* Tarjetas de producto */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px}
-.p{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .2s,border-color .2s}
+.p{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .2s,border-color .2s}
 .p:hover{border-color:var(--line-2);box-shadow:0 6px 20px rgba(20,27,35,.07)}
-.p .img{display:block;aspect-ratio:1/1;max-width:100%;padding:18px;background:#fff}
+.p .img{display:block;aspect-ratio:1/1;max-width:100%;padding:18px;background:#fff;cursor:pointer;text-decoration:none}
 .p .img img{width:100%;height:100%;object-fit:contain;display:block}
-.p .img .ph{display:grid;place-items:center;width:100%;height:100%;font:700 40px "Barlow Condensed";color:#C9D0D8;background:var(--soft);border-radius:8px}
+.ph{display:grid;place-items:center;width:100%;height:100%;font:700 40px "Barlow Condensed";color:#C9D0D8;background:var(--soft);border-radius:8px}
 .p .body{padding:4px 14px 0;display:flex;flex-direction:column;gap:2px;flex:1}
 .p .b{font-size:13px;color:var(--muted);font-weight:600}
 .p .n{font-size:15px;font-weight:500;line-height:1.3;text-decoration:none;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.6em}
 .p a.n:hover{text-decoration:underline;text-underline-offset:2px}
-.p .m{font-size:12.5px;color:var(--faint)}
+.p .m{font-size:12.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.favbtn{position:absolute;top:8px;right:8px;width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:rgba(255,255,255,.94);display:grid;place-items:center;cursor:pointer;z-index:1;padding:0}
+.favbtn svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:2}
+.favbtn[aria-pressed="true"] svg{fill:var(--heart);stroke:var(--heart)}
+.favbtn:hover{border-color:var(--ink)}
 
 /* La etiqueta de precio */
 .tag{margin:10px 14px 0;background:var(--tag);color:var(--tag-ink);border-radius:8px 8px 8px 2px;padding:9px 11px 8px}
@@ -101,30 +117,126 @@ aside.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 68px);max-hei
 .tag .price .dec{font-size:16px;align-self:flex-start;margin-top:2px}
 .tag .was{font:500 13px Barlow,sans-serif;text-decoration:line-through;opacity:.65}
 .tag .where{font-size:13px;font-weight:600;margin-top:4px;display:flex;align-items:center;gap:6px}
-.tag .where .sw{width:9px;height:9px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.75)}
+.sw{width:9px;height:9px;border-radius:50%;flex:0 0 auto;display:inline-block}
+.tag .where .sw{box-shadow:0 0 0 2px rgba(255,255,255,.75)}
 .tag.out{background:var(--soft);color:var(--muted)}
-.save{margin:7px 14px 0;font-size:13px;color:var(--down);font-weight:600}
-.offers{list-style:none;margin:6px 0 0;padding:4px 8px 10px;display:flex;flex-direction:column;border-top:1px solid var(--line);margin-top:10px}
-.offers li a{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;column-gap:8px;text-decoration:none;padding:6px 6px;border-radius:6px;font-size:14px}
+.flags{display:flex;flex-wrap:wrap;gap:4px;margin:8px 14px 0}
+.flag{font-size:12px;font-weight:600;border-radius:6px;padding:2px 7px;background:var(--down-soft);color:var(--down);line-height:1.4}
+.flag.warn{background:var(--warn-soft);color:var(--warn)}
+.flag.info{background:var(--soft);color:var(--muted)}
+.plan{margin:6px 14px 0;font-size:12.5px;color:var(--muted)}
+/* Ofertas en la tarjeta: máximo 3 filas de una línea; el resto en la ficha */
+.offers{list-style:none;margin:10px 0 0;padding:4px 8px 0;border-top:1px solid var(--line)}
+.offers li a{display:grid;grid-template-columns:9px minmax(0,1fr) auto auto;align-items:center;column-gap:8px;text-decoration:none;padding:5px 6px;border-radius:6px;font-size:14px}
 .offers li a:hover{background:var(--act-soft)}
-.offers .sw{width:8px;height:8px;border-radius:50%}
 .offers .st{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .offers .pr{font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
-.offers .diff{grid-column:3;font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;text-align:right;line-height:1.1}
+.offers .diff{font-size:12px;color:var(--faint);font-variant-numeric:tabular-nums;text-align:right;min-width:52px}
 .offers .best .diff{color:var(--down);font-weight:600}
+.allbtn{text-decoration:none;display:flex;align-items:center;justify-content:space-between;gap:8px;width:calc(100% - 16px);margin:2px 8px 0;padding:7px 6px;border:0;border-radius:6px;background:none;color:var(--act);font-weight:600;font-size:14px;cursor:pointer;text-align:left}
+.allbtn:hover{background:var(--act-soft)}
+.cardfoot{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding:8px 14px 12px}
+.cmp{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;color:var(--muted);cursor:pointer;user-select:none}
+.cmp input{width:16px;height:16px;margin:0;accent-color:var(--ink)}
+.save{font-size:13px;color:var(--down);font-weight:600;margin:7px 14px 0}
 .more{display:block;margin:30px auto 0;height:48px;padding:0 28px;border-radius:12px;border:1.5px solid var(--ink);background:var(--paper);font-weight:600;cursor:pointer}
 .more:hover{background:var(--ink);color:var(--paper)}
 .empty{grid-column:1/-1;padding:60px 0;text-align:center;color:var(--muted)}
 .empty strong{display:block;color:var(--ink);font:700 28px "Barlow Condensed";margin-bottom:6px}
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:14px}
-footer .wrap{padding-block:24px 44px}
-footer p{max-width:75ch;margin:0 0 8px}
+footer .wrap{padding-block:24px 90px}
+footer p{max-width:75ch;margin:0}
+
+/* Ofertas reales */
+.deals{display:grid;gap:34px}
+.dsec h3{font:700 24px/1.1 "Barlow Condensed",sans-serif;margin:0 0 4px}
+.dsec > p{margin:0 0 14px;color:var(--muted);max-width:70ch}
+.callout{border:1px solid var(--line);border-left:4px solid var(--tag);border-radius:10px;padding:14px 16px;background:var(--soft);max-width:80ch}
+.callout p{margin:0}
+.stbl{width:100%;border-collapse:collapse;font-size:15px;max-width:900px}
+.stbl th,.stbl td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.stbl th{font-size:13px;color:var(--muted);font-weight:600}
+.stbl td.num{font-variant-numeric:tabular-nums}
+.tscroll{overflow-x:auto}
+.bar{height:7px;border-radius:4px;background:var(--line);margin-top:5px;max-width:140px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--tag)}
+
+/* Ficha de producto y comparación */
+dialog.sheet{border:0;padding:0;width:min(1040px,calc(100vw - 32px));max-height:calc(100vh - 40px);border-radius:16px;box-shadow:0 30px 80px rgba(0,0,0,.25);color:var(--ink);background:var(--paper);overflow:auto;overscroll-behavior:contain}
+dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
+.sh-head{position:sticky;top:0;background:var(--paper);display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px 10px 20px;border-bottom:1px solid var(--line);z-index:2}
+.sh-head .crumb{color:var(--muted);font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{width:40px;height:40px;border:0;border-radius:10px;background:none;cursor:pointer;display:grid;place-items:center;flex:0 0 auto}
+.iconbtn:hover{background:var(--soft)}
+.sh-body{padding:22px 24px 30px;display:grid;gap:28px}
+.sh-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:30px;align-items:start}
+.sh-top > div{min-width:0}
+.gal-main{aspect-ratio:1/1;border:1px solid var(--line);border-radius:12px;display:grid;place-items:center;padding:22px;background:#fff}
+.gal-main img{max-width:100%;max-height:100%;object-fit:contain}
+.gal-th{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
+.gal-th button{width:62px;height:62px;border:1.5px solid var(--line);border-radius:8px;background:#fff;padding:4px;cursor:pointer;flex:0 0 auto}
+.gal-th button[aria-current="true"]{border-color:var(--ink)}
+.gal-th img{width:100%;height:100%;object-fit:contain}
+.sh-info h2{font:700 30px/1.05 "Barlow Condensed",sans-serif;margin:2px 0 6px;text-wrap:balance}
+.sh-info .b{font-weight:600;color:var(--muted);font-size:14px}
+.sh-info .m{color:var(--faint);font-size:14px}
+.sh-info .tag{margin:14px 0 0;display:inline-block;min-width:220px}
+.sh-info .tag .price{font-size:40px}
+.sh-info .flags,.sh-info .save,.sh-info .plan{margin-left:0;margin-right:0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.chip{border:1px solid var(--line-2);border-radius:999px;padding:3px 10px;font-size:13.5px}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.abtn{height:42px;border:1px solid var(--line-2);border-radius:10px;background:var(--paper);padding:0 14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-size:15px}
+.abtn:hover{border-color:var(--ink)}
+.abtn svg{width:18px;height:18px}
+.abtn.wa{background:#1FA855;border-color:#1FA855;color:#fff}
+.abtn[aria-pressed="true"] svg{fill:var(--heart);stroke:var(--heart)}
+.sh-sec h3{font:700 22px/1.1 "Barlow Condensed",sans-serif;margin:0 0 10px}
+.otable{width:100%;border-collapse:collapse;font-size:15px}
+.otable th,.otable td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.otable th{font-size:13px;color:var(--muted);font-weight:600}
+.otable td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.otable .stn{display:flex;align-items:center;gap:8px;font-weight:600}
+.otable .sub2{display:block;font-size:12.5px;color:var(--muted);font-weight:400}
+.otable tr.best td{background:#FFFBEA}
+.otable a.go{display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line-2);text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap}
+.otable a.go:hover{border-color:var(--ink)}
+.chart{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px;background:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:13.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.verdicts{display:grid;gap:6px;margin:0 0 12px;padding:0;list-style:none}
+.verdicts li{font-size:15px;padding-left:22px;position:relative}
+.verdicts li::before{content:"";position:absolute;left:4px;top:.55em;width:9px;height:9px;border-radius:50%;background:var(--faint)}
+.verdicts li.good::before{background:var(--down)}
+.verdicts li.bad::before{background:#D97706}
+.specs{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);border-top:1px solid var(--line);font-size:15px}
+.specs dt,.specs dd{margin:0;padding:8px 10px;border-bottom:1px solid var(--line)}
+.specs dt{color:var(--muted);background:var(--soft)}
+.desc{white-space:pre-line;color:#2B333C;max-width:80ch;margin:12px 0 0}
+.desc.clip{max-height:9.5em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 60%,transparent)}
+.muted{color:var(--muted)}
+/* Comparar */
+.ctbl{border-collapse:collapse;font-size:14.5px;min-width:100%}
+.ctbl th,.ctbl td{padding:10px;border-bottom:1px solid var(--line);vertical-align:top;text-align:left;min-width:190px}
+.ctbl th:first-child,.ctbl td:first-child{min-width:130px;color:var(--muted);font-weight:600;background:var(--soft);position:sticky;left:0}
+.ctbl img{width:120px;height:120px;object-fit:contain;display:block;margin-bottom:6px}
+.ctbl .cp{font:800 24px "Barlow Condensed";background:var(--tag);padding:2px 8px;border-radius:6px;display:inline-block}
+.ctbl .lowest{color:var(--down);font-weight:700}
+.cbar{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:14px;padding:8px 8px 8px 16px;display:flex;gap:10px;align-items:center;z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:calc(100vw - 24px)}
+.cbar .ct{font-weight:600;white-space:nowrap}
+.cbar button{height:38px;border-radius:10px;border:0;padding:0 14px;font-weight:700;cursor:pointer}
+.cbar .go{background:var(--tag);color:var(--tag-ink)}
+.cbar .x{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
+.toast{position:fixed;left:50%;bottom:calc(80px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;border-radius:12px;padding:12px 14px 12px 16px;z-index:50;display:flex;gap:12px;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:calc(100vw - 24px);font-size:15px}
+.toast button{border:0;background:var(--tag);color:var(--tag-ink);font-weight:700;border-radius:8px;height:34px;padding:0 12px;cursor:pointer}
+.toast .x{background:transparent;color:#fff;padding:0 6px}
 
 /* Celular y tableta: los filtros pasan a un panel deslizable */
 .scrim{display:none}
 @media (max-width:900px){
   .layout{grid-template-columns:minmax(0,1fr);gap:0;padding-top:16px}
   .fbtn{display:inline-flex;align-items:center;gap:8px}
+  .layout.solo .fbtn{display:none}
   aside.side{position:fixed;inset:0 auto 0 0;z-index:40;width:min(360px,88vw);max-height:none;height:100%;background:var(--paper);padding:0 20px calc(90px + env(safe-area-inset-bottom,0px)) max(20px,env(safe-area-inset-left,0px));transform:translateX(-102%);transition:transform .25s ease;box-shadow:0 0 40px rgba(0,0,0,.18)}
   aside.side.open{transform:none}
   .side-head{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--paper);padding:calc(14px + env(safe-area-inset-top,0px)) 0 12px;border-bottom:1px solid var(--line);margin-bottom:14px;z-index:1}
@@ -138,6 +250,16 @@ footer p{max-width:75ch;margin:0 0 8px}
   .toolbar h2{font-size:22px;width:100%}
 }
 @media (min-width:901px){.side-foot{display:none}}
+@media (max-width:760px){
+  dialog.sheet{width:100vw;max-width:100vw;height:100%;max-height:100%;border-radius:0;margin:0}
+  .sh-top{grid-template-columns:minmax(0,1fr);gap:18px}
+  .gal-main{aspect-ratio:4/3}
+  .sh-body{padding:16px 16px calc(28px + env(safe-area-inset-bottom,0px))}
+  .specs{grid-template-columns:minmax(0,1fr)}
+  .specs dt{border-bottom:0;padding-bottom:2px;background:none;font-size:13px}
+  .otable .hide-s{display:none}
+  .updated{width:100%;order:3}
+}
 @media (max-width:420px){
   .layout{padding-left:max(12px,env(safe-area-inset-left,0px));padding-right:max(12px,env(safe-area-inset-right,0px))}
   .p .n{font-size:14px}
@@ -145,9 +267,14 @@ footer p{max-width:75ch;margin:0 0 8px}
   .p .body{padding:2px 10px 0}
   .tag{margin:8px 10px 0;padding:8px 9px 7px}
   .tag .price{font-size:25px}
-  .save{margin:6px 10px 0}
-  .offers{padding:4px 4px 8px}
-  .offers li a{font-size:13px;padding:5px}
+  .flags,.save,.plan{margin-left:10px;margin-right:10px}
+  .offers{padding:4px 2px 0}
+  .offers li a{font-size:13px;padding:5px 4px;column-gap:6px}
+  .offers .diff{display:none}
+  .allbtn{font-size:13px;margin:2px 2px 0;width:calc(100% - 4px)}
+  .cardfoot{padding:6px 10px 10px}
+  .favbtn{width:32px;height:32px;top:6px;right:6px}
+  .hbtn .lbl{display:none}
 }
 @media (prefers-reduced-motion:reduce){aside.side,.scrim,.p{transition:none}}
 </style>
@@ -156,17 +283,21 @@ footer p{max-width:75ch;margin:0 0 8px}
 <header class="top">
   <div class="wrap">
     <div class="brandline">
-      <p class="logo">Vitrina<span>HN</span></p>
-      <span class="updated" id="updated"></span>
+      <a class="logo" href="#">Vitrina<span>HN</span></a>
+      <div class="top-actions">
+        <span class="updated" id="updated"></span>
+        <a class="hbtn" href="#ofertas" id="navDeals"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/></svg><span class="lbl">Ofertas reales</span></a>
+        <a class="hbtn" href="#favoritos" id="navFavs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.7 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg><span class="lbl">Favoritos</span><span class="badge" id="favCount" hidden></span></a>
+      </div>
     </div>
     <div class="hero">
       <div>
         <h1 class="ask">¿Dónde sale más barato?</h1>
-        <p class="sub" id="sub">Celulares, televisores, línea blanca, aires, camas y más de las cadenas grandes de Honduras, en un solo lugar.</p>
+        <p class="sub" id="sub">Celulares, televisores, línea blanca, consolas, motos y más de las tiendas grandes de Honduras, en un solo lugar.</p>
       </div>
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="q" type="search" placeholder="Busca producto, marca o modelo: aire 12000, Galaxy A56…" autocomplete="off" aria-label="Buscar productos">
+        <input id="q" type="search" placeholder="Busca producto, marca o modelo: refri 18 pies, Galaxy A56…" autocomplete="off" aria-label="Buscar productos">
       </div>
     </div>
   </div>
@@ -176,7 +307,7 @@ footer p{max-width:75ch;margin:0 0 8px}
   <div class="wrap"><div class="tabs" id="tabs" role="tablist"></div></div>
 </nav>
 
-<div class="wrap layout">
+<div class="wrap layout" id="layout">
   <aside class="side" id="side" aria-label="Filtros">
     <div class="side-head"><h2>Filtros</h2><button id="closeSide" aria-label="Cerrar filtros"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div id="filters"></div>
@@ -185,7 +316,7 @@ footer p{max-width:75ch;margin:0 0 8px}
   <div class="scrim" id="scrim"></div>
 
   <main>
-    <div class="toolbar">
+    <div class="toolbar" id="toolbar">
       <h2 id="title">Todos los productos</h2>
       <span class="count" id="count" aria-live="polite"></span>
       <span class="spacer"></span>
@@ -195,61 +326,87 @@ footer p{max-width:75ch;margin:0 0 8px}
         <option value="asc">Menor precio</option>
         <option value="desc">Mayor precio</option>
         <option value="off">Mayor descuento</option>
+        <option value="drop">Bajaron de precio</option>
         <option value="multi">En más tiendas</option>
       </select>
     </div>
+    <p class="didyou" id="didyou" hidden></p>
     <div class="pills" id="pills" hidden></div>
     <div class="grid" id="grid"></div>
     <button class="more" id="more" hidden>Ver más productos</button>
+    <div class="deals" id="deals" hidden></div>
   </main>
 </div>
 
 <footer>
-  <div class="wrap">
-    <p>Los precios son de contado, tomados de las tiendas en línea de cada cadena. Pueden cambiar en cualquier momento: confirma en la tienda antes de comprar.</p>
-    <p id="notes"></p>
-    <p>Vitrina HN no está afiliada a ninguna de las tiendas.</p>
-  </div>
+  <div class="wrap"><p>Vitrina HN no está afiliada a ninguna de las tiendas.</p></div>
 </footer>
+
+<dialog class="sheet" id="sheet" aria-labelledby="shTitle"></dialog>
+<dialog class="sheet" id="cmpDlg" aria-label="Comparar productos"></dialog>
+<div class="cbar" id="cbar" hidden><span class="ct" id="cbarText"></span><button class="go" id="cbarGo">Comparar</button><button class="x" id="cbarClear">Quitar</button></div>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script>
 (async function(){
-  const $ = (s) => document.querySelector(s);
+  const $ = (s, r=document) => r.querySelector(s);
   let data;
   try { data = await (await fetch('catalog.json', {cache:'no-cache'})).json(); }
   catch (e) { $('#grid').innerHTML = '<div class="empty"><strong>No se pudo cargar el catálogo</strong>Recarga la página. Si sigue igual, el archivo catalog.json no está publicado.</div>'; return; }
 
   const STORE_IDS = Object.keys(data.stores).filter(id => data.stores[id].count > 0);
-  const storeList = (ids) => { const n = ids.map(id => data.stores[id].name); return n.length > 1 ? n.slice(0,-1).join(', ') + ' y ' + n.at(-1) : n[0]; };
+  const storeName = (id) => data.stores[id]?.name || id;
+  const storeList = (ids) => { const n = ids.map(storeName); return n.length > 1 ? n.slice(0,-1).join(', ') + ' y ' + n.at(-1) : n[0]; };
   const fmt = new Intl.NumberFormat('es-HN', {minimumFractionDigits:0, maximumFractionDigits:2});
-  const norm = (s) => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+  const norm = (s) => String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/(\d)[,.](?=\d{3}\b)/g,'$1');
   const esc = (s) => String(s??'').replace(/[&<>"']/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = (n) => { const [i, d] = Number(n).toFixed(2).split('.'); return `<span><span class="cur">L</span>${fmt.format(Number(i))}${d !== '00' ? `<span class="dec">.${d}</span>` : ''}</span>`; };
   const plain = (n) => 'L ' + fmt.format(Math.round(n));
   const catName = (id) => data.categories.find(c=>c.id===id)?.name || '';
   const X = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M7 7l10 10M17 7 7 17"/></svg>';
+  const HEART = '<svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-9.6-9.3C.9 8.2 3 4.5 6.7 4.5c2.1 0 3.6 1.1 5.3 3 1.7-1.9 3.2-3 5.3-3 3.7 0 5.8 3.7 4.3 7.2C19.5 16.4 12 21 12 21z"/></svg>';
+  const EPOCH = Date.UTC(2026, 0, 1);
+  const TODAY = data.today ?? Math.floor((Date.now() - 6*3600e3 - EPOCH) / 864e5);
+  const dayDate = (d, opts={day:'numeric', month:'short'}) => new Date(EPOCH + d*864e5).toLocaleDateString('es-HN', {...opts, timeZone:'UTC'});
+  const store = { get(k, f){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : f; } catch { return f; } }, set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
 
   // ---- Características que se leen del nombre del producto, por categoría ----
   const num = (x) => Number(String(x).replace(',', '.'));
   const storage = (n) => { const m=[...n.matchAll(/(\d+)\s?(gb|tb)\b/g)].map(x=>Number(x[1])*(x[2]==='tb'?1024:1)).filter(v=>v>=32); if(!m.length) return null; const v=Math.max(...m); return v>=1024?'1 TB o más':v+' GB'; };
   const ram = (n) => { const m=[...n.matchAll(/(\d+)\s?gb/g)].map(x=>Number(x[1])).filter(v=>v>=4&&v<=64); if(!m.length) return null; const v=Math.min(...m); return v<=8?(v<8?'Menos de 8 GB':'8 GB'):v<=16?'16 GB':'32 GB o más'; };
-  const inches = (n) => { const m=n.match(/(\d{2,3})\s?(?:"|”|''|pulgadas|pulg\b|in\b|\s?p\b)/) || n.match(/\b(?:tv|televisor|pantalla)\D{0,25}?\b(\d{2,3})\b/); if(!m) return null; const v=Number(m[1]); if(v<19||v>120) return null; return v<=32?'32" o menos':v<=43?'40" a 43"':v<=55?'50" a 55"':v<=65?'58" a 65"':'70" o más'; };
+  const inchV = (n) => { const m=n.match(/(\d{2,3}(?:\.\d)?)\s?(?:"|”|''|pulgadas|pulg\b|in\b|\s?p\b)/) || n.match(/\b(?:tv|televisor|pantalla|monitor)\D{0,25}?\b(\d{2,3})\b/); if(!m) return null; const v=Number(m[1]); return v>=15&&v<=120 ? v : null; };
+  const inches = (n) => { const v=inchV(n); if(!v) return null; return v<=32?'32" o menos':v<=43?'40" a 43"':v<=55?'50" a 55"':v<=65?'58" a 65"':'70" o más'; };
+  const monInches = (n) => { const v=inchV(n); if(!v) return null; return v<=22?'22" o menos':v<=24.5?'23" a 24"':v<=28?'27"':'32" o más'; };
   const btu = (n) => { let v=null; const ton=n.match(/(\d(?:[.,]\d)?)\s?(?:toneladas?|ton)\b/); const x=n.match(/(\d{4,5})\s?btu/);
-    const m=n.match(/(\d{1,2})[,.]?000\s?btu/)||n.match(/(\d{1,2})\s?(?:mil|k)\s?btu/)||n.match(/\b(\d{1,2})\s?btu/)||n.match(/\b(\d{1,2})k\b/);
+    const m=n.match(/(\d{1,2})000\s?btu/)||n.match(/(\d{1,2})\s?(?:mil|k)\s?btu/)||n.match(/\b(\d{1,2})\s?btu/)||n.match(/\b(\d{1,2})k\b/);
     if (m) v=Number(m[1]); else if (x) v=Math.round(Number(x[1])/1000); else if (ton) v=num(ton[1])*12; if(!v) return null; return v<=10?'9,000 BTU':v<=13?'12,000 BTU':v<=19?'18,000 BTU':v<=25?'24,000 BTU':'30,000 BTU o más'; };
   const feet = (n) => { const m=n.match(/(\d{1,2}(?:[.,]\d)?)\s?(?:pies|pie\b|ft|cu|')/); if(!m) return null; const v=num(m[1]); if(v<2||v>40) return null; return v<=10?'Hasta 10 pies':v<=14?'11 a 14 pies':v<=20?'15 a 20 pies':'21 pies o más'; };
   const kilos = (n) => { let m=n.match(/(\d{2})\s?(?:kg|kilos)\b/); let v=m?Number(m[1]):null; if(!v){const l=n.match(/(\d{2})\s?(?:lb|lbs|libras)\b/); if(l) v=Math.round(Number(l[1])/2.2);} if(!v||v<5) return null; return v<=15?'Hasta 15 kg':v<=20?'16 a 20 kg':v<=25?'21 a 25 kg':'26 kg o más'; };
+  const cc = (n) => { const m=n.match(/(\d{2,4})\s?cc\b/) || n.match(/\b(?:[a-z]{1,4})\s?-?(1[0-9]{2}|2[0-9]{2}|[5-9]0)\b/); if(!m) return null; const v=Number(m[1]); if(v<49||v>1500) return null; return v<=125?'Hasta 125 cc':v<=200?'126 a 200 cc':'Más de 200 cc'; };
   const pick = (pairs) => (n) => { for (const [re, label] of pairs) if (re.test(n)) return label; return null; };
+  const PLAT = pick([[/switch\s*2|ns2/,'Switch 2'],[/ps5|playstation\s*5|dualsense/,'PlayStation 5'],[/ps4|playstation\s*4|dualshock/,'PlayStation 4'],[/xbox/,'Xbox'],[/switch|nintendo|joy-?con/,'Switch'],[/\bpc\b/,'PC']]);
   const FACETS = {
     celulares: [{ id:'cap', label:'Almacenamiento', fn:storage, order:['64 GB','128 GB','256 GB','512 GB','1 TB o más'] }],
     tablets:   [{ id:'cap', label:'Almacenamiento', fn:storage, order:['64 GB','128 GB','256 GB','512 GB','1 TB o más'] }],
     laptops:   [{ id:'ram', label:'Memoria RAM', fn:ram, order:['Menos de 8 GB','8 GB','16 GB','32 GB o más'] }],
+    monitores: [
+      { id:'size', label:'Tamaño', fn:monInches, order:['22" o menos','23" a 24"','27"','32" o más'] },
+      { id:'use', label:'Uso', fn:(n)=>/gam|1[4-9]\dhz|2[0-9]\dhz|ms\b.*hz|\b(144|165|170|180|200|240)\s?hz/.test(n)?'Gaming':'Oficina y hogar', order:['Oficina y hogar','Gaming'] },
+    ],
+    impresoras: [{ id:'tipo', label:'Tipo', fn:pick([[/laser|láser/,'Láser'],[/tinta continua|flujo continuo|ecotank|ink ?tank|smart ?tank|sistema continuo|megatank/,'Tinta continua'],[/matricial|punto de venta|termica|\bpos\b|ticket/,'Punto de venta'],[/./,'Inyección de tinta']]), order:['Tinta continua','Inyección de tinta','Láser','Punto de venta'] }],
+    smartwatches: [{ id:'tipo', label:'Tipo', fn:pick([[/band|pulsera/,'Pulseras'],[/./,'Relojes']]), order:['Relojes','Pulseras'] }],
+    accesorios: [{ id:'tipo', label:'Tipo', fn:pick([[/power ?bank|bateria (portatil|externa)/,'Power banks'],[/cargador|carga/,'Cargadores'],[/hub|adaptador/,'Adaptadores y hubs'],[/cable/,'Cables']]), order:['Cargadores','Cables','Power banks','Adaptadores y hubs'] }],
     televisores: [
       { id:'size', label:'Tamaño', fn:inches, order:['32" o menos','40" a 43"','50" a 55"','58" a 65"','70" o más'] },
       { id:'res', label:'Resolución', fn:pick([[/\b8k\b/,'8K'],[/\b4k\b|uhd/,'4K'],[/fhd|full hd|1080/,'Full HD'],[/\bhd\b/,'HD']]), order:['HD','Full HD','4K','8K'] },
     ],
     audio: [{ id:'tipo', label:'Tipo', fn:pick([[/barra/,'Barras de sonido'],[/minicomponente|mini componente|equipo de sonido|sistema de (audio|sonido)|teatro|home theater/,'Equipos de sonido'],[/parlante|bocina|altavoz|speaker|partybox/,'Bocinas']]), order:['Bocinas','Barras de sonido','Equipos de sonido'] }],
-    consolas: [{ id:'plat', label:'Plataforma', fn:pick([[/playstation|ps5|ps4/,'PlayStation'],[/nintendo|switch/,'Nintendo'],[/xbox/,'Xbox']]), order:['PlayStation','Nintendo','Xbox'] }],
+    audifonos: [{ id:'tipo', label:'Conexión', fn:pick([[/inalambric|bluetooth|wireless|tws|true wireless|airpods|buds|bt\b/,'Inalámbricos'],[/./,'Con cable']]), order:['Inalámbricos','Con cable'] }],
+    consolas: [{ id:'plat', label:'Plataforma', fn:pick([[/playstation|ps5|ps4|portal/,'PlayStation'],[/nintendo|switch/,'Nintendo'],[/xbox/,'Xbox']]), order:['PlayStation','Nintendo','Xbox'] }],
+    videojuegos: [
+      { id:'plat', label:'Plataforma', fn:PLAT, order:['PlayStation 5','PlayStation 4','Switch 2','Switch','Xbox','PC'] },
+      { id:'tipo', label:'Tipo', fn:pick([[/control|dualsense|dualshock|joy-?con|mando|gamepad/,'Controles'],[/headset|audifono|auricular/,'Audífonos'],[/volante|vr|portal|adaptador|estacion|base/,'Otros accesorios'],[/./,'Juegos']]), order:['Juegos','Controles','Audífonos','Otros accesorios'] },
+    ],
     refrigeradoras: [
       { id:'tipo', label:'Tipo', fn:pick([[/congelador|freezer/,'Congeladores'],[/side by side|sbs|french door|cross door/,'Dos puertas laterales'],[/frigobar|minibar|compact/,'Frigobares'],[/refri/,'Refrigeradoras']]), order:['Refrigeradoras','Dos puertas laterales','Congeladores','Frigobares'] },
       { id:'size', label:'Tamaño', fn:feet, order:['Hasta 10 pies','11 a 14 pies','15 a 20 pies','21 pies o más'] },
@@ -264,32 +421,119 @@ footer p{max-width:75ch;margin:0 0 8px}
       { id:'inv', label:'Tecnología', fn:pick([[/inverter/,'Inverter'],[/portatil/,'Portátil'],[/./,'Convencional']]), order:['Inverter','Convencional','Portátil'] },
     ],
     camas: [{ id:'size', label:'Tamaño', fn:pick([[/king/,'King'],[/queen/,'Queen'],[/matrimonial|full/,'Matrimonial'],[/individual|twin|imperial|semi/,'Individual']]), order:['Individual','Matrimonial','Queen','King'] }],
+    licuadoras: [{ id:'tipo', label:'Tipo', fn:pick([[/cafetera|espresso|percolador|cafe/,'Cafeteras'],[/batidora/,'Batidoras'],[/procesador|extractor/,'Procesadores y extractores'],[/licuadora|blender|nutribullet/,'Licuadoras']]), order:['Licuadoras','Cafeteras','Batidoras','Procesadores y extractores'] }],
+    motos: [
+      { id:'cc', label:'Cilindraje', fn:cc, order:['Hasta 125 cc','126 a 200 cc','Más de 200 cc'] },
+      { id:'tipo', label:'Tipo', fn:pick([[/cuatrimoto|atv/,'Cuatrimotos'],[/mototaxi|torito/,'Mototaxis'],[/scooter|motoneta|automatic/,'Scooters'],[/doble proposito|enduro|todo terreno/,'Doble propósito'],[/deportiv|sport/,'Deportivas'],[/./,'Trabajo y ciudad']]), order:['Trabajo y ciudad','Scooters','Deportivas','Doble propósito','Cuatrimotos','Mototaxis'] },
+    ],
   };
 
-  // Índice por producto: texto de búsqueda y características
+  // ---- Índice de productos ----
+  const pkey = (p) => p.o.map(o=>o.k).filter(Boolean).sort()[0] || p.id;
+  const byKey = new Map();
+  const vocab = new Map();
   for (const p of data.products) {
+    p.key = pkey(p);
+    for (const o of p.o) if (o.k) byKey.set(o.k, p);
+    byKey.set(p.id, p);
     p._n = norm(p.n);
     p._t = norm(`${p.b} ${p.n} ${p.m} ${catName(p.c)}`);
     p._f = {};
     for (const f of FACETS[p.c] || []) { const v = f.fn(p._n); if (v) p._f[f.id] = v; }
+    for (const w of p._t.split(/[^a-z0-9]+/)) if (w.length >= 3) vocab.set(w, (vocab.get(w)||0) + 1);
   }
 
-  const state = { q:'', cat:'', brands:new Set(), facets:{}, price:'', sort:'rel', multi:false, stock:true, stores:new Set(), shown:48, allBrands:false };
+  // ---- Búsqueda tolerante a errores ----
+  const SYN = {
+    tv:['tv','televisor','pantalla'], tele:['tele','tv','pantalla'], television:['televisor','tv','pantalla'], televisores:['televisor','tv','pantalla'], pantalla:['pantalla','televisor','tv','monitor'],
+    refri:['refri'], nevera:['refri'], refrigerador:['refri'], heladera:['refri'], frigobar:['frigobar','refri'],
+    cel:['cel','smartphone','telefono'], telefono:['telefono','celular','smartphone'], movil:['celular','smartphone'], smartphone:['smartphone','celular'],
+    compu:['laptop','computadora','notebook'], computadora:['computadora','laptop','notebook'], notebook:['notebook','laptop'], portatil:['portatil','laptop'],
+    play:['playstation','ps5','ps4'], ps:['playstation','ps5','ps4'], playstation:['playstation','ps5','ps4'], nintendo:['nintendo','switch'], ns2:['switch 2'],
+    aire:['aire'], minisplit:['aire','split'], split:['split','aire'], ac:['aire'],
+    micro:['microondas'], lava:['lava'], audifono:['audifono','auricular','headset','earbuds','buds','airpods'], auricular:['auricular','audifono','headset'], headphones:['audifono','headset'],
+    reloj:['reloj','watch','band'], smartwatch:['watch','reloj'], moto:['moto'], motocicleta:['moto'],
+    bocina:['bocina','parlante','speaker','altavoz'], parlante:['parlante','bocina','speaker'], speaker:['speaker','bocina','parlante'],
+    airfryer:['airfryer','freidora','air fryer'], fryer:['freidora','air fryer'], freidora:['freidora'], impresora:['impresora','multifuncional'], printer:['impresora'],
+    cargador:['cargador','carga'], powerbank:['power bank','powerbank','bateria'], licuadora:['licuadora','blender'], cafetera:['cafetera','espresso'],
+    colchon:['colchon','cama'], cama:['cama','colchon'], estufa:['estufa','cocina'], cocina:['cocina','estufa'], control:['control','mando'],
+  };
+  const QSTOP = new Set(['de','del','para','con','el','la','los','las','y','en','un','una','que','por','mas','barato','barata','precio','precios','pulgadas','pulg','pies','btu','marca']);
+  function dist(a, b, max){
+    if (Math.abs(a.length - b.length) > max) return max + 1;
+    const m = a.length, n = b.length; let prev2 = null, prev = Array.from({length:n+1}, (_, j) => j);
+    for (let i = 1; i <= m; i++) {
+      const cur = [i]; let rowMin = i;
+      for (let j = 1; j <= n; j++) {
+        let v = Math.min(prev[j] + 1, cur[j-1] + 1, prev[j-1] + (a[i-1] === b[j-1] ? 0 : 1));
+        if (prev2 && i > 1 && j > 1 && a[i-1] === b[j-2] && a[i-2] === b[j-1]) v = Math.min(v, prev2[j-2] + 1);
+        cur.push(v); if (v < rowMin) rowMin = v;
+      }
+      if (rowMin > max) return max + 1;
+      prev2 = prev; prev = cur;
+    }
+    return prev[n];
+  }
+  const fuzzyCache = new Map();
+  function fuzzyWords(t){
+    if (fuzzyCache.has(t)) return fuzzyCache.get(t);
+    const max = t.length >= 8 ? 2 : t.length >= 4 ? 1 : 0;
+    const out = [];
+    if (max) for (const [w, c] of vocab) { const d = dist(t, w, max); if (d <= max) out.push([w, d, c]); }
+    out.sort((a,b) => a[1]-b[1] || b[2]-a[2]);
+    const res = out.slice(0, 12).map(x => x[0]);
+    fuzzyCache.set(t, res);
+    return res;
+  }
+  // Convierte la búsqueda en términos; cada término acepta alternativas exactas y, si no hay, parecidas.
+  function compileQuery(q){
+    const toks = norm(q).replace(/(\d)\s?(gb|tb|kg|cc|hz)\b/g, '$1$2').split(/[^a-z0-9+"]+/).filter(t => t && !QSTOP.has(t));
+    return toks.map(t => {
+      const base = [t];
+      if (t.length > 4 && t.endsWith('es')) base.push(t.slice(0, -2));
+      if (t.length > 3 && t.endsWith('s')) base.push(t.slice(0, -1));
+      const alts = [...new Set([...base, ...(SYN[t] || SYN[base.at(-1)] || [])])];
+      const exact = data.products.some(p => alts.some(a => p._t.includes(a)));
+      const fz = exact || /^\d+$/.test(t) ? [] : fuzzyWords(t);
+      return { t, alts, fuzzy: [...new Set([...fz, ...fz.flatMap(w => SYN[w] || [])])] };
+    });
+  }
+  function scoreQuery(p, terms){
+    let s = 0;
+    for (const term of terms) {
+      if (term.alts.some(a => p._t.includes(a))) s += 3;
+      else if (term.fuzzy.some(w => p._t.includes(w))) s += 1;
+      else return 0;
+    }
+    if (terms[0] && p._n.startsWith(terms[0].t)) s += 1;
+    return s;
+  }
+
+  // ---- Estado y almacenamiento local ----
+  const state = { view:'catalog', q:'', terms:[], cat:'', brands:new Set(), facets:{}, price:'', sort:'rel', multi:false, stock:true, stores:new Set(), shown:48, allBrands:false };
+  let favs = store.get('vh:favs', {});       // clave -> { p: precio al guardar, t: fecha }
+  let cmp = store.get('vh:cmp', []).filter(k => byKey.has(k)).slice(0, 3);
+  const isFav = (p) => p.o.some(o => favs[o.k]) || !!favs[p.key];
+  const favEntry = (p) => favs[p.key] || p.o.map(o=>favs[o.k]).find(Boolean);
+  const inCmp = (p) => cmp.some(k => byKey.get(k) === p);
 
   // Encabezado
   $('#updated').textContent = 'Actualizado ' + new Date(data.updated).toLocaleString('es-HN', {weekday:'long', day:'numeric', month:'long', hour:'numeric', minute:'2-digit'});
   const multiCount = data.products.filter(p=>p.o.length>1).length;
-  $('#sub').textContent = `${fmt.format(data.products.length)} productos de ${storeList(STORE_IDS)}. ${fmt.format(multiCount)} están en más de una tienda.`;
-  $('#notes').textContent = Object.values(data.stores).filter(s=>s.note).map(s=>`${s.name}: ${s.note}`).join(' ');
+  $('#sub').textContent = `${fmt.format(data.products.length)} productos de ${STORE_IDS.length} tiendas: ${storeList(STORE_IDS)}. ${fmt.format(multiCount)} están en más de una tienda.`;
 
   const offersOf = (p) => p.o.filter(o => (!state.stores.size || state.stores.has(o.s)) && (!state.stock || o.a)).sort((a,b)=>(b.a-a.a)||(a.p-b.p));
+  const allOffers = (p) => [...p.o].sort((a,b)=>(b.a-a.a)||(a.p-b.p));
   const bestP = (p) => offersOf(p)[0]?.p ?? Infinity;
   const discount = (o) => o && o.r > o.p ? (o.r - o.p) / o.r : 0;
+  const tracked = (o) => o.f != null ? TODAY - o.f : 0;
+  // Bajada real: el precio de hoy es menor que el más bajo de los 30 días anteriores, o que hace 7 días.
+  const dropOf = (o) => { const ref = Math.max(o.l ?? 0, o.w ?? 0); return ref > o.p * 1.02 ? ref - o.p : 0; };
 
   function priceBuckets(list){
     const ps = list.map(bestP).filter(Number.isFinite).sort((a,b)=>a-b);
     if (ps.length < 8) return [];
-    const r = (v) => { const step = v > 20000 ? 5000 : v > 5000 ? 1000 : 500; return Math.max(step, Math.round(v/step)*step); };
+    const r = (v) => { const step = v > 20000 ? 5000 : v > 5000 ? 1000 : v > 1000 ? 500 : 100; return Math.max(step, Math.round(v/step)*step); };
     const cuts = [...new Set([0.25,0.5,0.75].map(q => r(ps[Math.floor(q*(ps.length-1))])))];
     const out = []; let lo = 0;
     cuts.forEach((c,i) => { out.push({ id:`${lo}-${c}`, label: i===0 ? `Hasta ${plain(c)}` : `${plain(lo)} a ${plain(c)}` }); lo = c; });
@@ -300,22 +544,25 @@ footer p{max-width:75ch;margin:0 0 8px}
 
   // Filtro que puede ignorar un grupo, para contar lo que quedaría al marcar cada opción
   function matches(p, skip){
+    if (state.view === 'favs' && !isFav(p)) return false;
     if (skip !== 'cat' && state.cat && p.c !== state.cat) return false;
     if (skip !== 'brand' && state.brands.size && !state.brands.has(p.b)) return false;
     for (const [fid, vals] of Object.entries(state.facets)) if (skip !== fid && vals.size && !vals.has(p._f[fid])) return false;
-    const offers = p.o.filter(o => (skip === 'store' || !state.stores.size || state.stores.has(o.s)) && (!state.stock || o.a));
+    const offers = p.o.filter(o => (skip === 'store' || !state.stores.size || state.stores.has(o.s)) && (!state.stock || o.a || state.view === 'favs'));
     if (!offers.length) return false;
     if (state.multi && offers.length < 2) return false;
     if (skip !== 'price' && state.price) { const [lo, hi] = state.price.split('-'); const v = Math.min(...offers.map(o=>o.p)); if (v <= Number(lo) || (hi && v > Number(hi))) return false; }
-    if (state.q) for (const t of norm(state.q).split(/\s+/).filter(Boolean)) if (!p._t.includes(t)) return false;
+    if (state.terms.length && !p._qs) return false;
     return true;
   }
   const countBy = (list, key) => { const c = {}; list.forEach(p => { const ks = [].concat(key(p)); ks.forEach(k => { if (k) c[k] = (c[k]||0)+1; }); }); return c; };
 
   function renderTabs(){
+    const v = state.view; state.view = 'catalog';
     const base = data.products.filter(p => matches(p, 'cat'));
+    state.view = v;
     const counts = countBy(base, p => p.c);
-    const tab = (id, name, n) => `<button class="tab" role="tab" aria-selected="${state.cat===id}" data-c="${id}">${esc(name)}<small>${fmt.format(n)}</small></button>`;
+    const tab = (id, name, n) => `<button class="tab" role="tab" aria-selected="${state.view==='catalog' && state.cat===id}" data-c="${id}">${esc(name)}<small>${fmt.format(n)}</small></button>`;
     $('#tabs').innerHTML = tab('', 'Todo', base.length) + data.categories.filter(c=>counts[c.id]).map(c=>tab(c.id, c.name, counts[c.id])).join('');
   }
 
@@ -323,14 +570,12 @@ footer p{max-width:75ch;margin:0 0 8px}
 
   function renderFilters(){
     const out = [];
-    // Características propias de la categoría (lo más útil va primero)
     for (const f of FACETS[state.cat] || []) {
       const c = countBy(data.products.filter(p => matches(p, f.id)), p => p._f[f.id]);
       const vals = f.order.filter(v => c[v] || state.facets[f.id]?.has(v));
       if (vals.length < 2) continue;
       out.push(`<section class="fsec"><h3>${esc(f.label)}</h3>${vals.map(v => opt(f.id, v, v, c[v]||0, !!state.facets[f.id]?.has(v))).join('')}</section>`);
     }
-    // Marca
     const bc = countBy(data.products.filter(p => matches(p, 'brand')), p => p.b);
     for (const b of state.brands) bc[b] ??= 0;
     const brands = Object.entries(bc).sort((a,b)=>b[1]-a[1]);
@@ -339,14 +584,11 @@ footer p{max-width:75ch;margin:0 0 8px}
       const shown = state.allBrands ? brands : brands.slice(0, LIMIT).concat(brands.slice(LIMIT).filter(([b]) => state.brands.has(b)));
       out.push(`<section class="fsec"><h3>Marca</h3>${shown.map(([b,n]) => opt('brand', b, b, n, state.brands.has(b))).join('')}${brands.length > LIMIT ? `<button class="linkbtn" data-more="1">${state.allBrands ? 'Ver menos' : `Ver las ${brands.length} marcas`}</button>` : ''}</section>`);
     }
-    // Precio
     const pb = priceBuckets(data.products.filter(p => matches(p, 'price')));
     if (pb.length) out.push(`<section class="fsec"><h3>Precio</h3>${opt('price', '', 'Cualquier precio', null, !state.price, 'radio')}${pb.map(b => opt('price', b.id, b.label, null, state.price===b.id, 'radio')).join('')}</section>`);
-    // Tiendas
     const sc = countBy(data.products.filter(p => matches(p, 'store')), p => p.o.filter(o=>!state.stock||o.a).map(o=>o.s));
     out.push(`<section class="fsec"><h3>Tienda</h3>${STORE_IDS.map(id => { const s = data.stores[id]; const age = s.manual ? Math.floor((Date.now()-new Date(s.updated))/864e5) : 0;
-      return opt('store', id, s.name, sc[id]||0, state.stores.has(id), 'checkbox', `<span class="dot" style="background:var(--s-${id})"></span>`) + (s.manual ? `<p class="note">Precios del ${new Date(s.updated).toLocaleDateString('es-HN',{day:'numeric',month:'long'})}${age>14?' (pueden estar desactualizados)':''}</p>` : ''); }).join('')}</section>`);
-    // Opciones
+      return opt('store', id, s.name, sc[id]||0, state.stores.has(id), 'checkbox', `<span class="dot" style="background:var(--s-${id})"></span>`) + (s.manual && age > 1 ? `<p class="note">Precios del ${new Date(s.updated).toLocaleDateString('es-HN',{day:'numeric',month:'long'})}</p>` : ''); }).join('')}</section>`);
     out.push(`<section class="fsec"><h3>Mostrar</h3>${opt('multi','1','Solo los que están en 2 o más tiendas',null,state.multi)}${opt('stock','1','Solo disponibles',null,state.stock)}</section>`);
     $('#filters').innerHTML = out.join('');
   }
@@ -356,56 +598,87 @@ footer p{max-width:75ch;margin:0 0 8px}
     for (const f of FACETS[state.cat] || []) for (const v of state.facets[f.id] || []) a.push({ g:f.id, v, label:v });
     for (const b of state.brands) a.push({ g:'brand', v:b, label:b });
     if (state.price) a.push({ g:'price', v:state.price, label:priceLabel(state.price) });
-    for (const s of state.stores) a.push({ g:'store', v:s, label:data.stores[s].name });
+    for (const s of state.stores) a.push({ g:'store', v:s, label:storeName(s) });
     if (state.multi) a.push({ g:'multi', v:'1', label:'En 2 o más tiendas' });
     return a;
   }
   function renderPills(){
-    const a = activeFilters();
+    const a = state.view === 'catalog' ? activeFilters() : [];
     $('#pills').hidden = !a.length;
     $('#pills').innerHTML = a.map(f => `<button class="pill" data-g="${f.g}" data-v="${esc(f.v)}" aria-label="Quitar ${esc(f.label)}">${esc(f.label)}${X}</button>`).join('') + (a.length > 1 ? '<button class="clear" id="clearAll">Quitar todo</button>' : '');
     $('#fbtnLabel').textContent = a.length ? `Filtros (${a.length})` : 'Filtros';
   }
 
+  // ---- Señales de precio (historial) ----
+  function flagsOf(p, best){
+    const out = [];
+    if (!best) return out;
+    const drop = dropOf(best);
+    if (drop) out.push(['', `Bajó ${plain(drop)}`]);
+    else if (best.l != null && best.p < best.l) out.push(['', 'Precio más bajo en 30 días']);
+    if (best.r > best.p * 1.01 && tracked(best) >= 7 && best.l != null && best.p >= best.l) out.push(['warn', 'Sin rebaja real', `Muestra un precio "antes" de ${plain(best.r)}, pero no está más barato que en los últimos ${Math.min(30, tracked(best))} días.`]);
+    const fe = favEntry(p);
+    if (fe && best.p < fe.p - 1) out.push(['', `Bajó ${plain(fe.p - best.p)} desde que lo guardaste`]);
+    return out;
+  }
+  const flagsHtml = (fl) => fl.length ? `<div class="flags">${fl.map(([c, t, tip]) => `<span class="flag ${c}"${tip ? ` title="${esc(tip)}"` : ''}>${esc(t)}</span>`).join('')}</div>` : '';
+  const planText = (o) => o?.q ? `o ${o.q.n} cuotas de ${plain(o.p / o.q.n)} ${o.q.t} (${storeName(o.s)})` : '';
+
+  const imgSrc = (p) => p.t ? `thumbs/${p.t}.webp` : p.i;
+  const imgTag = (src, initial, extra='') => src ? `<img src="${esc(src)}" alt="" ${extra} decoding="async" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;>${initial}</span>'">` : `<span class="ph">${initial}</span>`;
+  const plink = (p) => '#p/' + encodeURIComponent(p.key);
+
   function card(p){
-    const offers = offersOf(p);
+    let offers = state.view === 'favs' ? allOffers(p) : offersOf(p);
+    if (!offers.length) offers = allOffers(p);
     const best = offers[0];
-    const src = p.t ? `thumbs/${p.t}.webp` : p.i;
     const initial = esc((p.b||catName(p.c)).slice(0,1));
-    const img = src ? `<img src="${esc(src)}" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;>${initial}</span>'">` : `<span class="ph">${initial}</span>`;
     const was = best.r > best.p ? `<span class="was">${plain(best.r)}</span>` : '';
     const spread = offers.length > 1 ? offers[offers.length-1].p - best.p : 0;
-    const rows = offers.map((o,i) => {
-      const diff = i === 0 ? (offers.length>1 ? 'el más bajo' : '') : '+' + plain(o.p - best.p);
-      return `<li class="${i===0?'best':''}"><a href="${esc(o.u)}" target="_blank" rel="noopener"><span class="sw" style="background:var(--s-${o.s})"></span><span class="st">${esc(data.stores[o.s].name)}${o.a?'':' (agotado)'}</span><span class="pr">${plain(o.p)}</span>${diff?`<span class="diff">${diff}</span>`:''}</a></li>`;
+    const top = offers.slice(0, 3);
+    const rows = top.map((o,i) => {
+      const diff = i === 0 ? (offers.length>1 ? 'más bajo' : '') : '+' + fmt.format(Math.round(o.p - best.p));
+      return `<li class="${i===0?'best':''}"><a href="${esc(o.u)}" target="_blank" rel="noopener" title="Ver en ${esc(storeName(o.s))}"><span class="sw" style="background:var(--s-${o.s})"></span><span class="st">${esc(storeName(o.s))}${o.a?'':' (agotado)'}</span><span class="pr">${plain(o.p)}</span><span class="diff">${diff}</span></a></li>`;
     }).join('');
-    return `<article class="p">
-      <a class="img" href="${esc(best.u)}" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">${img}</a>
-      <div class="body"><span class="b">${esc(p.b || catName(p.c))}</span><a class="n" href="${esc(best.u)}" target="_blank" rel="noopener" title="${esc(p.n)}">${esc(p.n)}</a>${p.m?`<span class="m">Modelo ${esc(p.m)}</span>`:''}</div>
-      <div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${was}</div><div class="where"><span class="sw" style="background:var(--s-${best.s})"></span>${offers.length>1?'Más barato en ':'En '}${esc(data.stores[best.s].name)}</div></div>
+    const rest = p.o.length - top.length;
+    const plan = planText(offers.find(o => o.q));
+    return `<article class="p" data-key="${esc(p.key)}">
+      <button class="favbtn" data-fav="${esc(p.key)}" aria-pressed="${isFav(p)}" aria-label="${isFav(p)?'Quitar de':'Guardar en'} favoritos">${HEART}</button>
+      <a class="img" href="${plink(p)}" tabindex="-1" aria-hidden="true">${imgTag(imgSrc(p), initial, 'loading="lazy"')}</a>
+      <div class="body"><span class="b">${esc(p.b || catName(p.c))}</span><a class="n" href="${plink(p)}" title="${esc(p.n)}">${esc(p.n)}</a>${p.m?`<span class="m">Modelo ${esc(p.m)}</span>`:''}</div>
+      <div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${was}</div><div class="where"><span class="sw" style="background:var(--s-${best.s})"></span>${offers.length>1?'Más barato en ':'En '}${esc(storeName(best.s))}${best.a?'':' (agotado)'}</div></div>
+      ${flagsHtml(flagsOf(p, best))}
       ${spread>0?`<div class="save">Ahorras ${plain(spread)} frente a la más cara</div>`:''}
-      ${offers.length > 1 ? `<ul class="offers">${rows}</ul>` : '<div style="height:14px"></div>'}
+      ${plan?`<div class="plan">${esc(plan)}</div>`:''}
+      ${offers.length > 1 ? `<ul class="offers">${rows}</ul>` : ''}
+      ${rest > 0 ? `<a class="allbtn" href="${plink(p)}">Ver las ${p.o.length} tiendas<span aria-hidden="true">›</span></a>` : ''}
+      <div class="cardfoot"><label class="cmp"><input type="checkbox" data-cmp="${esc(p.key)}"${inCmp(p)?' checked':''}>Comparar</label></div>
     </article>`;
   }
 
   let current = [];
   function computeList(){
     const list = data.products.filter(p => matches(p));
-    const toks = norm(state.q).split(/\s+/).filter(Boolean);
     if (state.sort === 'asc') list.sort((a,b)=>bestP(a)-bestP(b));
     else if (state.sort === 'desc') list.sort((a,b)=>bestP(b)-bestP(a));
     else if (state.sort === 'off') list.sort((a,b)=>discount(offersOf(b)[0])-discount(offersOf(a)[0]));
+    else if (state.sort === 'drop') list.sort((a,b)=>(dropOf(offersOf(b)[0]||{})/bestP(b))-(dropOf(offersOf(a)[0]||{})/bestP(a)) || bestP(a)-bestP(b));
     else if (state.sort === 'multi') list.sort((a,b)=>offersOf(b).length-offersOf(a).length || bestP(a)-bestP(b));
-    else if (toks.length) list.sort((a,b)=>(b._n.startsWith(toks[0])-a._n.startsWith(toks[0])) || (offersOf(b).length-offersOf(a).length));
+    else if (state.terms.length) list.sort((a,b)=>(b._qs-a._qs) || (offersOf(b).length-offersOf(a).length));
     return list;
   }
   function renderGrid(append){
     const grid = $('#grid');
     const n = current.length;
-    $('#title').textContent = state.cat ? catName(state.cat) : (state.q ? 'Resultados' : 'Todos los productos');
+    $('#title').textContent = state.view === 'favs' ? 'Tus favoritos' : state.cat ? catName(state.cat) : (state.q ? 'Resultados' : 'Todos los productos');
     $('#count').textContent = `${fmt.format(n)} producto${n===1?'':'s'}`;
     $('#applySide').textContent = `Ver ${fmt.format(n)} producto${n===1?'':'s'}`;
-    if (!n) { grid.innerHTML = `<div class="empty"><strong>Sin resultados</strong>Prueba con otra palabra o quita algún filtro.</div>`; $('#more').hidden = true; return; }
+    if (!n) {
+      grid.innerHTML = state.view === 'favs'
+        ? `<div class="empty"><strong>Aún no tienes favoritos</strong>Toca el corazón de un producto para guardarlo aquí. Te avisaremos cuando baje de precio.</div>`
+        : `<div class="empty"><strong>Sin resultados</strong>Prueba con otra palabra o quita algún filtro.</div>`;
+      $('#more').hidden = true; return;
+    }
     const shown = Math.min(state.shown, n);
     if (append) grid.insertAdjacentHTML('beforeend', current.slice(grid.children.length, shown).map(card).join(''));
     else grid.innerHTML = current.slice(0, shown).map(card).join('');
@@ -413,10 +686,37 @@ footer p{max-width:75ch;margin:0 0 8px}
     $('#more').hidden = left <= 0;
     $('#more').textContent = `Ver ${fmt.format(Math.min(48, left))} productos más (quedan ${fmt.format(left)})`;
   }
-  function refresh(){ state.shown = 48; current = computeList(); renderTabs(); renderFilters(); renderPills(); renderGrid(false); }
+  function renderDidYou(){
+    const fixes = state.terms.filter(t => t.fuzzy.length && !data.products.some(p => p._qs && t.alts.some(a => p._t.includes(a))));
+    const el = $('#didyou');
+    if (!fixes.length || !current.length) { el.hidden = true; return; }
+    el.hidden = false;
+    el.innerHTML = 'Mostrando resultados para ' + fixes.map(t => `<b>${esc(t.fuzzy[0])}</b>`).join(', ') + ` (buscaste “${esc(fixes.map(t=>t.t).join(' '))}”).`;
+  }
+  function applyQuery(){
+    state.terms = state.q.trim() ? compileQuery(state.q) : [];
+    for (const p of data.products) p._qs = state.terms.length ? scoreQuery(p, state.terms) : 0;
+    // Si lo buscado no está en la categoría abierta pero sí en otras, se busca en todas.
+    if (state.terms.length && state.cat && !data.products.some(p => p._qs && p.c === state.cat) && data.products.some(p => p._qs)) {
+      state.cat = ''; resetFilters(); history.replaceState(null, '', location.pathname + location.search);
+    }
+  }
+  function refresh(){
+    const solo = state.view !== 'catalog';
+    $('#layout').classList.toggle('solo', solo);
+    $('#navDeals').toggleAttribute('aria-current', false); $('#navFavs').toggleAttribute('aria-current', false);
+    if (state.view === 'deals') $('#navDeals').setAttribute('aria-current', 'page');
+    if (state.view === 'favs') $('#navFavs').setAttribute('aria-current', 'page');
+    const deals = state.view === 'deals';
+    $('#deals').hidden = !deals; $('#grid').hidden = deals; $('#toolbar').hidden = deals; $('#pills').hidden = true;
+    renderTabs();
+    if (deals) { $('#more').hidden = true; $('#didyou').hidden = true; renderDeals(); return; }
+    state.shown = 48; current = computeList();
+    if (!solo) renderFilters();
+    renderPills(); renderGrid(false); renderDidYou();
+  }
 
   const resetFilters = () => { state.brands.clear(); state.facets = {}; state.price = ''; state.allBrands = false; };
-  function setCat(id){ if (id === state.cat) return; state.cat = id; resetFilters(); history.replaceState(null, '', id ? '#'+id : location.pathname + location.search); }
   function toggle(g, v, on){
     if (g === 'brand') on ? state.brands.add(v) : state.brands.delete(v);
     else if (g === 'store') on ? state.stores.add(v) : state.stores.delete(v);
@@ -426,10 +726,277 @@ footer p{max-width:75ch;margin:0 0 8px}
     else { const s = state.facets[g] ||= new Set(); on ? s.add(v) : s.delete(v); }
   }
 
-  // Eventos
-  let tmr; $('#q').addEventListener('input', (e) => { clearTimeout(tmr); tmr = setTimeout(()=>{ state.q = e.target.value; refresh(); }, 140); });
-  $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (!b) return; setCat(b.dataset.c); refresh(); b.scrollIntoView({inline:'nearest', block:'nearest'}); });
-  window.addEventListener('hashchange', () => { const h = decodeURIComponent(location.hash.slice(1)); setCat(data.categories.some(c=>c.id===h) ? h : ''); refresh(); });
+  // ---- Ofertas reales ----
+  function renderDeals(){
+    const since = data.since ?? TODAY;
+    const days = TODAY - since;
+    const drops = [], gaps = [], st = {};
+    for (const p of data.products) {
+      const av = allOffers(p).filter(o => o.a);
+      for (const o of p.o) {
+        const s = st[o.s] ||= { n:0, adv:0, sum:0, tr:0, real:0 };
+        s.n++;
+        if (o.r > o.p * 1.01) { s.adv++; s.sum += (o.r - o.p) / o.r; if (tracked(o) >= 7) { s.tr++; if (dropOf(o) || (o.l != null && o.p < o.l)) s.real++; } }
+      }
+      const b = av[0];
+      if (b && dropOf(b)) drops.push([p, dropOf(b) / (b.p + dropOf(b))]);
+      if (av.length >= 2) { const hi = av[av.length-1].p; const pct = (hi - b.p) / hi; if (pct >= 0.12 && hi - b.p >= 300) gaps.push([p, hi - b.p, pct]); }
+    }
+    drops.sort((a,b)=>b[1]-a[1]); gaps.sort((a,b)=>b[1]-a[1]);
+    const prevView = state.view; state.view = 'catalog'; const saveStock = state.stock; // las tarjetas usan los filtros por defecto
+    const cards = (list) => `<div class="grid">${list.map(card).join('')}</div>`;
+    const ready = days >= 7;
+    const stores = Object.entries(st).filter(([id]) => data.stores[id]).sort((a,b)=>(b[1].adv/b[1].n)-(a[1].adv/a[1].n));
+    const html = `
+      <section class="dsec">
+        <h3>Ofertas reales</h3>
+        <p>Una etiqueta de “descuento” no siempre significa que el precio bajó. Aquí comparamos el precio de hoy con el que tenía cada producto en los días anteriores.</p>
+        <div class="callout"><p>${ready
+          ? `Seguimos los precios desde el ${dayDate(since,{day:'numeric',month:'long'})} (${days} días).`
+          : `Empezamos a guardar los precios el ${dayDate(since,{day:'numeric',month:'long'})}. Para confirmar si un descuento es real hacen falta al menos 7 días de historial: las comparaciones completas aparecen a partir del ${dayDate(since+7,{day:'numeric',month:'long'})}. Mientras tanto ya puedes ver cuántos productos tienen etiqueta de descuento en cada tienda y dónde hay más diferencia de precio.`}</p></div>
+      </section>
+      <section class="dsec">
+        <h3>Etiquetas de descuento por tienda</h3>
+        <p>Cuántos productos muestran un precio “antes” tachado y, cuando ya hay historial, cuántos de esos bajaron de verdad.</p>
+        <div class="tscroll"><table class="stbl"><thead><tr><th>Tienda</th><th>Productos</th><th>Con etiqueta de descuento</th><th>Descuento anunciado promedio</th><th>Bajaron de verdad</th></tr></thead><tbody>
+        ${stores.map(([id, s]) => { const share = s.adv / s.n; return `<tr><td><span class="sw" style="background:var(--s-${id})"></span> ${esc(storeName(id))}</td><td class="num">${fmt.format(s.n)}</td><td class="num">${fmt.format(s.adv)} (${Math.round(share*100)}%)<div class="bar"><i style="width:${Math.round(share*100)}%"></i></div></td><td class="num">${s.adv ? Math.round(s.sum / s.adv * 100) + '%' : '—'}</td><td class="num">${s.tr ? `${fmt.format(s.real)} de ${fmt.format(s.tr)}` : '<span class="muted">Falta historial</span>'}</td></tr>`; }).join('')}
+        </tbody></table></div>
+      </section>
+      <section class="dsec">
+        <h3>Bajaron de precio</h3>
+        ${drops.length ? `<p>Productos cuyo precio de hoy es menor que el más bajo de los días anteriores.</p>${cards(drops.slice(0, 24).map(x=>x[0]))}` : `<p>Todavía no hay bajadas confirmadas${ready ? ' en los últimos días' : ': aparecerán aquí cuando tengamos historial'}.</p>`}
+      </section>
+      <section class="dsec">
+        <h3>Mayor diferencia entre tiendas</h3>
+        <p>El mismo producto, con la mayor diferencia entre la tienda más barata y la más cara.</p>
+        ${cards(gaps.slice(0, 24).map(x=>x[0]))}
+      </section>`;
+    state.view = prevView; state.stock = saveStock;
+    $('#deals').innerHTML = html;
+  }
+
+  // ---- Detalles (descripción, características, historial) por categoría ----
+  const detCache = {};
+  const loadDetails = (cat) => detCache[cat] ||= fetch(`details/${cat}.json`, {cache:'no-cache'}).then(r => r.ok ? r.json() : {}).catch(() => ({}));
+
+  function chartSvg(h, offers){
+    const series = Object.entries(h || {}).filter(([s, e]) => e?.length);
+    if (!series.length) return '';
+    const minD = Math.min(...series.map(([,e]) => e[0][0]));
+    const span = TODAY - minD;
+    if (span < 1) return '';
+    const W = 640, H = 220, L = 58, R = 12, T = 14, B = 30;
+    const vals = series.flatMap(([,e]) => e.map(x=>x[1]));
+    let lo = Math.min(...vals), hi = Math.max(...vals);
+    if (hi === lo) { hi += hi * 0.05; lo -= lo * 0.05; }
+    const pad = (hi - lo) * 0.1; lo -= pad; hi += pad;
+    const x = (d) => L + (d - minD) / span * (W - L - R);
+    const y = (v) => T + (hi - v) / (hi - lo) * (H - T - B);
+    const lines = series.map(([s, e]) => {
+      let d = ''; let prev = null;
+      for (const [day, pr] of e) { const dd = Math.max(day, minD); if (prev == null) d += `M${x(dd).toFixed(1)},${y(pr).toFixed(1)}`; else d += `H${x(dd).toFixed(1)}V${y(pr).toFixed(1)}`; prev = pr; }
+      d += `H${x(TODAY).toFixed(1)}`;
+      return `<path d="${d}" fill="none" stroke="var(--s-${s})" stroke-width="2.5" stroke-linejoin="round"/>`;
+    }).join('');
+    const ticks = [lo + pad, (lo + hi) / 2, hi - pad].map(v => `<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="#E6EAEE"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="#8A949E">${fmt.format(Math.round(v))}</text>`).join('');
+    const xt = [minD, Math.round((minD + TODAY)/2), TODAY].filter((v,i,a)=>a.indexOf(v)===i).map(d => `<text x="${x(d)}" y="${H-8}" text-anchor="${d===minD?'start':d===TODAY?'end':'middle'}" font-size="11" fill="#8A949E">${dayDate(d)}</text>`).join('');
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Historial de precios">${ticks}${lines}${xt}</svg>
+      <div class="legend">${series.map(([s]) => `<span><span class="sw" style="background:var(--s-${s})"></span>${esc(storeName(s))}</span>`).join('')}</div>`;
+  }
+
+  function verdicts(p, h){
+    const out = [];
+    for (const o of allOffers(p)) {
+      const e = h?.[o.s];
+      const days = e?.length ? TODAY - e[0][0] : 0;
+      const name = storeName(o.s);
+      if (!days) {
+        if (o.r > o.p * 1.01) out.push(['', `${name} anuncia ${Math.round(discount(o)*100)}% de descuento (antes ${plain(o.r)}). Empezamos a seguir este precio hoy; pronto podremos confirmar si la rebaja es real.`]);
+        continue;
+      }
+      const prices = e.map(x=>x[1]);
+      const lowPrev = Math.min(...e.filter(x => x[0] < TODAY).map(x=>x[1]), Infinity);
+      const lastChange = e[e.length-1][0];
+      if (o.p < lowPrev - 1) out.push(['good', `${name}: bajó a ${plain(o.p)}, el precio más bajo desde el ${dayDate(e[0][0])} (antes ${plain(lowPrev)}).`]);
+      else if (o.p > Math.min(...prices) + 1) out.push(['bad', `${name}: hoy está ${plain(o.p - Math.min(...prices))} más caro que su precio más bajo desde el ${dayDate(e[0][0])}.`]);
+      else if (o.r > o.p * 1.01 && TODAY - lastChange >= 3) out.push(['bad', `${name} anuncia ${Math.round(discount(o)*100)}% de descuento, pero el precio es el mismo desde el ${dayDate(lastChange)}.`]);
+      else out.push(['', `${name}: ${plain(o.p)}, sin cambios desde el ${dayDate(lastChange)}.`]);
+      if (o.r > o.p * 1.01 && days >= 14 && Math.max(...prices) < o.r - 1) out.push(['bad', `${name}: el precio “antes” de ${plain(o.r)} no se cobró en ningún día desde el ${dayDate(e[0][0])}.`]);
+    }
+    return out;
+  }
+
+  const sheet = $('#sheet');
+  let sheetFromNav = false;
+  async function openSheet(p){
+    const offers = allOffers(p);
+    const best = offers.find(o => o.a) || offers[0];
+    const initial = esc((p.b||catName(p.c)).slice(0,1));
+    const chips = Object.entries(p._f).map(([,v]) => v).concat(p.o.length > 1 ? [`En ${p.o.length} tiendas`] : []);
+    const spread = offers.filter(o=>o.a).length > 1 ? Math.max(...offers.filter(o=>o.a).map(o=>o.p)) - best.p : 0;
+    sheet.innerHTML = `
+      <div class="sh-head"><span class="crumb">${esc(catName(p.c))}${p.b ? ' · ' + esc(p.b) : ''}</span><button class="iconbtn" data-close aria-label="Cerrar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="sh-body">
+        <div class="sh-top">
+          <div><div class="gal-main" id="galMain">${imgTag(imgSrc(p), initial)}</div><div class="gal-th" id="galTh"></div></div>
+          <div class="sh-info">
+            <span class="b">${esc(p.b || catName(p.c))}</span>
+            <h2 id="shTitle">${esc(p.n)}</h2>
+            ${p.m ? `<span class="m">Modelo ${esc(p.m)}</span>` : ''}
+            <div><div class="tag${best.a?'':' out'}"><div class="price">${money(best.p)}${best.r > best.p ? `<span class="was">${plain(best.r)}</span>` : ''}</div><div class="where"><span class="sw" style="background:var(--s-${best.s})"></span>${offers.length>1?'Más barato en ':'En '}${esc(storeName(best.s))}</div></div></div>
+            ${flagsHtml(flagsOf(p, best))}
+            ${spread > 0 ? `<div class="save">Ahorras ${plain(spread)} frente a la tienda más cara</div>` : ''}
+            ${planText(offers.find(o=>o.q)) ? `<div class="plan">${esc(planText(offers.find(o=>o.q)))}</div>` : ''}
+            ${chips.length ? `<div class="chips">${chips.map(c=>`<span class="chip">${esc(c)}</span>`).join('')}</div>` : ''}
+            <div class="actions">
+              <a class="abtn wa" id="shWa" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.6 14.2c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-5-4.3-5.1-4.5-.2-.2-1.2-1.6-1.2-3s.7-2.2 1-2.5c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.7-.1l2 1c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>Compartir</a>
+              <button class="abtn" id="shCopy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Copiar enlace</button>
+              <button class="abtn" id="shFav" aria-pressed="${isFav(p)}">${HEART.replace('<svg ', '<svg fill="none" stroke="currentColor" stroke-width="2" ')}<span>${isFav(p) ? 'Guardado' : 'Guardar'}</span></button>
+              <button class="abtn" id="shCmp">${inCmp(p) ? 'Quitar de comparar' : 'Comparar'}</button>
+            </div>
+          </div>
+        </div>
+        <section class="sh-sec">
+          <h3>Precio en cada tienda</h3>
+          <div class="tscroll"><table class="otable"><thead><tr><th>Tienda</th><th>Precio</th><th class="hide-s">Antes</th><th>Disponible</th><th></th></tr></thead><tbody>
+          ${offers.map((o,i) => `<tr class="${o===best?'best':''}"><td><span class="stn"><span class="sw" style="background:var(--s-${o.s})"></span>${esc(storeName(o.s))}</span>${o.q ? `<span class="sub2">${o.q.n} cuotas de ${plain(o.p/o.q.n)} ${esc(o.q.t)}</span>` : ''}</td>
+            <td class="num"><strong>${plain(o.p)}</strong>${o!==best && o.a && best.a ? `<span class="sub2">+${plain(o.p - best.p)}</span>` : ''}</td>
+            <td class="num hide-s">${o.r > o.p ? `<s>${plain(o.r)}</s> <span class="sub2">−${Math.round(discount(o)*100)}%</span>` : '—'}</td>
+            <td>${o.a ? 'Sí' : '<span class="muted">Agotado</span>'}</td>
+            <td><a class="go" href="${esc(o.u)}" target="_blank" rel="noopener">Ver en tienda ›</a></td></tr>`).join('')}
+          </tbody></table></div>
+        </section>
+        <section class="sh-sec" id="shHist"><h3>Historial de precio</h3><p class="muted">Cargando…</p></section>
+        <section class="sh-sec" id="shSpecs" hidden></section>
+      </div>`;
+    if (!sheet.open) sheet.showModal();
+    sheet.scrollTop = 0;
+    const url = location.origin + location.pathname + plink(p);
+    const txt = `${p.n} — desde ${plain(best.p)} en ${storeName(best.s)}${p.o.length > 1 ? ` (comparado en ${p.o.length} tiendas)` : ''}. Míralo en Vitrina HN: ${url}`;
+    $('#shWa', sheet).href = 'https://wa.me/?text=' + encodeURIComponent(txt);
+    $('#shCopy', sheet).onclick = async () => { try { await navigator.clipboard.writeText(url); toast('Enlace copiado'); } catch { prompt('Copia este enlace:', url); } };
+    $('#shFav', sheet).onclick = () => { toggleFav(p); const on = isFav(p); $('#shFav', sheet).setAttribute('aria-pressed', on); $('#shFav span', sheet).textContent = on ? 'Guardado' : 'Guardar'; };
+    $('#shCmp', sheet).onclick = () => { toggleCmp(p); $('#shCmp', sheet).textContent = inCmp(p) ? 'Quitar de comparar' : 'Comparar'; };
+
+    const det = (await loadDetails(p.c))[p.id] || {};
+    if (!sheet.open || $('#shTitle', sheet)?.textContent !== p.n) return;
+    // Galería
+    const pics = [...new Set([imgSrc(p), ...(det.g || []).filter(u => u !== p.i)].filter(Boolean))].slice(0, 8);
+    if (pics.length > 1) {
+      $('#galTh', sheet).innerHTML = pics.map((u,i) => `<button aria-current="${i===0}" data-pic="${esc(u)}" aria-label="Foto ${i+1}">${imgTag(u, initial, 'loading="lazy"')}</button>`).join('');
+      $('#galTh', sheet).onclick = (e) => { const b = e.target.closest('[data-pic]'); if (!b) return; $('#galMain', sheet).innerHTML = imgTag(b.dataset.pic, initial); $('#galTh', sheet).querySelectorAll('button').forEach(x => x.setAttribute('aria-current', x === b)); };
+    }
+    // Historial
+    const h = det.h || {};
+    const chart = chartSvg(h, offers);
+    const vs = verdicts(p, h);
+    const firstDay = Math.min(...Object.values(h).filter(e=>e?.length).map(e => e[0][0]), TODAY);
+    $('#shHist', sheet).innerHTML = `<h3>Historial de precio</h3>
+      ${vs.length ? `<ul class="verdicts">${vs.map(([c, t]) => `<li class="${c}">${esc(t)}</li>`).join('')}</ul>` : ''}
+      ${chart || `<p class="muted">Empezamos a seguir este precio el ${dayDate(firstDay,{day:'numeric',month:'long'})}. La gráfica aparece en cuanto haya más de un día de datos.</p>`}`;
+    // Características y descripción
+    const specs = det.s || [];
+    if (specs.length || det.d) {
+      const sec = $('#shSpecs', sheet);
+      sec.hidden = false;
+      sec.innerHTML = `<h3>Características</h3>${specs.length ? `<dl class="specs">${specs.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
+        ${det.d ? `<p class="desc${det.d.length > 420 ? ' clip' : ''}" id="shDesc">${esc(det.d)}</p>${det.d.length > 420 ? '<button class="linkbtn" id="shMore">Leer más</button>' : ''}` : ''}`;
+      const more = $('#shMore', sec); if (more) more.onclick = () => { $('#shDesc', sec).classList.remove('clip'); more.remove(); };
+    }
+  }
+  function closeSheet(){
+    if (!sheet.open) return;
+    sheet.close();
+    if (location.hash.startsWith('#p/')) { if (sheetFromNav) history.back(); else history.replaceState(null, '', viewHash()); }
+    sheetFromNav = false;
+  }
+  sheet.addEventListener('click', (e) => { if (e.target === sheet || e.target.closest('[data-close]')) closeSheet(); });
+  sheet.addEventListener('cancel', (e) => { e.preventDefault(); closeSheet(); });
+
+  // ---- Favoritos ----
+  function updateFavCount(){ const n = Object.keys(favs).length; $('#favCount').hidden = !n; $('#favCount').textContent = n; }
+  function toggleFav(p){
+    if (isFav(p)) { for (const o of p.o) delete favs[o.k]; delete favs[p.key]; toast('Quitado de favoritos'); }
+    else { const b = allOffers(p).find(o=>o.a) || p.o[0]; favs[p.key] = { p: b.p, t: Date.now() }; toast('Guardado en favoritos. Te avisaremos si baja de precio.'); }
+    store.set('vh:favs', favs); updateFavCount();
+    document.querySelectorAll(`[data-fav="${CSS.escape(p.key)}"]`).forEach(b => { b.setAttribute('aria-pressed', isFav(p)); b.setAttribute('aria-label', (isFav(p)?'Quitar de':'Guardar en') + ' favoritos'); });
+    if (state.view === 'favs') refresh();
+  }
+
+  // ---- Comparar ----
+  const cmpDlg = $('#cmpDlg');
+  function updateCbar(){
+    $('#cbar').hidden = !cmp.length;
+    $('#cbarText').textContent = cmp.length === 1 ? '1 producto para comparar' : `${cmp.length} productos para comparar`;
+    $('#cbarGo').disabled = cmp.length < 2; $('#cbarGo').style.opacity = cmp.length < 2 ? .5 : 1;
+    document.querySelectorAll('[data-cmp]').forEach(i => { i.checked = cmp.includes(i.dataset.cmp); });
+  }
+  function toggleCmp(p){
+    if (inCmp(p)) cmp = cmp.filter(k => byKey.get(k) !== p);
+    else { if (cmp.length >= 3) { toast('Puedes comparar hasta 3 productos'); updateCbar(); return; } cmp.push(p.key); }
+    store.set('vh:cmp', cmp); updateCbar();
+  }
+  async function openCompare(){
+    const ps = cmp.map(k => byKey.get(k)).filter(Boolean);
+    if (ps.length < 2) return;
+    const dets = await Promise.all(ps.map(p => loadDetails(p.c).then(d => d[p.id] || {})));
+    const bests = ps.map(p => allOffers(p).find(o=>o.a) || p.o[0]);
+    const minP = Math.min(...bests.map(b=>b.p));
+    const facetRows = [...new Set(ps.flatMap(p => (FACETS[p.c]||[]).map(f => f.label)))].map(label => [label, ps.map(p => { const f = (FACETS[p.c]||[]).find(f=>f.label===label); return f ? (p._f[f.id] || '—') : '—'; })]);
+    const specKeys = []; for (const d of dets) for (const [k] of d.s || []) if (!specKeys.includes(k)) specKeys.push(k);
+    const specRows = specKeys.filter(k => dets.filter(d => (d.s||[]).some(x=>x[0]===k)).length >= Math.min(2, dets.length)).slice(0, 14).map(k => [k, dets.map(d => (d.s||[]).find(x=>x[0]===k)?.[1] || '—')]);
+    const row = (label, cells) => `<tr><td>${esc(label)}</td>${cells.map(c => `<td>${c}</td>`).join('')}</tr>`;
+    cmpDlg.innerHTML = `<div class="sh-head"><span class="crumb">Comparar ${ps.length} productos</span><button class="iconbtn" data-close aria-label="Cerrar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="sh-body"><div class="tscroll"><table class="ctbl"><tbody>
+        ${row('', ps.map(p => `${imgTag(imgSrc(p), esc((p.b||'·').slice(0,1)))}<a href="${plink(p)}" data-close-cmp>${esc(p.n)}</a>`))}
+        ${row('Mejor precio', bests.map(b => `<span class="cp">${plain(b.p)}</span>${b.p === minP ? ' <span class="lowest">el más bajo</span>' : ` <span class="muted">+${plain(b.p - minP)}</span>`}`))}
+        ${row('Dónde', bests.map(b => `<span class="sw" style="background:var(--s-${b.s})"></span> ${esc(storeName(b.s))}`))}
+        ${row('Tiendas', ps.map(p => String(p.o.length)))}
+        ${row('Marca', ps.map(p => esc(p.b || '—')))}
+        ${row('Modelo', ps.map(p => esc(p.m || '—')))}
+        ${row('Categoría', ps.map(p => esc(catName(p.c))))}
+        ${facetRows.map(([l, cells]) => row(l, cells.map(esc))).join('')}
+        ${specRows.map(([l, cells]) => row(l, cells.map(esc))).join('')}
+        ${row('Precio más bajo en 30 días', bests.map(b => b.l != null ? plain(Math.min(b.l, b.p)) : '<span class="muted">Falta historial</span>'))}
+      </tbody></table></div></div>`;
+    cmpDlg.showModal();
+  }
+  cmpDlg.addEventListener('click', (e) => { if (e.target === cmpDlg || e.target.closest('[data-close]')) cmpDlg.close(); if (e.target.closest('[data-close-cmp]')) cmpDlg.close(); });
+  $('#cbarGo').addEventListener('click', openCompare);
+  $('#cbarClear').addEventListener('click', () => { cmp = []; store.set('vh:cmp', cmp); updateCbar(); });
+
+  // ---- Avisos ----
+  let toastTmr;
+  function toast(msg, action){
+    const t = $('#toast');
+    t.innerHTML = `<span>${esc(msg)}</span>${action ? `<button id="toastGo">${esc(action.label)}</button>` : ''}<button class="x" id="toastX" aria-label="Cerrar">✕</button>`;
+    t.hidden = false;
+    if (action) $('#toastGo').onclick = () => { t.hidden = true; action.run(); };
+    $('#toastX').onclick = () => { t.hidden = true; };
+    clearTimeout(toastTmr); toastTmr = setTimeout(() => { t.hidden = true; }, action ? 9000 : 3000);
+  }
+
+  // ---- Rutas: #categoria, #ofertas, #favoritos, #p/<producto> ----
+  const viewHash = () => state.view === 'deals' ? '#ofertas' : state.view === 'favs' ? '#favoritos' : state.cat ? '#' + state.cat : location.pathname + location.search;
+  function route(){
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (h.startsWith('p/')) {
+      const p = byKey.get(h.slice(2));
+      if (p) { openSheet(p); return; }
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+    if (sheet.open) { sheet.close(); sheetFromNav = false; }
+    let view = 'catalog', cat = state.cat;
+    if (h === 'ofertas') view = 'deals';
+    else if (h === 'favoritos') view = 'favs';
+    else cat = data.categories.some(c=>c.id===h) ? h : '';
+    if (view !== state.view || cat !== state.cat) { if (cat !== state.cat) resetFilters(); state.view = view; state.cat = view === 'catalog' ? cat : ''; refresh(); }
+  }
+  window.addEventListener('hashchange', route);
+
+  // ---- Eventos ----
+  let tmr; $('#q').addEventListener('input', (e) => { clearTimeout(tmr); tmr = setTimeout(()=>{ state.q = e.target.value; applyQuery(); if (state.view !== 'catalog') { state.view = 'catalog'; history.replaceState(null, '', viewHash()); } refresh(); }, 160); });
+  $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (!b) return; const id = b.dataset.c; if (state.view === 'catalog' && id === state.cat) return; resetFilters(); state.view = 'catalog'; state.cat = id; history.replaceState(null, '', viewHash()); refresh(); b.scrollIntoView({inline:'nearest', block:'nearest'}); });
   $('#filters').addEventListener('change', (e) => { const i = e.target.closest('input[data-g]'); if (!i) return; toggle(i.dataset.g, i.value, i.type === 'radio' ? i.value !== '' : i.checked); refresh(); });
   $('#filters').addEventListener('click', (e) => { if (e.target.closest('[data-more]')) { state.allBrands = !state.allBrands; renderFilters(); } });
   $('#pills').addEventListener('click', (e) => {
@@ -438,6 +1005,12 @@ footer p{max-width:75ch;margin:0 0 8px}
   });
   $('#sort').addEventListener('change', (e) => { state.sort = e.target.value; current = computeList(); state.shown = 48; renderGrid(false); });
   $('#more').addEventListener('click', () => { state.shown += 48; renderGrid(true); });
+  // Clic en tarjetas: favoritos, comparar y abrir la ficha
+  document.querySelector('main').addEventListener('click', (e) => {
+    const f = e.target.closest('[data-fav]'); if (f) { e.preventDefault(); toggleFav(byKey.get(f.dataset.fav)); return; }
+    const a = e.target.closest('a[href^="#p/"]'); if (a) { sheetFromNav = true; }
+  });
+  document.querySelector('main').addEventListener('change', (e) => { const c = e.target.closest('[data-cmp]'); if (c) toggleCmp(byKey.get(c.dataset.cmp)); });
   const side = $('#side'), scrim = $('#scrim');
   const openSide = (on) => { side.classList.toggle('open', on); scrim.classList.toggle('open', on); document.body.style.overflow = on ? 'hidden' : ''; };
   $('#openSide').addEventListener('click', () => openSide(true));
@@ -446,9 +1019,17 @@ footer p{max-width:75ch;margin:0 0 8px}
   scrim.addEventListener('click', () => openSide(false));
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') openSide(false); });
 
-  const h = decodeURIComponent(location.hash.slice(1));
-  if (data.categories.some(c=>c.id===h)) state.cat = h;
+  // ---- Inicio ----
+  updateFavCount(); updateCbar();
+  const h0 = decodeURIComponent(location.hash.slice(1));
+  if (h0 === 'ofertas') state.view = 'deals';
+  else if (h0 === 'favoritos') state.view = 'favs';
+  else if (data.categories.some(c=>c.id===h0)) state.cat = h0;
   refresh();
+  if (h0.startsWith('p/')) route();
+  // Aviso: favoritos que bajaron de precio desde que se guardaron
+  const dropped = data.products.filter(p => { const fe = favEntry(p); if (!fe) return false; const b = allOffers(p).find(o=>o.a); return b && b.p < fe.p - 1; });
+  if (dropped.length) toast(dropped.length === 1 ? `Un favorito bajó de precio: ${dropped[0].n}` : `${dropped.length} de tus favoritos bajaron de precio`, { label:'Ver', run: () => { location.hash = dropped.length === 1 ? plink(dropped[0]) : '#favoritos'; } });
 })();
 </script>
 </body>

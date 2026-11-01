@@ -1,31 +1,45 @@
 # Vitrina HN
 
-Catálogo unificado de las cadenas grandes de Honduras — **Diunsa, La Curacao, Elektra, Lady Lee y Walmart** (Jetstereo listo, ver nota) — en las categorías de compras grandes: celulares, laptops, tablets, televisores, audio, consolas, refrigeradoras, lavadoras, estufas, microondas, aires acondicionados, camas y freidoras de aire.
+Catálogo unificado de 11 tiendas de Honduras — **Jetstereo, Diunsa, La Curacao, Elektra, Lady Lee, Walmart, Gallo más Gallo, RadioShack, Tropigas, Acosa y Game Station** — en 21 categorías: celulares, laptops, tablets, monitores, impresoras, relojes inteligentes, cargadores y cables, televisores, audio, audífonos, consolas, juegos y controles, refrigeradoras, lavadoras, estufas, microondas, aires acondicionados, camas, freidoras de aire, licuadoras y cafeteras, y motos.
 
 Cuando el mismo modelo está en varias tiendas, se muestra como un solo producto con el precio de cada una y el más bajo resaltado.
+
+## Funciones de la página
+
+- **Búsqueda tolerante a errores**: entiende "samsumg", "lavdora", "refri", "compu", "tele", plurales y sinónimos.
+- **Ficha de cada producto** con link propio (`#p/<tienda:código>`), botón para compartir por WhatsApp, galería, precio en cada tienda, características, descripción y gráfica del historial.
+- **Historial de precios**: cada día se guarda el precio de cada oferta (`data/history.json`). Con eso se marca "Bajó L …", "Precio más bajo en 30 días" y "Sin rebaja real" (tiene precio "antes" tachado pero no está más barato que en los días anteriores).
+- **Ofertas reales** (`#ofertas`): etiquetas de descuento por tienda vs. bajadas confirmadas, productos que bajaron y mayores diferencias entre tiendas.
+- **Favoritos** (`#favoritos`) guardados en el navegador, con aviso al volver si alguno bajó de precio.
+- **Comparar** hasta 3 productos lado a lado.
+- **Cuotas**: se muestran solo donde la tienda las publica (Walmart: meses sin intereses con BAC). La Curacao, Elektra, Gallo y Diunsa no publican su precio a crédito.
 
 ## Cómo funciona
 
 ```
-GitHub Actions (diario, 6:17 a. m. HN)
+GitHub Actions (diario, 6:17 a. m. HN; también a mano o con un commit que diga [scrape])
   └─ src/scrape.mjs
-       ├─ stores/jetstereo.mjs  → api.jetstereo.com (paginado, 50 por página)
-       ├─ stores/diunsa.mjs     → API del sitio de Diunsa (por código de categoría)
-       ├─ stores/curacao.mjs    → HTML público de cada categoría (ver nota)
-       ├─ stores/elektra.mjs    → API pública de catálogo VTEX
-       ├─ stores/ladylee.mjs    → catálogo público de Shopify por colección
-       └─ stores/walmart.mjs    → API pública de catálogo VTEX (con código de barras)
-  └─ src/build.mjs   → limpia, filtra accesorios/precios < L1,000 y agrupa por modelo
-  └─ src/thumbs.mjs  → miniatura WebP de 220 px de cada producto (site/thumbs/)
-  └─ site/catalog.json + data/raw/*.json  (se guardan en el repo)
+       ├─ stores/jetstereo.mjs   → api.jetstereo.com (captura manual, ver nota)
+       ├─ stores/diunsa.mjs      → API del sitio de Diunsa (por código de categoría)
+       ├─ stores/unicomer.mjs    → La Curacao, RadioShack y Tropigas: HTML público de cada categoría (ver nota)
+       ├─ stores/elektra.mjs     → API pública de catálogo VTEX
+       ├─ stores/walmart.mjs     → API pública de catálogo VTEX (código de barras, características, meses sin intereses)
+       ├─ stores/ladylee.mjs     → catálogo público de Shopify por colección
+       ├─ stores/gallo.mjs       → sitemap + datos estructurados (JSON-LD) de categorías y productos
+       ├─ stores/acosa.mjs       → API pública de tienda de WooCommerce (/API/wc/store/v1)
+       └─ stores/gamestation.mjs → páginas públicas de categoría de WooCommerce
+  └─ src/build.mjs    → limpia, filtra accesorios y precios mínimos por categoría, agrupa por modelo
+  └─ src/history.mjs  → historial de precios y archivos de detalle (site/details/<categoría>.json)
+  └─ src/thumbs.mjs   → miniatura WebP de 520 px de cada producto (site/thumbs/)
   └─ GitHub Pages     → publica la carpeta site/
 ```
 
 - **Mínimas dependencias**: Node 22 y `fetch` nativo; `sharp` solo para las miniaturas.
-- **Tolerante a fallas**: si una tienda falla, se conservan sus últimos datos y la página la marca como "sin actualizar".
-- **Agrupación**: por código de barras (cuando existe) o por número de modelo del fabricante, con reglas para no mezclar capacidades distintas (GB) ni tamaños distintos (pulgadas).
+- **Tolerante a fallas**: si una tienda falla, se conservan sus últimos datos.
+- **Agrupación**: por código de barras, por número de modelo del fabricante o, en juegos, por plataforma + título; con reglas para no mezclar capacidades (GB), tamaños (pulgadas), variantes del mismo modelo ni secuelas.
+- **Sin consultas repetidas**: un push solo reconstruye con los datos guardados; las tiendas se consultan una vez al día (o a mano).
 
-### Nota sobre La Curacao
+### Nota sobre La Curacao, RadioShack y Tropigas (Unicomer)
 
 Su API de listado responde solo a su propio sitio, así que se respeta esa restricción: se toma lo que la página pública de cada categoría entrega en el HTML (los primeros ~20 productos en existencia). En categorías grandes (celulares, televisores, camas) la cobertura es parcial.
 
@@ -52,7 +66,8 @@ La captura se identifica como `VitrinaHN/1.0` y va a ritmo pausado. Es una zona 
 ```bash
 npm install
 node src/scrape.mjs              # todas las tiendas
-node src/scrape.mjs diunsa       # solo una
+node src/scrape.mjs diunsa gallo # solo esas
+node src/scrape.mjs none         # reconstruir sin consultar tiendas
 node src/thumbs.mjs              # miniaturas
 npx serve site                   # abrir la página
 ```

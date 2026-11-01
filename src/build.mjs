@@ -136,6 +136,8 @@ export function clean(items) {
     if (/^9{5,}(\.0+)?$/.test(String(p.price))) continue;
     // Juegos y controles que vienen dentro de "consolas".
     if (p.cat === 'consolas' && !/\bconsola\b/i.test(name) && (GAME_GEAR.test(name) || (p.price < 4000 && !CONSOLE_NAME.test(name)))) p.cat = 'videojuegos';
+    // Baterías portátiles y power banks que algunas tiendas ponen en celulares o audio.
+    if (['celulares', 'tablets', 'audio', 'audifonos', 'smartwatches'].includes(p.cat) && /^\s*(bater[ií]a|power ?bank|cargador)\b/i.test(name)) p.cat = 'accesorios';
     // Accesorios: los cargadores y cables pasan a su categoría; el resto (fundas, micas…) se descarta.
     if (p.cat === 'accesorios') {
       if (!CHARGER_RE.test(name) || /funda|estuche|protector|mica|vidrio|case\b|soporte|holder/i.test(name)) continue;

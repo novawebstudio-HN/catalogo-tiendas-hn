@@ -46,4 +46,4 @@ export const minPrice = (cat) => CATEGORIES.find((c) => c.id === cat)?.min ?? MI
 // Palabras que delatan accesorios dentro de categorías grandes.
 export const ACCESSORY_RE = /\b(funda|estuche|protector|mica|cable|cargador|adaptador|soporte|control remoto|forro|base para|almohada|sabana|sábana|cubre ?colch|protector de colch|repuesto|filtro|cobertor|cubierta|case|skin|correa|lapiz|lápiz|stylus|vidrio templado|tinta|cartucho|toner|tóner|casco|llanta|bateria para moto|batería para moto)\b/i;
 // Lo que sí se queda en "Cargadores y cables".
-export const CHARGER_RE = /\b(cargador(es)?|cable(s)?|power ?bank|bater[ií]a (port[aá]til|externa)|adaptador(es)?|hub|carga inal[aá]mbrica|base de carga)\b/i;
+export const CHARGER_RE = /\b(cargador(es)?|cable(s)?|power ?bank|bater[ií]a( (port[aá]til|externa|inal[aá]mbrica|inalam|magn[eé]tica))?|adaptador(es)?|hub|carga inal[aá]mbrica|base de carga)\b/i;

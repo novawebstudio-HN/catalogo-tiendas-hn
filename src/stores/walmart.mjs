@@ -61,7 +61,7 @@ export async function scrapeWalmart({ fetch, sleep = (ms) => new Promise((r) => 
           url: p.link || `${BASE}/${p.linkText}/p`,
           img: d.img, alts: d.alts, desc: d.desc, specs: d.specs,
           sku: String(item.itemId || p.productId || ''), model: '', barcode: String(item.ean || ''),
-          ...(msi ? { plan: { n: Number(msi[1]), t: 'meses sin intereses con tarjeta BAC' } } : {}),
+          ...(msi ? { plan: { n: Number(msi[1]), t: 'sin intereses con tarjeta BAC' } } : {}),
         });
       }
       if (list.length < 50) break;

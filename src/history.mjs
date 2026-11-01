@@ -39,11 +39,13 @@ export function updateHistory(hist, catalog, today = dayNumber()) {
 export function applyStats(hist, catalog, today = dayNumber()) {
   catalog.today = today;
   catalog.epoch = '2026-01-01';
+  catalog.since = today;
   for (const p of catalog.products) {
     for (const o of p.o) {
       const h = hist.offers[o.k];
       if (!h?.length) continue;
       o.f = h[0][0];
+      catalog.since = Math.min(catalog.since, o.f);
       if (o.f >= today) { delete o.f; continue; }
       let min = Infinity;
       const start = Math.max(o.f, today - 30);
