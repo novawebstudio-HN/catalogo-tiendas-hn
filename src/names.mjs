@@ -31,7 +31,7 @@ const COLORS = {
   blanco: 'Blanco', blanca: 'Blanco', white: 'Blanco', wh: 'Blanco', wht: 'Blanco', starlight: 'Blanco estelar',
   gris: 'Gris', gray: 'Gris', grey: 'Gris', gry: 'Gris', grafito: 'Grafito', graphite: 'Grafito',
   plata: 'Plata', plateado: 'Plata', plateada: 'Plata', silver: 'Plata', slv: 'Plata',
-  azul: 'Azul', blue: 'Azul', celeste: 'Celeste', marino: 'Azul marino', cobalt: 'Azul', indigo: 'Índigo', zafiro: 'Azul', sapphire: 'Azul', ultramarine: 'Azul',
+  azul: 'Azul', blue: 'Azul', celeste: 'Celeste', marino: 'Azul marino', cobalt: 'Azul', indigo: 'Índigo', zafiro: 'Azul', sapphire: 'Azul',
   rojo: 'Rojo', roja: 'Rojo', red: 'Rojo', vino: 'Vino',
   rosado: 'Rosado', rosada: 'Rosado', rosa: 'Rosado', pink: 'Rosado', fucsia: 'Fucsia', coral: 'Coral',
   verde: 'Verde', green: 'Verde', menta: 'Menta', mint: 'Menta', jade: 'Verde', sage: 'Verde', teal: 'Verde azulado', olive: 'Verde oliva',
@@ -44,11 +44,15 @@ const COLORS = {
 // Un color puede venir con adjetivo ("Titanium Black", "Negro Medianoche", "Light Gold"): se toma el principal.
 // Abreviaturas y colores cortados que usan algunas tiendas ("SILVE", "ORANG", "BLU", "CMO" = Cosmic Orange).
 const COLOR_ABBR = { blu: 'Azul', cmo: 'Naranja', sb: '', db: 'Azul', dgy: 'Gris' };
+// Abreviaturas que solo valen al final del nombre (Diunsa corta los nombres: "…/128GB/WIFI+CEL/PIN", "…/6GB/WIFI/GY").
+const COLOR_TAIL = { pin: 'Rosado', pnk: 'Rosado', ros: 'Rosado', gy: 'Gris', gra: 'Gris', gry: 'Gris', sil: 'Plata', slv: 'Plata', grn: 'Verde', pur: 'Morado', mor: 'Morado', yel: 'Amarillo', ama: 'Amarillo', org: 'Naranja', nar: 'Naranja', lav: 'Lavanda', neg: 'Negro', bk: 'Negro', wh: 'Blanco', gld: 'Dorado', dor: 'Dorado', azu: 'Azul', cel: '', wf: '' };
 function colorOf(text) {
   const toks = deaccent(text).toLowerCase().split(/[^a-z]+/).filter(Boolean);
   for (const t of toks) if (COLORS[t] && !['titanio', 'titanium'].includes(t)) return COLORS[t];
   for (const t of toks) if (COLOR_ABBR[t]) return COLOR_ABBR[t];
   for (const t of toks) if (t.length >= 4) { const k = Object.keys(COLORS).find((c) => c.length > t.length && c.startsWith(t) && c.length >= 5); if (k) return COLORS[k]; }
+  const last = toks[toks.length - 1];
+  if (last && COLOR_TAIL[last] !== undefined) return COLOR_TAIL[last];
   return toks.some((t) => t === 'titanio' || t === 'titanium') ? 'Titanio' : '';
 }
 
@@ -85,7 +89,8 @@ const fmtNum = (v) => Number(v).toLocaleString('en-US');
 // Separa el texto del modelo: lo que viene después de la marca y antes del primer dato técnico.
 function modelWords(name, brand, extraStop = []) {
   let s = deaccent(name).replace(/[–—]/g, ' - ').replace(/\(.*?\)/g, ' ').replace(/(\d)\s+(gb|tb|mb|mp|mah|ghz|hz)\b/gi, '$1$2');
-  s = s.split(/\s*[\/|,+]\s*|\s+-\s+/)[0] || '';
+  // Se corta en / | , y en " + " o " - " con espacios; el + pegado al modelo se conserva (A11+, S12+).
+  s = s.split(/\s*[\/|,]\s*|\s+[-+]\s+|\+(?=\s)/)[0] || '';
   let toks = s.split(/\s+/).filter(Boolean);
   const b = deaccent(brand).toLowerCase();
   const bi = toks.findIndex((t) => t.toLowerCase() === b || BRAND_CANON[t.toLowerCase()] === brand);
@@ -100,35 +105,44 @@ function modelWords(name, brand, extraStop = []) {
   return out.join(' ');
 }
 
-function phoneName(name, brand) {
+function phoneName(name, brand, cat = 'celulares') {
   const n = deaccent(name).toLowerCase();
   const gbs = [...n.matchAll(/(\d+)\s?(gb|tb|g)\b/g)].filter((m) => m[2] !== 'g' || Number(m[1]) >= 6).map((m) => Number(m[1]) * (m[2] === 'tb' ? 1024 : 1));
   for (const m of n.matchAll(/\/\s?(32|64|128|256|512)\s?(?=\/|$|\s)/g)) gbs.push(Number(m[1]));
   const storage = Math.max(0, ...gbs.filter((v) => v >= 32));
   const ramM = n.match(/(\d+)\s?gb\s?(de\s)?ram|ram\s?(\d+)/);
   const ram = ramM ? Number(ramM[1] || ramM[3]) : (gbs.filter((v) => v <= 24 && v !== storage)[0] || 0);
-  let model = modelWords(name.replace(/^\s*(celular|cel|smartphone|tel[eé]fono|m[oó]vil)\s+(4g|5g\s+)?/i, '').replace(/^\s*(4g|5g)\s+/i, ''), brand, ['4g']);
-  model = model.replace(/^(celular|cel|smartphone)\s+/i, '').replace(/^(4g|5g)\s+/i, '');
+  let model = modelWords(name.replace(/^\s*(celular|cel|smartphone|tel[eé]fono|m[oó]vil|tablet|tableta)\s+(4g|5g\s+)?/i, '').replace(/^\s*(4g|5g)\s+/i, ''), brand, ['4g', 'lte', 'wifi', 'wi-fi', '5g']);
+  model = model.replace(/^(celular|cel|smartphone|tablet|tableta)\s+/i, '').replace(/^(4g|5g)\s+/i, '').replace(/\s+(w\/kbc|wifi|wi-fi|lte)$/i, '').replace(/\s+[A-Za-z]$/, '');
   if (!model || !storage) return '';
   let m = ttl(model);
-  if (brand === 'Samsung' && /^[ASMZ]\d{2}/i.test(m)) m = `Galaxy ${m}`;
+  // Diunsa abrevia "Galaxy" como "G": "G A11+", "G S25".
+  if (brand === 'Samsung') m = m.replace(/^G\s+(?=[A-Z]\d|Tab\b|Fold|Flip)/i, 'Galaxy ');
+  if (brand === 'Samsung' && cat === 'tablets') m = `Galaxy Tab ${m.replace(/^(Galaxy\s+)?(Tab(let)?\s+)?/i, '')}`;
+  else if (brand === 'Samsung' && /^[ASMZ]\d{2}/i.test(m)) m = `Galaxy ${m}`;
   if (brand === 'Apple' && !/^i/i.test(m) && /^\d/.test(m)) m = `iPhone ${m}`;
   const color = colorOf(name.split(/\s\|\s|\s-\s/)[0]) || colorOf(name);
-  return [`${brand} ${m}`.trim(), GB(storage), ram ? `${ram} GB RAM` : '', color].filter(Boolean).join(' · ');
+  const inch = cat === 'tablets' ? n.match(/(\d{1,2}(?:\.\d)?)\s?(?:"|”|''|pulgadas|pulg\b)/) : null;
+  const lte = cat === 'tablets' && /\b(lte|5g|4g|celular|cel|cellular|celluar)\b/.test(n) ? 'LTE' : '';
+  // Apple no publica la RAM de sus equipos; lo que ponen las tiendas suele estar mal.
+  return [`${brand} ${m}`.trim(), inch ? `${inch[1]}"` : '', GB(storage), ram && brand !== 'Apple' ? `${ram} GB RAM` : '', lte, color].filter(Boolean).join(' · ');
 }
 
 // Clave para emparejar teléfonos y tablets sin código común: marca + modelo + almacenamiento + color.
-export function phoneKey(name, brand) {
+export function phoneKey(name, brand, cat = 'celulares') {
   const b = brand || brandFromName(name);
-  const d = b ? phoneName(name, b) : '';
+  const d = b ? phoneName(name, b, cat) : '';
   if (!d) return '';
-  const [model, storage, ...rest] = d.split(' · ');
-  const color = rest.find((x) => !/RAM$/.test(x)) || '';
-  if (!color) return '';
+  const parts = d.split(' · ');
+  const model = parts[0];
+  const storage = parts.find((x) => /^\d+ (GB|TB)$/.test(x)) || '';
+  const lte = parts.includes('LTE') ? '|lte' : '';
+  const color = parts.slice(1).find((x) => !/RAM$|^\d+ (GB|TB)$|^LTE$|"$/.test(x)) || '';
+  if (!color || !storage) return '';
   const fam = { redmi: 'xiaomi', poco: 'xiaomi' }[b.toLowerCase()] || b.toLowerCase();
   const core = deaccent(model).toLowerCase().replace(/\b(apple|samsung|galaxy|motorola|moto|xiaomi|redmi|poco|honor|huawei|infinix|tecno|zte|oppo|realme|vivo|nokia|alcatel|google|oneplus|5g|4g|lte)\b/g, ' ').replace(/[^a-z0-9]/g, '');
   if (core.length < 2) return '';
-  return `${fam}|${core}|${storage}|${color}`;
+  return `${fam}|${core}|${storage}|${color}${lte}`;
 }
 
 function tvName(name, brand) {
@@ -192,7 +206,7 @@ function laptopName(name, brand) {
   return [`Laptop ${brand} ${series}`.replace(/\s+/g, ' ').trim(), cpu, `${ram} GB RAM`, `${GB(storage)}${/ssd/.test(n) ? ' SSD' : ''}`, inch ? `${inch[1]}"` : ''].filter(Boolean).join(' · ');
 }
 
-const BUILDERS = { celulares: phoneName, tablets: phoneName, televisores: tvName, aires: acName, refrigeradoras: fridgeName, lavadoras: washerName, laptops: laptopName };
+const BUILDERS = { celulares: phoneName, tablets: (n, b) => phoneName(n, b, 'tablets'), televisores: tvName, aires: acName, refrigeradoras: fridgeName, lavadoras: washerName, laptops: laptopName };
 
 export function displayName(name, cat, brand) {
   const b = brand || brandFromName(name);

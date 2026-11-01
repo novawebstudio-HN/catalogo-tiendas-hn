@@ -2,14 +2,16 @@
 const API = 'https://api.jetstereo.com';
 const SITE = 'https://www.jetstereo.com';
 
+// id de categoría de la tienda -> categoría propia. La consulta de una categoría incluye sus subcategorías,
+// así que se usan las categorías padre; las específicas van primero para que ganen.
 const MAP = {
-  26: 'celulares', 325: 'laptops', 32: 'laptops', 330: 'laptops', 38: 'tablets', 41: 'televisores',
-  47: 'audio', 48: 'audio', 212: 'audio', 52: 'consolas',
+  26: 'celulares', 330: 'laptops', 30: 'laptops', 38: 'tablets', 41: 'televisores',
+  49: 'audio', 212: 'audio', 46: 'audio', 52: 'consolas',
   74: 'refrigeradoras', 195: 'refrigeradoras', 77: 'lavadoras', 78: 'lavadoras',
   75: 'estufas', 76: 'microondas', 79: 'aires', 204: 'freidoras',
-  91: 'monitores', 331: 'monitores', 33: 'impresoras', 89: 'smartwatches', 132: 'audifonos', 219: 'audifonos',
+  91: 'monitores', 331: 'monitores', 33: 'impresoras', 89: 'smartwatches', 219: 'audifonos', 132: 'audifonos',
   147: 'videojuegos', 341: 'videojuegos', 166: 'accesorios', 284: 'accesorios',
-  193: 'licuadoras', 189: 'licuadoras', 191: 'licuadoras',
+  193: 'licuadoras', 189: 'licuadoras', 191: 'licuadoras', 190: 'licuadoras', 235: 'licuadoras',
 };
 
 export async function scrapeJetstereo({ fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) }) {

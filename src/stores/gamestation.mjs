@@ -4,15 +4,16 @@ import { brandFromName } from './unicomer.mjs';
 
 const SITE = 'https://gamestation.hn';
 
-// categoría de la tienda -> [categoría propia por defecto, máximo de páginas]
+// categoría de la tienda -> categoría propia por defecto. Se recorren todas las páginas (12 productos cada una).
 const PAGES = [
-  ['play4/ps5', 'consolas', 4], ['switch/switch-2-consolas', 'consolas', 3], ['switch/nintendo-switch-consolas', 'consolas', 3],
-  ['xbox/xbox-series', 'consolas', 4],
-  ['play4/ps5games', 'videojuegos', 20], ['switch/switch-2-video-juegos', 'videojuegos', 15], ['switch/nintendo-switch-juegos', 'videojuegos', 15],
-  ['xbox/xbox-one-juegos', 'videojuegos', 8],
-  ['play4/ps5items', 'videojuegos', 12], ['switch/switch-2-accesorios', 'videojuegos', 6], ['switch/nintendo-switch-accesorios', 'videojuegos', 8],
-  ['tecno/celulares', 'celulares', 4], ['tecno/parlante', 'audio', 4], ['tecno/headset-auriculares', 'audifonos', 6],
+  ['play4/ps5', 'consolas'], ['play4/ps4-one', 'consolas'], ['switch/switch-2-consolas', 'consolas'], ['switch/nintendo-switch-consolas', 'consolas'],
+  ['xbox/xbox-series', 'consolas'], ['xbox/xbox-one', 'consolas'],
+  ['play4/ps5games', 'videojuegos'], ['play4/ps4-juegos', 'videojuegos'], ['switch/switch-2-video-juegos', 'videojuegos'], ['switch/nintendo-switch-juegos', 'videojuegos'],
+  ['xbox/xbox-one-juegos', 'videojuegos'],
+  ['play4/ps5items', 'videojuegos'], ['play4/ps4-accesorios', 'videojuegos'], ['switch/switch-2-accesorios', 'videojuegos'], ['switch/nintendo-switch-accesorios', 'videojuegos'],
+  ['tecno/celulares', 'celulares'], ['tecno/parlante', 'audio'], ['tecno/headset-auriculares', 'audifonos'],
 ];
+const MAX_PAGES = 120;
 
 const dec = (s) => String(s || '').replace(/&#8211;|&ndash;/g, '-').replace(/&#8217;|&rsquo;/g, "'").replace(/&#215;/g, 'x')
   .replace(/&amp;/g, '&').replace(/&quot;|&#8220;|&#8221;/g, '"').replace(/&#(\d+);/g, (_, n) => String.fromCharCode(n)).replace(/<[^>]+>/g, '').trim();
@@ -48,8 +49,8 @@ const GAMEGEAR_RE = /\b(control|dualsense|joy-?con|mando|volante|headset|aud[ií
 export async function scrapeGameStation({ fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) }) {
   const out = [];
   const seen = new Set();
-  for (const [path, defCat, maxPages] of PAGES) {
-    for (let page = 1; page <= maxPages; page++) {
+  for (const [path, defCat] of PAGES) {
+    for (let page = 1; page <= MAX_PAGES; page++) {
       const url = `${SITE}/product-category/${path}/${page > 1 ? `page/${page}/` : ''}?orderby=date`;
       const res = await fetch(url, { headers: { Accept: 'text/html' } });
       if (res.status === 404) break;
@@ -72,9 +73,9 @@ export async function scrapeGameStation({ fetch, sleep = (ms) => new Promise((r)
         });
       }
       if (items.length < 12 || !html.includes(`/page/${page + 1}/`)) break;
-      await sleep(900);
+      await sleep(700);
     }
-    await sleep(900);
+    await sleep(700);
   }
   return out;
 }

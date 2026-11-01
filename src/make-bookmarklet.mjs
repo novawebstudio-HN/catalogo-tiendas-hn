@@ -1,30 +1,36 @@
-// Genera los botones de captura (bookmarklets) a partir de los extractores reales, para las tiendas
-// que rechazan consultas desde la nube. Se ejecutan en el navegador de una persona, dentro del sitio
-// de la tienda, y descargan un JSON que se sube a data/manual/<tienda>.json.
-import { readFile, writeFile } from 'node:fs/promises';
+// Genera los capturadores para las tiendas que rechazan consultas desde la nube. El código real se publica
+// con la página (site/captura/<tienda>.js), a partir de los extractores de src/stores; el botón del navegador
+// (bookmarklet) es solo un cargador que descarga esa versión publicada y la ejecuta dentro del sitio de la
+// tienda. Así los botones no hay que reinstalarlos cuando cambian los extractores.
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
 
+const PAGES = 'https://novawebstudio-hn.github.io/catalogo-tiendas-hn';
 const TARGETS = [
   { id: 'jetstereo', file: 'src/stores/jetstereo.mjs', fn: 'scrapeJetstereo', host: 'jetstereo\\.com$', site: 'www.jetstereo.com', cred: 'omit' },
   { id: 'acosa', file: 'src/stores/acosa.mjs', fn: 'scrapeAcosa', host: 'acosa\\.com\\.hn$', site: 'acosa.com.hn', cred: 'same-origin' },
 ];
 
+await mkdir('site/captura', { recursive: true });
 for (const t of TARGETS) {
-  const mod = (await readFile(t.file, 'utf8')).replace(/^import .*$/gm, '').replace(/^export /gm, '');
+  const files = t.files || [t.file];
+  const mod = (await Promise.all(files.map((f) => readFile(f, 'utf8')))).join('\n').replace(/^import .*$/gm, '').replace(/^export /gm, '');
   const code = `(async()=>{
 if(!/${t.host}/.test(location.hostname)){alert('Abre ${t.site} y vuelve a hacer clic.');return;}
-const box=document.createElement('div');box.style.cssText='position:fixed;right:16px;bottom:16px;z-index:99999;background:#FFDA4D;color:#1E1700;padding:12px 16px;border-radius:8px;font:600 14px system-ui;box-shadow:0 2px 8px rgba(0,0,0,.2)';box.textContent='Vitrina HN: capturando ${t.id}…';document.body.appendChild(box);
+const box=document.createElement('div');box.style.cssText='position:fixed;right:16px;bottom:16px;z-index:99999;background:#059669;color:#fff;padding:12px 16px;border-radius:8px;font:600 14px system-ui;box-shadow:0 2px 8px rgba(0,0,0,.2)';box.textContent='Vitrina HN: capturando ${t.id}…';document.body.appendChild(box);
 ${mod}
 try{
 const items=await ${t.fn}({fetch:(u,o)=>fetch(u,{...(o||{}),credentials:'${t.cred}'}),sleep:(ms)=>new Promise(r=>setTimeout(r,ms*2))});
 const blob=new Blob([JSON.stringify({captured:new Date().toISOString(),source:'navegador',items})],{type:'application/json'});
 const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='${t.id}.json';document.body.appendChild(a);a.click();
 box.textContent='Listo: '+items.length+' productos. Sube ${t.id}.json a data/manual/ en GitHub.';
-}catch(e){box.style.background='#FDE2E2';box.textContent='Error: '+e.message;}
+}catch(e){box.style.background='#B91C1C';box.textContent='Error: '+e.message;}
 setTimeout(()=>box.remove(),15000);
 })();`;
-  await writeFile(`tools/bookmarklet-${t.id}.txt`, 'javascript:' + encodeURIComponent(code));
+  await writeFile(`site/captura/${t.id}.js`, code);
+  const loader = `(async()=>{try{const s=await(await fetch('${PAGES}/captura/${t.id}.js?'+Date.now(),{cache:'no-store'})).text();(0,eval)(s);}catch(e){alert('No se pudo cargar el capturador de ${t.id}: '+e.message);}})();`;
+  await writeFile(`tools/bookmarklet-${t.id}.txt`, 'javascript:' + encodeURIComponent(loader));
   await writeFile(`tools/captura-${t.id}.js`, code);
-  console.log(`tools/bookmarklet-${t.id}.txt listo`);
+  console.log(`site/captura/${t.id}.js y tools/bookmarklet-${t.id}.txt listos`);
 }
 
 // Página local con los botones para arrastrar a la barra de marcadores y los pasos (tools/captura-tiendas.html).
@@ -34,7 +40,7 @@ const kit = `<!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Captura de precios</title>
 <style>
-:root{--ink:#141B23;--muted:#5D6873;--line:#E6EAEE;--soft:#F5F7F9;--tag:#FFD84A;--act:#0B5FB8}
+:root{--ink:#0B1F17;--muted:#5D6873;--line:#E6EAEE;--soft:#F5F7F9;--tag:#E8F7F0;--act:#059669}
 *{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
 main{max-width:760px;margin:0 auto;padding:32px 20px 60px}
 h1{font-size:30px;line-height:1.1;margin:0 0 6px}h2{font-size:20px;margin:0 0 4px}
@@ -44,7 +50,7 @@ h1{font-size:30px;line-height:1.1;margin:0 0 6px}h2{font-size:20px;margin:0 0 4p
 .step h2{display:flex;align-items:center}
 .step p,.step li{color:#2B333C}.step ol{margin:8px 0 0;padding-left:22px}.step li{margin:6px 0}
 .once{background:var(--soft)}
-.bm{display:inline-flex;align-items:center;gap:8px;background:var(--tag);color:#1E1700;font-weight:700;text-decoration:none;padding:10px 16px;border-radius:10px;margin:8px 10px 4px 0;cursor:grab;border:2px dashed #C9A600}
+.bm{display:inline-flex;align-items:center;gap:8px;background:var(--tag);color:#065F46;font-weight:700;text-decoration:none;padding:10px 16px;border-radius:10px;margin:8px 10px 4px 0;cursor:grab;border:2px dashed #059669}
 .btn{display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:#fff;font-weight:600;text-decoration:none;padding:10px 16px;border-radius:10px;margin-top:8px}
 .link{color:var(--act);font-weight:600}
 kbd{background:#fff;border:1px solid var(--line);border-bottom-width:2px;border-radius:6px;padding:1px 6px;font-size:14px}
@@ -58,10 +64,10 @@ button.copy{border:1px solid var(--line);background:#fff;border-radius:8px;paddi
 <section class="step once"><h2><span class="n">0</span>Solo la primera vez: instala los botones</h2>
 <ol>
 <li>Muestra la barra de marcadores de Chrome: <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> en Mac (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>B</kbd> en Windows).</li>
-<li>Arrastra cada botón amarillo hasta esa barra:<br>
+<li>Arrastra cada botón verde hasta esa barra:<br>
 <a class="bm" href="${await href('jetstereo')}" onclick="alert('Arrástrame a la barra de marcadores; no hagas clic aquí.');return false;">Capturar Jetstereo</a>
 <a class="bm" href="${await href('acosa')}" onclick="alert('Arrástrame a la barra de marcadores; no hagas clic aquí.');return false;">Capturar Acosa</a></li>
-<li>Si ya tenías un botón viejo de Jetstereo, bórralo (clic derecho sobre él → <b>Eliminar</b>). El nuevo incluye las categorías nuevas.</li>
+<li>Si ya tenías botones viejos, bórralos (clic derecho sobre el botón → <b>Eliminar</b>). Los nuevos se actualizan solos: siempre usan la última versión publicada.</li>
 </ol>
 <details><summary>¿No se puede arrastrar? Hazlo a mano</summary>
 <p>Copia el código de un botón, luego clic derecho en la barra de marcadores → <b>Agregar página…</b>, ponle el nombre y pega el código en <b>URL</b>.</p>

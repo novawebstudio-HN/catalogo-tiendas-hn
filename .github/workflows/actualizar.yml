@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       tiendas:
-        description: 'Tiendas a actualizar separadas por espacio (vacío = todas; none = ninguna): diunsa curacao elektra ladylee walmart gallo radioshack tropigas acosa gamestation'
+        description: 'Tiendas a actualizar separadas por espacio (vacío = todas; none = ninguna): diunsa curacao elektra ladylee walmart gallo radioshack tropigas acosa gamestation sycom'
         required: false
         default: ''
   push:

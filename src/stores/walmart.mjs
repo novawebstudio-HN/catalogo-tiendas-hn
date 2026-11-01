@@ -5,8 +5,9 @@ const BASE = 'https://www.walmart.com.hn';
 
 // ruta de categoría VTEX -> reglas [categoría propia, filtro opcional sobre el nombre]; gana la primera que aplique.
 const MAP = [
-  ['/13/106/', [['celulares', /celular|smartphone|tel[eé]fono|galaxy|iphone|redmi|honor|motorola|moto /i]]],
-  ['/13/106/501/', [['smartwatches', /smartwatch|reloj inteligente|smart ?band|watch/i], ['accesorios', /cargador|cable|power ?bank|bater[ií]a port/i]]],
+  // Celulares: la tienda mezcla teléfonos (a veces sin la palabra "celular": "Samsung A57 8gb 256gb"), relojes y accesorios.
+  ['/13/106/', [['smartwatches', /smartwatch|reloj|smart ?band|\bwatch\b/i], ['accesorios', /cargador|cable|power ?bank|bater[ií]a|adaptador/i],
+    [null, /tr[ií]pode|micr[oó]fono|organizador|\bkit\b|cocina|aud[ií]fono|selfie|\baro\b|\bluz\b|l[aá]piz|memoria|funda|protector|mica|soporte|vidrio|estuche|\bcase\b|palo|lente|ventilador|parlante|bocina|teclado|mouse/i], ['celulares']]],
   ['/13/109/516/', [['laptops']]],
   ['/13/109/519/', [['tablets']]], ['/13/109/831/', [['tablets']]], ['/13/109/832/', [['tablets']]], ['/13/109/935/', [['tablets']]], ['/13/109/936/', [['tablets']]],
   ['/13/109/518/', [['impresoras', /impresora|multifuncional/i]]],
@@ -46,7 +47,7 @@ export async function scrapeWalmart({ fetch, sleep = (ms) => new Promise((r) => 
         if (seen.has(p.productId)) continue;
         const name = (p.productName || '').replace(/\s+/g, ' ').trim();
         const cat = rules.find(([, re]) => !re || re.test(name))?.[0];
-        if (!cat) continue;
+        if (!cat) continue; // sin regla o regla nula: fuera de alcance
         seen.add(p.productId);
         const item = p.items?.[0];
         const offer = item?.sellers?.[0]?.commertialOffer;

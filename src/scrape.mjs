@@ -14,6 +14,7 @@ import { scrapeRadioShack } from './stores/radioshack.mjs';
 import { scrapeTropigas } from './stores/tropigas.mjs';
 import { scrapeAcosa } from './stores/acosa.mjs';
 import { scrapeGameStation } from './stores/gamestation.mjs';
+import { scrapeSycom } from './stores/sycom.mjs';
 import { buildCatalog } from './build.mjs';
 import { loadHistory, updateHistory, applyStats, writeDetails, saveHistory } from './history.mjs';
 
@@ -27,7 +28,7 @@ const politeFetch = (url, opts = {}) => fetch(url, {
 const SCRAPERS = {
   jetstereo: scrapeJetstereo, diunsa: scrapeDiunsa, curacao: scrapeCuracao, elektra: scrapeElektra,
   ladylee: scrapeLadyLee, walmart: scrapeWalmart, gallo: scrapeGallo, radioshack: scrapeRadioShack,
-  tropigas: scrapeTropigas, acosa: scrapeAcosa, gamestation: scrapeGameStation,
+  tropigas: scrapeTropigas, acosa: scrapeAcosa, gamestation: scrapeGameStation, sycom: scrapeSycom,
 };
 const NOTES = {
   curacao: 'Cobertura parcial: primeros productos de cada categoría.',

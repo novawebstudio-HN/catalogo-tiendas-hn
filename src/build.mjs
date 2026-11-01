@@ -177,11 +177,39 @@ const COLOR_NAMES = {
   inox: 'Acero inoxidable', inoxidable: 'Acero inoxidable', acero: 'Acero inoxidable',
 };
 const MODELISH = (t) => /\d/.test(t) && /[a-z]/.test(t) && t.length >= 6;
+// Colores de dos palabras en los nombres normalizados ("Blanco estelar", "Azul marino") se tratan como uno.
+const MULTI_COLOR = [[/blanco estelar/g, 'starlight'], [/azul marino/g, 'marino'], [/azul cobalto/g, 'cobalt'], [/verde azulado/g, 'teal'], [/verde oliva/g, 'olive'], [/verde salvia/g, 'sage'], [/rojo volcanico/g, 'volcanic'], [/acero inoxidable/g, 'inox']];
+const colorToks = (name) => MULTI_COLOR.reduce((t, [re, w]) => t.replace(re, w), deaccent(name).toLowerCase());
 export function colorFamily(p) {
-  const toks = deaccent(p.n).toLowerCase().split(/[^a-z0-9]+/).filter(Boolean);
+  const toks = colorToks(p.n).split(/[^a-z0-9]+/).filter(Boolean);
   const colors = [], rest = [];
   for (const t of toks) { if (COLOR_NAMES[t]) { if (!colors.includes(COLOR_NAMES[t])) colors.push(COLOR_NAMES[t]); } else if (!MODELISH(t)) rest.push(t); }
   return { key: `${p.c}|${brandKey(p.b)}|${rest.join(' ')}`, color: colors.join(' / ') };
+}
+// Celulares, tablets y laptops: el mismo modelo en distintos colores y capacidades (almacenamiento y RAM)
+// se muestra en una sola tarjeta con selector. La clave es el nombre sin color ni capacidades.
+const VARIANT_CATS = new Set(['celulares', 'tablets', 'laptops']);
+const fmtGB = (n) => (n >= 1024 ? `${n / 1024} TB` : `${n} GB`);
+export function variantFamily(p) {
+  const toks = colorToks(p.n).split(/[^a-z0-9+]+/).filter(Boolean);
+  const colors = [], rest = [];
+  let storage = 0, ram = 0;
+  for (let i = 0; i < toks.length; i++) {
+    const t = toks[i];
+    if (COLOR_NAMES[t]) { if (!colors.includes(COLOR_NAMES[t])) colors.push(COLOR_NAMES[t]); continue; }
+    const cap = /^(\d+)(gb|tb)?$/.exec(t);
+    const unit = cap && (cap[2] || ((toks[i + 1] === 'gb' || toks[i + 1] === 'tb') ? toks[i + 1] : ''));
+    if (cap && unit) {
+      const v = Number(cap[1]) * (unit === 'tb' ? 1024 : 1);
+      if (!cap[2]) i++;
+      if (toks[i + 1] === 'ram') { ram = v; i++; } else if (v >= 32) storage = Math.max(storage, v); else if (!ram && v <= 24) ram = v;
+      continue;
+    }
+    if (t === 'ssd' || t === 'ram') continue;
+    if (!MODELISH(t)) rest.push(t);
+  }
+  const cap = storage ? [fmtGB(storage), ram ? `${ram} GB RAM` : ''].filter(Boolean).join(' · ') : '';
+  return { key: `${p.c}|${brandKey(p.b)}|${rest.join(' ')}`, color: colors.join(' / '), cap, storage, ram };
 }
 
 // ---- Características que se leen del nombre, para productos cuya tienda no publica ficha ----
@@ -239,7 +267,8 @@ const DROP_BY_CAT = {
   motos: /casco|llanta|bater[ií]a|aceite|repuesto|guante|chaqueta|juguete/i,
   smartwatches: /correa|pulso|cargador|protector|funda/i,
   lavadoras: /cabello|pelo|de mano|plancha/i,
-  camas: /camarote|litera|cuna|sof[aá] ?cama|almohada/i,
+  camas: /camarote|litera|cuna|sof[aá] ?cama|almohada|\brespaldo\b|inflable/i,
+  refrigeradoras: /\bvitrina|exhibidor|enfriador de (bebidas|botellas|vino)|dispensador|cava\b/i,
 };
 const CONSOLE_NAME = /\bconsola\b|console|playstation\s*5\s*(slim|pro|digital)|ps5\s*(slim|pro|digital)|switch\s*(2|oled|lite)\b|xbox series [xs]\b/i;
 const GAME_GEAR = /\bjuego\b|videojuego|\bcontrol(es)?\b|\bmando\b|dualsense|joy-?con|volante|headset/i;
@@ -279,7 +308,7 @@ export function clean(items) {
       brand = first && p.cat !== 'videojuegos' ? titleBrand(first) : '';
     }
     const models = modelCandidates(p);
-    out.push({ ...p, brand, bk: brandKey(brand), models, cores: cores(models), barcode: (p.barcode || '').replace(/^0+/, ''), gk: p.cat === 'videojuegos' ? gameKey(p.name) : '', ck: p.cat === 'consolas' ? consoleKey(p.name) : '', nk: ['celulares', 'tablets'].includes(p.cat) ? phoneKey(p.name, brand) : '' });
+    out.push({ ...p, brand, bk: brandKey(brand), models, cores: cores(models), barcode: (p.barcode || '').replace(/^0+/, ''), gk: p.cat === 'videojuegos' ? gameKey(p.name) : '', ck: p.cat === 'consolas' ? consoleKey(p.name) : '', nk: ['celulares', 'tablets'].includes(p.cat) ? phoneKey(p.name, brand, p.cat) : '' });
   }
   return out;
 }
@@ -409,17 +438,29 @@ export function buildCatalog(rawByStore, status) {
   const all = clean(Object.values(rawByStore).flat());
   const used = new Set(all.map((p) => p.cat));
   const products = group(all).sort((a, b) => (b.o.length - a.o.length) || a.c.localeCompare(b.c) || a.n.localeCompare(b.n));
-  // Familias de color: mismo nombre salvo el color, colores todos distintos y precios parecidos.
+  // Familias: mismo nombre salvo el color (y, en celulares, tablets y laptops, salvo la capacidad).
+  // Cada combinación color+capacidad aparece una sola vez y los precios deben ser parecidos.
   const fam = {};
-  for (const p of products) { const f = colorFamily(p); if (f.color) (fam[f.key] ||= []).push([p, f.color]); }
-  for (const [key, list] of Object.entries(fam)) {
+  for (const p of products) {
+    const f = VARIANT_CATS.has(p.c) ? variantFamily(p) : { ...colorFamily(p), cap: '', storage: 0, ram: 0 };
+    if (f.color || f.cap) (fam[f.key] ||= []).push([p, f]);
+  }
+  for (const [key, list0] of Object.entries(fam)) {
+    let list = list0;
+    // Si unos integrantes dicen la capacidad y otros no, se agrupan solo los que la dicen.
+    if (list.some(([, f]) => f.cap) && list.some(([, f]) => !f.cap)) list = list.filter(([, f]) => f.cap);
+    // Misma capacidad y color repetidos (tiendas que no dicen la RAM o el color): se queda el más barato.
+    const best = new Map();
+    for (const e of list) { const k = `${e[1].storage}|${e[1].color}`; const price = Math.min(...e[0].o.map((o) => o.p)); if (!best.has(k) || price < best.get(k)[1]) best.set(k, [e, price]); }
+    list = [...best.values()].map(([e]) => e);
+    // Un integrante sin color, cuando otro de la misma capacidad sí lo dice, es casi siempre el mismo producto.
+    list = list.filter(([, f]) => f.color || !list.some(([, g]) => g.color && g.storage === f.storage));
     if (list.length < 2) continue;
-    const colors = list.map(([, c]) => c);
-    if (new Set(colors).size !== colors.length) continue;
+    const withCap = list.every(([, f]) => f.cap);
     const prices = list.map(([p]) => Math.min(...p.o.map((o) => o.p)));
-    if (Math.max(...prices) / Math.min(...prices) > 1.3) continue;
+    if (Math.max(...prices) / Math.min(...prices) > (withCap ? 3 : 1.3)) continue;
     const v = createHash('sha1').update(key).digest('hex').slice(0, 10);
-    for (const [p, c] of list) { p.v = v; p.cl = c; }
+    for (const [p, f] of list) { p.v = v; p.cl = f.color; if (f.cap) { p.cp = f.cap; p.cs = f.storage * 1000 + f.ram; } }
   }
   return {
     updated: new Date().toISOString(),

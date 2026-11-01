@@ -1,6 +1,6 @@
 # Vitrina HN
 
-Catálogo unificado de 11 tiendas de Honduras — **Jetstereo, Diunsa, La Curacao, Elektra, Lady Lee, Walmart, Gallo más Gallo, RadioShack, Tropigas, Acosa y Game Station** — en 21 categorías: celulares, laptops, tablets, monitores, impresoras, relojes inteligentes, cargadores y cables, televisores, audio, audífonos, consolas, juegos y controles, refrigeradoras, lavadoras, estufas, microondas, aires acondicionados, camas, freidoras de aire, licuadoras y cafeteras, y motos.
+Catálogo unificado de 12 tiendas de Honduras — **Jetstereo, Diunsa, La Curacao, Elektra, Lady Lee, Walmart, Gallo más Gallo, RadioShack, Tropigas, Acosa, Game Station y Sycom** — en 21 categorías: celulares, laptops, tablets, monitores, impresoras, relojes inteligentes, cargadores y cables, televisores, audio, audífonos, consolas, juegos y controles, refrigeradoras, lavadoras, estufas, microondas, aires acondicionados, camas, freidoras de aire, licuadoras y cafeteras, y motos.
 
 Cuando el mismo modelo está en varias tiendas, se muestra como un solo producto con el precio de cada una y el más bajo resaltado.
 
@@ -20,14 +20,16 @@ Cuando el mismo modelo está en varias tiendas, se muestra como un solo producto
 GitHub Actions (diario, 6:17 a. m. HN; también a mano o con un commit que diga [scrape])
   └─ src/scrape.mjs
        ├─ stores/jetstereo.mjs   → api.jetstereo.com (captura manual, ver nota)
-       ├─ stores/diunsa.mjs      → API del sitio de Diunsa (por código de categoría)
+       ├─ stores/diunsa.mjs      → API del sitio de Diunsa (por grupo, más un recorrido del catálogo completo)
        ├─ stores/unicomer.mjs    → La Curacao, RadioShack y Tropigas: HTML público de cada categoría (ver nota)
        ├─ stores/elektra.mjs     → API pública de catálogo VTEX
        ├─ stores/walmart.mjs     → API pública de catálogo VTEX (código de barras, características, meses sin intereses)
-       ├─ stores/ladylee.mjs     → catálogo público de Shopify por colección
+       ├─ stores/ladylee.mjs     → catálogo público de Shopify (colecciones + catálogo completo por nombre)
        ├─ stores/gallo.mjs       → sitemap + datos estructurados (JSON-LD) de categorías y productos
-       ├─ stores/acosa.mjs       → API pública de tienda de WooCommerce (/API/wc/store/v1)
-       └─ stores/gamestation.mjs → páginas públicas de categoría de WooCommerce
+       ├─ stores/acosa.mjs       → API pública de tienda de WooCommerce (/API/wc/store/v1), ramas completas de Tecnología y Electrodomésticos
+       ├─ stores/gamestation.mjs → páginas públicas de categoría de WooCommerce (todas las páginas)
+       └─ stores/sycom.mjs       → listado público de Odoo (/shop), clasificado por nombre
+  └─ src/classify.mjs → clasificación por nombre para productos sin categoría reconocible
   └─ src/build.mjs    → limpia, filtra accesorios y precios mínimos por categoría, agrupa por modelo
   └─ src/history.mjs  → historial de precios y archivos de detalle (site/details/<categoría>.json)
   └─ src/thumbs.mjs   → miniatura WebP de 520 px de cada producto (site/thumbs/)

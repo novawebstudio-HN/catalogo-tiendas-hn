@@ -1,18 +1,20 @@
 (async()=>{
 if(!/jetstereo\.com$/.test(location.hostname)){alert('Abre www.jetstereo.com y vuelve a hacer clic.');return;}
-const box=document.createElement('div');box.style.cssText='position:fixed;right:16px;bottom:16px;z-index:99999;background:#FFDA4D;color:#1E1700;padding:12px 16px;border-radius:8px;font:600 14px system-ui;box-shadow:0 2px 8px rgba(0,0,0,.2)';box.textContent='Vitrina HN: capturando jetstereo…';document.body.appendChild(box);
+const box=document.createElement('div');box.style.cssText='position:fixed;right:16px;bottom:16px;z-index:99999;background:#059669;color:#fff;padding:12px 16px;border-radius:8px;font:600 14px system-ui;box-shadow:0 2px 8px rgba(0,0,0,.2)';box.textContent='Vitrina HN: capturando jetstereo…';document.body.appendChild(box);
 // Jetstereo — API propia (api.jetstereo.com), paginada de 50 en 50.
 const API = 'https://api.jetstereo.com';
 const SITE = 'https://www.jetstereo.com';
 
+// id de categoría de la tienda -> categoría propia. La consulta de una categoría incluye sus subcategorías,
+// así que se usan las categorías padre; las específicas van primero para que ganen.
 const MAP = {
-  26: 'celulares', 325: 'laptops', 32: 'laptops', 330: 'laptops', 38: 'tablets', 41: 'televisores',
-  47: 'audio', 48: 'audio', 212: 'audio', 52: 'consolas',
+  26: 'celulares', 330: 'laptops', 30: 'laptops', 38: 'tablets', 41: 'televisores',
+  49: 'audio', 212: 'audio', 46: 'audio', 52: 'consolas',
   74: 'refrigeradoras', 195: 'refrigeradoras', 77: 'lavadoras', 78: 'lavadoras',
   75: 'estufas', 76: 'microondas', 79: 'aires', 204: 'freidoras',
-  91: 'monitores', 331: 'monitores', 33: 'impresoras', 89: 'smartwatches', 132: 'audifonos', 219: 'audifonos',
+  91: 'monitores', 331: 'monitores', 33: 'impresoras', 89: 'smartwatches', 219: 'audifonos', 132: 'audifonos',
   147: 'videojuegos', 341: 'videojuegos', 166: 'accesorios', 284: 'accesorios',
-  193: 'licuadoras', 189: 'licuadoras', 191: 'licuadoras',
+  193: 'licuadoras', 189: 'licuadoras', 191: 'licuadoras', 190: 'licuadoras', 235: 'licuadoras',
 };
 
 async function scrapeJetstereo({ fetch, sleep = (ms) => new Promise((r) => setTimeout(r, ms)) }) {
@@ -53,6 +55,6 @@ const items=await scrapeJetstereo({fetch:(u,o)=>fetch(u,{...(o||{}),credentials:
 const blob=new Blob([JSON.stringify({captured:new Date().toISOString(),source:'navegador',items})],{type:'application/json'});
 const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='jetstereo.json';document.body.appendChild(a);a.click();
 box.textContent='Listo: '+items.length+' productos. Sube jetstereo.json a data/manual/ en GitHub.';
-}catch(e){box.style.background='#FDE2E2';box.textContent='Error: '+e.message;}
+}catch(e){box.style.background='#B91C1C';box.textContent='Error: '+e.message;}
 setTimeout(()=>box.remove(),15000);
 })();

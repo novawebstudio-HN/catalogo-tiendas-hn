@@ -37,6 +37,7 @@ export const STORES = {
   tropigas: { name: 'Tropigas', site: 'https://www.almacenestropigas.com.hn/honduras' },
   acosa: { name: 'Acosa', site: 'https://acosa.com.hn' },
   gamestation: { name: 'Game Station', site: 'https://gamestation.hn' },
+  sycom: { name: 'Sycom', site: 'https://www.sycomhn.com' },
 };
 
 // Filtro de alcance: solo compras grandes / reconocidas.
