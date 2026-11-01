@@ -906,8 +906,9 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     if (specs.length || det.d) {
       const sec = $('#shSpecs', sheet);
       sec.hidden = false;
-      sec.innerHTML = `<h3>Características</h3>${specs.length ? `<dl class="specs">${specs.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
-        ${det.d ? `<div class="desc${det.d.length > 420 ? ' clip' : ''}" id="shDesc">${descHtml(det.d)}</div>${det.d.length > 420 ? '<button class="linkbtn" id="shMore">Leer más</button>' : ''}` : ''}`;
+      sec.innerHTML = `<h3>${det.d ? 'Descripción y características' : 'Características'}</h3>
+        ${det.d ? `<div class="desc${det.d.length > 420 ? ' clip' : ''}" id="shDesc">${descHtml(det.d)}</div>${det.d.length > 420 ? '<button class="linkbtn" id="shMore">Leer más</button>' : ''}` : ''}
+        ${specs.length ? `<dl class="specs" style="margin-top:16px">${specs.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}`;
       const more = $('#shMore', sec); if (more) more.onclick = () => { $('#shDesc', sec).classList.remove('clip'); more.remove(); };
     }
   }
