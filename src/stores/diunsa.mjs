@@ -34,12 +34,16 @@ export async function scrapeDiunsa({ fetch, sleep = (ms) => new Promise((r) => s
         // Vehículos y otros subgrupos fuera de alcance.
         if (/vehicul|carro|moto/i.test(p.materialGroupName || '')) continue;
         const num = parseInt(String(p.code || '').split('-').pop(), 10);
+        const pics = (p.images || []).filter((im) => im.active !== 0 && Number(im.idDelete || 0) === 0)
+          .sort((a, b) => (a.position ?? 999999) - (b.position ?? 999999))
+          .map((im) => im.fileLink || (im.fileName ? IMG + im.fileName : ''))
+          .filter(Boolean);
         out.push({
           store: 'diunsa', cat, brand: p.brandName || '', name: p.name || '',
           price, regular: Number(p.oldPrice || price),
           available: Number(p.stock ?? p.availibilityCount ?? 1) > 0,
           url: `${SITE}/${slug(p.materialGroupName)}/${slug(p.name)}-${num}`,
-          img: p.images?.[0]?.fileName ? IMG + p.images[0].fileName : '',
+          img: pics[0] || '', alts: pics.slice(1, 5),
           sku: String(p.externalKeys?.code || ''), model: String(p.nameAlias || ''), barcode: String(p.barcode || ''),
         });
       }
