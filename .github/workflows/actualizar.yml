@@ -1,0 +1,42 @@
+name: Actualizar catálogo
+
+on:
+  schedule:
+    - cron: '17 12 * * *'   # todos los días ~6:17 a. m. hora de Honduras
+  workflow_dispatch:
+    inputs:
+      tiendas:
+        description: 'Tiendas a actualizar separadas por espacio (vacío = todas): jetstereo diunsa curacao elektra'
+        required: false
+        default: ''
+  push:
+    branches: [main]
+    paths: ['src/**', '.github/workflows/actualizar.yml']
+
+permissions:
+  contents: write
+
+concurrency:
+  group: actualizar-catalogo
+  cancel-in-progress: false
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Extraer productos de las tiendas
+        run: node src/scrape.mjs ${{ github.event.inputs.tiendas }}
+      - name: Guardar cambios
+        run: |
+          git config user.name "vitrina-bot"
+          git config user.email "vitrina-bot@users.noreply.github.com"
+          git add data site/catalog.json
+          if git diff --cached --quiet; then echo "Sin cambios"; exit 0; fi
+          git commit -m "Catálogo actualizado $(date -u +'%Y-%m-%d %H:%M') UTC"
+          git pull --rebase origin main
+          git push
