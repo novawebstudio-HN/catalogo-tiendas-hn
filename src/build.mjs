@@ -5,7 +5,7 @@ const STORE_ORDER = ['jetstereo', 'diunsa', 'curacao', 'elektra', 'ladylee', 'wa
 
 const deaccent = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-const BRAND_ALIASES = { 'general electric': 'ge', 'black and decker': 'black+decker', 'black & decker': 'black+decker', 'sin marca': '' };
+const BRAND_ALIASES = { 'general electric': 'ge', 'black and decker': 'black+decker', 'black & decker': 'black+decker', 'black + decker': 'black+decker', 'b&d': 'black+decker', 'bd': 'black+decker', 'sin marca': '' };
 export const brandKey = (b) => {
   const k = deaccent(b).toLowerCase().trim();
   return (BRAND_ALIASES[k] ?? k).replace(/[^a-z0-9+]/g, '');
@@ -36,38 +36,67 @@ export function modelCandidates(item) {
     if (!/[A-Z]/.test(n) || !/\d/.test(n)) continue;
     if (UNIT_RE.test(n)) continue;
     if ((n.match(/\d/g) || []).length < 2) continue;
+    // No son modelos: capacidades/colores ("BLACK256GB"), resoluciones ("1920X1080"),
+    // procesadores ("I513420H") ni códigos internos de tienda ("HN4195").
+    if (/\d(GB|TB)|(GB|TB)\d|\d+X\d{3,}|^I[3579]\d{4}|^HN\d{3,5}$|BLACK|BLUE|GR[AE]Y|GREEN|WHITE|SILVER|GOLD|PINK|PURPLE|NEGRO|AZUL|GRIS|VERDE|BLANCO|PLATA|ROSA|MORADO/.test(n)) continue;
     out.push(n.replace(/^COMBO/, '').replace(/ESP$/, ''));
   }
   return [...new Set(out)].filter((n) => n.length >= 5);
 }
 
+// Capacidad (GB) para no mezclar 128 GB con 256 GB. Acepta "256GB", "256 G", "1TB" y "/128/".
 const storage = (name) => {
-  const m = [...String(name).toUpperCase().matchAll(/(\d+)\s?(GB|TB)/g)].map((x) => Number(x[1]) * (x[2] === 'TB' ? 1024 : 1));
-  return m.length ? Math.max(...m) : null;
+  const N = String(name).toUpperCase();
+  const m = [...N.matchAll(/(\d+)\s?(GB|TB|G|T)\b/g)].map((x) => Number(x[1]) * (x[2].startsWith('T') ? 1024 : 1));
+  for (const x of N.matchAll(/\/\s?(32|64|128|256|512)\s?(?=\/|$|\s)/g)) m.push(Number(x[1]));
+  const big = m.filter((v) => v >= 32);
+  return big.length ? Math.max(...big) : null;
 };
 const inches = (name) => {
   const m = String(name).match(/(\d{2,3})\s?(?:"|”|''|pulgadas|pulg\b|in\b)/i);
   return m ? Number(m[1]) : null;
 };
 
-function sameModel(a, b) {
-  for (const x of a.models) for (const y of b.models) {
-    const [s, l] = x.length <= y.length ? [x, y] : [y, x];
-    if (s.length >= 7 && l.startsWith(s) && l.length - s.length <= 6) return true;
+// Núcleo del modelo: se quitan sufijos de región o empaque que no cambian el producto
+// (Samsung UN55U8000FPXPA = UN55U8000F; WA23C3553GWAP = WA23C3553GW).
+const REGION_SUFFIX = /(PXPA|PXZA|PXZX|PXPR|PXPE|PXZS|PXP|PXZ|PX|AP|ESP)$/;
+export function cores(models) {
+  const out = new Set();
+  for (let m of models) {
+    if (m.length < 7) continue;
+    out.add(m);
+    for (let k = 0; k < 2; k++) { const s = m.replace(REGION_SUFFIX, ''); if (s === m || s.length < 7) break; m = s; out.add(m); }
+  }
+  return [...out];
+}
+
+// Señales de que dos productos NO son el mismo, aunque compartan código de barras o parte del modelo.
+function conflict(a, b) {
+  if (a.cat !== b.cat) return true;
+  // Algunas tiendas cargan mal la marca; un modelo completo idéntico (9+ caracteres) o el mismo
+  // código de barras pesa más que la marca.
+  const strong = (a.barcode && a.barcode === b.barcode) || (a.full || a.cores).some((x) => x.length >= 9 && (b.full || b.cores).includes(x));
+  if (!strong && a.bk && b.bk && a.bk !== b.bk) return true;
+  const sa = storage(a.name), sb = storage(b.name);
+  if (sa && sb && sa !== sb) return true;
+  const ia = inches(a.name), ib = inches(b.name);
+  if (ia && ib && ia !== ib) return true;
+  if (Math.max(a.price, b.price) / Math.min(a.price, b.price) > 2.5) return true;
+  // Misma familia pero variante distinta (UN65U8000F vs UN65U8000H, VX122C1N vs VX122C1U).
+  if (a.cores.length && b.cores.length && !a.cores.some((x) => b.cores.includes(x))) {
+    for (const x of a.cores) for (const y of b.cores) {
+      if (x.length >= 8 && y.length >= 8 && x.slice(0, 6) === y.slice(0, 6) && !x.startsWith(y) && !y.startsWith(x)) return true;
+    }
   }
   return false;
 }
 
-function compatible(a, b) {
-  if (a.cat !== b.cat) return false;
+// Enlace directo: mismo código de barras o mismo núcleo de modelo, sin señales en contra.
+function linked(a, b) {
+  if (conflict(a, b)) return false;
   if (a.barcode && b.barcode && a.barcode === b.barcode) return true;
-  if (a.bk && b.bk && a.bk !== b.bk) return false;
-  if (!sameModel(a, b)) return false;
-  const sa = storage(a.name), sb = storage(b.name);
-  if (sa && sb && sa !== sb) return false;
-  const ia = inches(a.name), ib = inches(b.name);
-  if (ia && ib && ia !== ib) return false;
-  return true;
+  const fa = a.full || a.cores, fb = b.full || b.cores;
+  return fa.some((x) => fb.includes(x));
 }
 
 export function clean(items) {
@@ -76,6 +105,8 @@ export function clean(items) {
     // Precios marcador (99999, 999999…) que algunas tiendas usan para productos no a la venta.
     .filter((p) => !/^9{5,}(\.0+)?$/.test(String(p.price)))
     .filter((p) => !(p.cat === 'aires' && /enfriador|ventilador/i.test(p.name)))
+    // Combos de dos productos (estufa + lavadora, etc.) no se comparan con un producto suelto.
+    .filter((p) => !(/\bcombo\b/i.test(p.name) && /\+/.test(p.name)))
     .filter((p) => !(p.cat === 'laptops' && /monitor|impresora|desktop|escritorio|all in one|\baio\b|mouse|teclado|mochila/i.test(p.name)))
     .map((p) => {
       let brand = titleBrand(p.brand);
@@ -83,24 +114,54 @@ export function clean(items) {
         const first = String(p.name).split(/\s+/).find((w) => /^[A-Z][A-Za-z]+$/.test(w) && w.length > 2 && !/^(Cama|Colchon|Colchón|Televisor|Refrigeradora|Lavadora|Estufa|Aire|Bocina|Horno|Microondas|Freidora|Celular|Laptop|Tablet|Consola|Secadora|Congelador|Minicomponente|Individual|Matrimonial|Queen|King)$/i.test(w));
         brand = first ? titleBrand(first) : '';
       }
-      return { ...p, brand, bk: brandKey(brand), models: modelCandidates(p), barcode: (p.barcode || '').replace(/^0+/, '') };
+      const models = modelCandidates(p);
+      return { ...p, brand, bk: brandKey(brand), models, cores: cores(models), barcode: (p.barcode || '').replace(/^0+/, '') };
     });
 }
 
 export function group(items) {
   const parent = items.map((_, i) => i);
+  const members = items.map((_, i) => [i]);
   const find = (i) => (parent[i] === i ? i : (parent[i] = find(parent[i])));
+  // Solo se unen dos grupos si ningún par de productos entre ellos tiene señales en contra.
+  const union = (x, y) => {
+    const rx = find(x), ry = find(y);
+    if (rx === ry) return false;
+    for (const i of members[rx]) for (const j of members[ry]) if (conflict(items[i], items[j])) return false;
+    parent[rx] = ry; members[ry].push(...members[rx]); members[rx] = [];
+    return true;
+  };
   const byCat = {};
   items.forEach((p, i) => (byCat[p.cat] ||= []).push(i));
   for (const idxs of Object.values(byCat)) {
-    // Índice por prefijo de 7 caracteres del modelo para no comparar todo contra todo.
+    // 1) Enlaces seguros: código de barras o núcleo de modelo idéntico.
+    // Un núcleo es "incompleto" si existe otro que solo le agrega 1-2 letras (UN65U8000 vs UN65U8000F/H).
+    const all = new Set(idxs.flatMap((i) => items[i].cores));
+    // Solo es ambiguo si tiene dos o más versiones completas distintas (sin contar sufijos de región).
+    const exts = (c) => new Set([...all].filter((d) => d.length > c.length && d.length - c.length <= 2 && d.startsWith(c) && /^[A-Z]{1,2}$/.test(d.slice(c.length)))
+      .map((d) => d.replace(REGION_SUFFIX, '')).filter((d) => d !== c));
+    const incomplete = new Set([...all].filter((c) => exts(c).size >= 2));
+    for (const i of idxs) items[i].full = items[i].cores.filter((c) => !incomplete.has(c));
     const buckets = {};
-    for (const i of idxs) for (const m of items[i].models) if (m.length >= 7) (buckets[m.slice(0, 7)] ||= new Set()).add(i);
-    for (const i of idxs) if (items[i].barcode) (buckets[`bc:${items[i].barcode}`] ||= new Set()).add(i);
-    for (const set of Object.values(buckets)) {
-      const arr = [...set];
+    for (const i of idxs) for (const c of items[i].full) (buckets[`m:${c}`] ||= []).push(i);
+    for (const i of idxs) if (items[i].barcode) (buckets[`b:${items[i].barcode}`] ||= []).push(i);
+    for (const arr of Object.values(buckets)) {
       for (let x = 0; x < arr.length; x++) for (let y = x + 1; y < arr.length; y++) {
-        if (find(arr[x]) !== find(arr[y]) && compatible(items[arr[x]], items[arr[y]])) parent[find(arr[x])] = find(arr[y]);
+        if (linked(items[arr[x]], items[arr[y]])) union(arr[x], arr[y]);
+      }
+    }
+    // 2) Códigos incompletos (ej. "UN58U8000" sin la letra del año): se unen solo si
+    //    existe una única versión completa posible en la misma categoría y marca.
+    for (const i of idxs) {
+      for (const c of items[i].cores) {
+        if (c.length < 8) continue;
+        const roots = new Set();
+        for (const j of idxs) {
+          if (i === j || find(i) === find(j)) continue;
+          if (items[j].cores.some((d) => d.length - c.length >= 1 && d.length - c.length <= 2 && d.startsWith(c) && /^[A-Z]{1,2}$/.test(d.slice(c.length))) && !conflict(items[i], items[j])) roots.add(find(j));
+        }
+        const exts = new Set([...roots].flatMap((r) => members[r].flatMap((k) => items[k].cores.filter((d) => d.startsWith(c) && d.length - c.length <= 2 && d.length > c.length).map((d) => d.replace(REGION_SUFFIX, '')))));
+        if (roots.size === 1 && exts.size === 1) union(i, [...roots][0]);
       }
     }
   }
