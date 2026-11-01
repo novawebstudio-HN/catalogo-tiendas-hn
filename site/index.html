@@ -363,6 +363,7 @@ nav.cats{border-top:1px solid var(--line)}
 .save{display:inline-block;align-self:flex-start;background:var(--act-soft);color:var(--act);border-radius:6px;padding:2px 8px;margin:7px 14px 0;font-size:13px}
 .sh-info .save{margin-left:0}
 .allbtn{color:var(--act)}
+.nst{font-size:13px;font-weight:600;color:var(--act);text-decoration:none;white-space:nowrap}.nst:hover{text-decoration:underline}
 .offers li a:hover{background:var(--soft)}
 .more{border-color:var(--act);color:var(--act)}.more:hover{background:var(--act);color:#fff}
 .cbar .go{background:var(--act);color:#fff}
@@ -757,12 +758,6 @@ footer .wrap{padding-block:20px 90px}
     const initial = esc((p.b||catName(p.c)).slice(0,1));
     const was = best.r > best.p ? `<span class="was">${plain(best.r)}</span>` : '';
     const spread = offers.length > 1 ? offers[offers.length-1].p - best.p : 0;
-    const top = offers.slice(0, 3);
-    const rows = top.map((o,i) => {
-      const diff = i === 0 ? (offers.length>1 ? 'más bajo' : '') : '+' + fmt.format(Math.round(o.p - best.p));
-      return `<li class="${i===0?'best':''}"><a href="${esc(o.u)}" target="_blank" rel="noopener" title="Ver en ${esc(storeName(o.s))}"><span class="sw" style="background:var(--s-${o.s})"></span><span class="st">${esc(storeName(o.s))}${o.a?'':' (agotado)'}</span><span class="pr">${plain(o.p)}</span><span class="diff">${diff}</span></a></li>`;
-    }).join('');
-    const rest = p.o.length - top.length;
     const plan = planText(offers.find(o => o.q));
     return `<article class="p" data-key="${esc(p.key)}">
       <button class="favbtn" data-fav="${esc(p.key)}" aria-pressed="${isFav(p)}" aria-label="${isFav(p)?'Quitar de':'Guardar en'} favoritos">${HEART}</button>
@@ -773,9 +768,7 @@ footer .wrap{padding-block:20px 90px}
       ${flagsHtml(flagsOf(p, best))}
       ${spread>0?`<div class="save">Ahorras ${plain(spread)}</div>`:''}
       ${plan?`<div class="plan">${esc(plan)}</div>`:''}
-      ${offers.length > 1 ? `<ul class="offers">${rows}</ul>` : ''}
-      ${rest > 0 ? `<a class="allbtn" href="${plink(p)}">Ver las ${p.o.length} tiendas<span aria-hidden="true">›</span></a>` : ''}
-      <div class="cardfoot"><label class="cmp"><input type="checkbox" data-cmp="${esc(p.key)}"${inCmp(p)?' checked':''}>Comparar</label></div>
+      <div class="cardfoot"><label class="cmp"><input type="checkbox" data-cmp="${esc(p.key)}"${inCmp(p)?' checked':''}>Comparar</label>${p.o.length > 1 ? `<a class="nst" href="${plink(p)}">${p.o.length} tiendas<span aria-hidden="true"> ›</span></a>` : ''}</div>
     </article>`;
   }
 
