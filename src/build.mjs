@@ -103,6 +103,31 @@ function linked(a, b) {
   return fa.some((x) => fb.includes(x));
 }
 
+// Descripciones para el público: sin emojis, sin frases que mencionan a una tienda, y las tablas
+// que vienen aplanadas ("Marca / Samsung / Modelo / …") o líneas "clave: valor" pasan a características.
+const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}\u{20E3}\u{1F1E6}-\u{1F1FF}\u{E000}-\u{F8FF}]/gu;
+const STORE_WORDS = /\b(elektra|diunsa|curacao|jetstereo|walmart|lady ?lee|gallo|tropigas|radioshack|radio shack|acosa|game ?station|credigallo|tienda en l[ií]nea|nuestr[ao]s? (tienda|cr[eé]dito|opciones|sucursal)|env[ií]o gratis|cuotas|a cr[eé]dito|compr[aá] (ya|hoy|en)|agr[eé]galo al carrito)\b/i;
+export function cleanDesc(text) {
+  let lines = String(text || '').replace(EMOJI, '').replace(/\s+:\s+/g, ': ').split('\n')
+    .map((l) => l.replace(/\s+/g, ' ').trim()).filter((l) => l && !/^[•·\-–]\s*$/.test(l));
+  const pairs = [];
+  const hi = lines.findIndex((l, i) => /^(especificaci[oó]n(es)?|caracter[ií]stica(s)?)(:)?$/i.test(l) && /^(detalle|descripci[oó]n|valor)(:)?$/i.test(lines[i + 1] || ''));
+  if (hi >= 0) {
+    const rest = lines.slice(hi + 2);
+    for (let i = 0; i + 1 < rest.length; i += 2) pairs.push([rest[i], rest[i + 1]]);
+    lines = lines.slice(0, hi);
+  }
+  const keep = [];
+  for (const l of lines) {
+    if (/^especificaci[oó]n(es)?(: ?detalle)?:?$/i.test(l)) continue;
+    const m = l.match(/^([^:•·\-–][^:]{1,38}):\s*(.{1,120})$/);
+    if (m && !/[.!?]$/.test(m[2]) && m[1].split(' ').length <= 5) { pairs.push([m[1].trim(), m[2].trim()]); continue; }
+    keep.push(l);
+  }
+  const d = keep.map((l) => l.split(/(?<=[.!?])\s+/).filter((x) => !STORE_WORDS.test(x)).join(' ').trim()).filter(Boolean).join('\n');
+  return { d: d.replace(/\s+([.,;:!?])/g, '$1').slice(0, 1200), pairs: pairs.filter(([k, v]) => k && v && k.length <= 40 && v.length <= 120 && !STORE_WORDS.test(`${k} ${v}`)).slice(0, 16) };
+}
+
 // Juegos: plataforma y título normalizado para emparejar el mismo juego entre tiendas.
 const PLATFORMS = [[/switch\s*2|ns2\b/i, 'NS2'], [/ps5|playstation\s*5/i, 'PS5'], [/ps4|playstation\s*4/i, 'PS4'], [/xbox\s*series|xsx/i, 'XSX'], [/xbox\s*one/i, 'XB1'], [/xbox/i, 'XBOX'], [/switch|nintendo/i, 'NSW']];
 const PLATFORM_WORDS = /(nintendo\s*)?switch\s*2|\bns2\b|nintendo\s*switch|\bswitch\b|\bps[45]\b|playstation\s*[45]|xbox\s*series\s*[xs](\s*[|/]\s*[xs])?|xbox\s*one|\bxbox\b|\bnsw\b/gi;
@@ -226,8 +251,14 @@ export function group(items) {
     for (const p of ps) for (const c of new Set((p.full || p.cores).map((c) => c.replace(REGION_SUFFIX, '')))) freq[c] = (freq[c] || 0) + 1;
     const model = Object.entries(freq).sort((a, b) => (b[1] - a[1]) || (b[0].length - a[0].length))[0]?.[0] || ps.flatMap((p) => p.models)[0] || '';
     // Detalles para la ficha: la descripción más completa y la lista de características más larga.
-    const desc = ps.map((p) => p.desc || '').sort((a, b) => b.length - a.length)[0] || '';
-    const specs = ps.map((p) => p.specs || []).sort((a, b) => b.length - a.length)[0] || [];
+    // Se prefiere la descripción más completa y mejor ordenada (con líneas o viñetas).
+    const score = (x) => Math.min(x.d.length, 900) + 250 * Math.min(6, x.d.split('\n').length - 1);
+    const descs = ps.map((p) => cleanDesc(p.desc)).sort((a, b) => score(b) - score(a));
+    const desc = descs[0]?.d || '';
+    const specs = [...(ps.map((p) => p.specs || []).sort((a, b) => b.length - a.length)[0] || [])].map(([k, v]) => [String(k).replace(EMOJI, '').trim(), String(v).replace(EMOJI, '').trim()]);
+    for (const pr of descs.flatMap((x) => x.pairs)) if (specs.length < 18 && !specs.some(([k]) => k.toLowerCase() === pr[0].toLowerCase())) specs.push(pr);
+    // Características cortas y concretas; las frases largas no son una característica.
+    for (let i = specs.length - 1; i >= 0; i--) { const [k, v] = specs[i]; if (!k || !v || k.length > 32 || v.length > 90 || (/[.!]$/.test(v) && v.length > 40)) specs.splice(i, 1); }
     const product = {
       id: `${ps[0].store}-${ps[0].sku || ps[0].url}`.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 60),
       c: ps[0].cat, b: ps.find((p) => p.brand)?.brand || '', n: ps[0].name.replace(/\s+/g, ' ').trim(),

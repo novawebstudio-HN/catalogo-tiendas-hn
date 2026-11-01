@@ -212,7 +212,10 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 .specs{display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);border-top:1px solid var(--line);font-size:15px}
 .specs dt,.specs dd{margin:0;padding:8px 10px;border-bottom:1px solid var(--line)}
 .specs dt{color:var(--muted);background:var(--soft)}
-.desc{white-space:pre-line;color:#2B333C;max-width:80ch;margin:12px 0 0}
+.desc{color:#2B333C;max-width:80ch;margin:14px 0 0}
+.desc p{margin:0 0 8px}
+.desc ul{margin:0 0 8px;padding-left:20px}
+.desc li{margin:3px 0}
 .desc.clip{max-height:9.5em;overflow:hidden;-webkit-mask-image:linear-gradient(#000 60%,transparent)}
 .muted{color:var(--muted)}
 /* Comparar */
@@ -587,8 +590,8 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     const pb = priceBuckets(data.products.filter(p => matches(p, 'price')));
     if (pb.length) out.push(`<section class="fsec"><h3>Precio</h3>${opt('price', '', 'Cualquier precio', null, !state.price, 'radio')}${pb.map(b => opt('price', b.id, b.label, null, state.price===b.id, 'radio')).join('')}</section>`);
     const sc = countBy(data.products.filter(p => matches(p, 'store')), p => p.o.filter(o=>!state.stock||o.a).map(o=>o.s));
-    out.push(`<section class="fsec"><h3>Tienda</h3>${STORE_IDS.map(id => { const s = data.stores[id]; const age = s.manual ? Math.floor((Date.now()-new Date(s.updated))/864e5) : 0;
-      return opt('store', id, s.name, sc[id]||0, state.stores.has(id), 'checkbox', `<span class="dot" style="background:var(--s-${id})"></span>`) + (s.manual && age > 1 ? `<p class="note">Precios del ${new Date(s.updated).toLocaleDateString('es-HN',{day:'numeric',month:'long'})}</p>` : ''); }).join('')}</section>`);
+    out.push(`<section class="fsec"><h3>Tienda</h3>${STORE_IDS.map(id => { const s = data.stores[id];
+      return opt('store', id, s.name, sc[id]||0, state.stores.has(id), 'checkbox', `<span class="dot" style="background:var(--s-${id})"></span>`); }).join('')}</section>`);
     out.push(`<section class="fsec"><h3>Mostrar</h3>${opt('multi','1','Solo los que están en 2 o más tiendas',null,state.multi)}${opt('stock','1','Solo disponibles',null,state.stock)}</section>`);
     $('#filters').innerHTML = out.join('');
   }
@@ -728,8 +731,6 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 
   // ---- Ofertas reales ----
   function renderDeals(){
-    const since = data.since ?? TODAY;
-    const days = TODAY - since;
     const drops = [], gaps = [], st = {};
     for (const p of data.products) {
       const av = allOffers(p).filter(o => o.a);
@@ -745,32 +746,27 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     drops.sort((a,b)=>b[1]-a[1]); gaps.sort((a,b)=>b[1]-a[1]);
     const prevView = state.view; state.view = 'catalog'; const saveStock = state.stock; // las tarjetas usan los filtros por defecto
     const cards = (list) => `<div class="grid">${list.map(card).join('')}</div>`;
-    const ready = days >= 7;
     const stores = Object.entries(st).filter(([id]) => data.stores[id]).sort((a,b)=>(b[1].adv/b[1].n)-(a[1].adv/a[1].n));
+    const withTags = stores.filter(([, s]) => s.adv > 0);
+    const anyTracked = withTags.some(([, s]) => s.tr > 0);
     const html = `
-      <section class="dsec">
-        <h3>Ofertas reales</h3>
-        <p>Una etiqueta de “descuento” no siempre significa que el precio bajó. Aquí comparamos el precio de hoy con el que tenía cada producto en los días anteriores.</p>
-        <div class="callout"><p>${ready
-          ? `Seguimos los precios desde el ${dayDate(since,{day:'numeric',month:'long'})} (${days} días).`
-          : `Empezamos a guardar los precios el ${dayDate(since,{day:'numeric',month:'long'})}. Para confirmar si un descuento es real hacen falta al menos 7 días de historial: las comparaciones completas aparecen a partir del ${dayDate(since+7,{day:'numeric',month:'long'})}. Mientras tanto ya puedes ver cuántos productos tienen etiqueta de descuento en cada tienda y dónde hay más diferencia de precio.`}</p></div>
-      </section>
-      <section class="dsec">
-        <h3>Etiquetas de descuento por tienda</h3>
-        <p>Cuántos productos muestran un precio “antes” tachado y, cuando ya hay historial, cuántos de esos bajaron de verdad.</p>
-        <div class="tscroll"><table class="stbl"><thead><tr><th>Tienda</th><th>Productos</th><th>Con etiqueta de descuento</th><th>Descuento anunciado promedio</th><th>Bajaron de verdad</th></tr></thead><tbody>
-        ${stores.map(([id, s]) => { const share = s.adv / s.n; return `<tr><td><span class="sw" style="background:var(--s-${id})"></span> ${esc(storeName(id))}</td><td class="num">${fmt.format(s.n)}</td>${s.adv ? `<td class="num">${fmt.format(s.adv)} (${Math.round(share*100)}%)<div class="bar"><i style="width:${Math.round(share*100)}%"></i></div></td><td class="num">${Math.round(s.sum / s.adv * 100)}%</td><td class="num">${s.tr ? `${fmt.format(s.real)} de ${fmt.format(s.tr)}` : '<span class="muted">Falta historial</span>'}</td>` : `<td colspan="3" class="muted">Su listado no muestra precio “antes”; solo se sigue el precio actual.</td>`}</tr>`; }).join('')}
-        </tbody></table></div>
-      </section>
-      <section class="dsec">
+      ${drops.length ? `<section class="dsec">
         <h3>Bajaron de precio</h3>
-        ${drops.length ? `<p>Productos cuyo precio de hoy es menor que el más bajo de los días anteriores.</p>${cards(drops.slice(0, 24).map(x=>x[0]))}` : `<p>Todavía no hay bajadas confirmadas${ready ? ' en los últimos días' : ': aparecerán aquí cuando tengamos historial'}.</p>`}
-      </section>
+        <p>Productos que hoy están más baratos que en los días anteriores.</p>
+        ${cards(drops.slice(0, 24).map(x=>x[0]))}
+      </section>` : ''}
       <section class="dsec">
         <h3>Mayor diferencia entre tiendas</h3>
         <p>El mismo producto, con la mayor diferencia entre la tienda más barata y la más cara.</p>
         ${cards(gaps.slice(0, 24).map(x=>x[0]))}
-      </section>`;
+      </section>
+      ${withTags.length ? `<section class="dsec">
+        <h3>¿Cuántos productos tienen etiqueta de descuento?</h3>
+        <p>Productos que muestran un precio “antes” tachado en cada tienda${anyTracked ? ', y cuántos de ellos de verdad están más baratos que en los días anteriores' : ''}.</p>
+        <div class="tscroll"><table class="stbl"><thead><tr><th>Tienda</th><th>Productos</th><th>Con etiqueta de descuento</th><th>Descuento anunciado promedio</th>${anyTracked ? '<th>Bajaron de verdad</th>' : ''}</tr></thead><tbody>
+        ${withTags.map(([id, s]) => { const share = s.adv / s.n; return `<tr><td><span class="sw" style="background:var(--s-${id})"></span> ${esc(storeName(id))}</td><td class="num">${fmt.format(s.n)}</td><td class="num">${fmt.format(s.adv)} (${Math.round(share*100)}%)<div class="bar"><i style="width:${Math.round(share*100)}%"></i></div></td><td class="num">${Math.round(s.sum / s.adv * 100)}%</td>${anyTracked ? `<td class="num">${s.tr ? `${fmt.format(s.real)} de ${fmt.format(s.tr)}` : '—'}</td>` : ''}</tr>`; }).join('')}
+        </tbody></table></div>
+      </section>` : ''}`;
     state.view = prevView; state.stock = saveStock;
     $('#deals').innerHTML = html;
   }
@@ -806,13 +802,11 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 
   function verdicts(p, h){
     const out = [];
-    const pending = [];
     for (const o of allOffers(p)) {
       const e = h?.[o.s];
       const days = e?.length ? TODAY - e[0][0] : 0;
       const name = storeName(o.s);
       if (!days) {
-        if (o.r > o.p * 1.01) pending.push(`${name} (${Math.round(discount(o)*100)}%)`);
         continue;
       }
       const prices = e.map(x=>x[1]);
@@ -824,8 +818,19 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
       else out.push(['', `${name}: ${plain(o.p)}, sin cambios desde el ${dayDate(lastChange)}.`]);
       if (o.r > o.p * 1.01 && days >= 14 && Math.max(...prices) < o.r - 1) out.push(['bad', `${name}: el precio “antes” de ${plain(o.r)} no se cobró en ningún día desde el ${dayDate(e[0][0])}.`]);
     }
-    if (pending.length) out.push(['', `${pending.length === 1 ? 'Anuncia descuento' : 'Anuncian descuento'}: ${pending.join(', ')}. Empezamos a seguir ${pending.length === 1 ? 'este precio' : 'estos precios'} hace poco; en unos días podremos confirmar si la rebaja es real.`]);
     return out;
+  }
+
+  // Descripción: párrafos y viñetas.
+  function descHtml(t){
+    const out = []; let list = [];
+    const flush = () => { if (list.length) { out.push(`<ul>${list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`); list = []; } };
+    for (const l of String(t).split('\n')) {
+      const m = l.match(/^[•·\-–*]\s*(.+)$/);
+      if (m) list.push(m[1]); else { flush(); out.push(`<p>${esc(l)}</p>`); }
+    }
+    flush();
+    return out.join('');
   }
 
   const sheet = $('#sheet');
@@ -868,7 +873,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
             <td><a class="go" href="${esc(o.u)}" target="_blank" rel="noopener">Ver en tienda ›</a></td></tr>`).join('')}
           </tbody></table></div>
         </section>
-        <section class="sh-sec" id="shHist"><h3>Historial de precio</h3><p class="muted">Cargando…</p></section>
+        <section class="sh-sec" id="shHist"></section>
         <section class="sh-sec" id="shSpecs" hidden></section>
       </div>`;
     if (!sheet.open) sheet.showModal();
@@ -892,17 +897,17 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
     const h = det.h || {};
     const chart = chartSvg(h, offers);
     const vs = verdicts(p, h);
-    const firstDay = Math.min(...Object.values(h).filter(e=>e?.length).map(e => e[0][0]), TODAY);
-    $('#shHist', sheet).innerHTML = `<h3>Historial de precio</h3>
-      ${vs.length ? `<ul class="verdicts">${vs.map(([c, t]) => `<li class="${c}">${esc(t)}</li>`).join('')}</ul>` : ''}
-      ${chart || `<p class="muted">Empezamos a seguir este precio el ${dayDate(firstDay,{day:'numeric',month:'long'})}. La gráfica aparece en cuanto haya más de un día de datos.</p>`}`;
+    if (chart || vs.length) {
+      $('#shHist', sheet).innerHTML = `<h3>Historial de precio</h3>
+        ${vs.length ? `<ul class="verdicts">${vs.map(([c, t]) => `<li class="${c}">${esc(t)}</li>`).join('')}</ul>` : ''}${chart}`;
+    } else $('#shHist', sheet).remove();
     // Características y descripción
     const specs = det.s || [];
     if (specs.length || det.d) {
       const sec = $('#shSpecs', sheet);
       sec.hidden = false;
       sec.innerHTML = `<h3>Características</h3>${specs.length ? `<dl class="specs">${specs.map(([k,v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : ''}
-        ${det.d ? `<p class="desc${det.d.length > 420 ? ' clip' : ''}" id="shDesc">${esc(det.d)}</p>${det.d.length > 420 ? '<button class="linkbtn" id="shMore">Leer más</button>' : ''}` : ''}`;
+        ${det.d ? `<div class="desc${det.d.length > 420 ? ' clip' : ''}" id="shDesc">${descHtml(det.d)}</div>${det.d.length > 420 ? '<button class="linkbtn" id="shMore">Leer más</button>' : ''}` : ''}`;
       const more = $('#shMore', sec); if (more) more.onclick = () => { $('#shDesc', sec).classList.remove('clip'); more.remove(); };
     }
   }
@@ -959,7 +964,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
         ${row('Categoría', ps.map(p => esc(catName(p.c))))}
         ${facetRows.map(([l, cells]) => row(l, cells.map(esc))).join('')}
         ${specRows.map(([l, cells]) => row(l, cells.map(esc))).join('')}
-        ${row('Precio más bajo en 30 días', bests.map(b => b.l != null ? plain(Math.min(b.l, b.p)) : '<span class="muted">Falta historial</span>'))}
+        ${bests.some(b => b.l != null) ? row('Precio más bajo en 30 días', bests.map(b => b.l != null ? plain(Math.min(b.l, b.p)) : '—')) : ''}
       </tbody></table></div></div>`;
     cmpDlg.showModal();
   }
