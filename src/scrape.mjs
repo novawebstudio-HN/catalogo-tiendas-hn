@@ -2,7 +2,7 @@
 // precios (data/history.json) y los detalles por categoría (site/details/*.json).
 // Si una tienda falla, se conserva su último archivo crudo para no vaciar el catálogo.
 // Uso: node src/scrape.mjs [tienda ...]   (sin argumentos corre todas; "none" no consulta ninguna)
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises';
 import { scrapeJetstereo } from './stores/jetstereo.mjs';
 import { scrapeDiunsa } from './stores/diunsa.mjs';
 import { scrapeCuracao } from './stores/curacao.mjs';
@@ -40,9 +40,16 @@ const NOTES = {
 const readJson = async (p, fallback) => { try { return JSON.parse(await readFile(p, 'utf8')); } catch { return fallback; } };
 // Jetstereo: usar la foto en tamaño completo en vez de la versión reducida de 350 px.
 const fullImg = (u) => String(u || '').replace(/\/images\/cache\/(.+?)-\d+x\d+(\.\w+)$/, '/images/$1$2');
+// Acepta el archivo aunque el navegador lo haya renombrado ("jetstereo (1).json"): se usa la captura más reciente.
 const loadManual = async (id) => {
-  const manual = await readJson(`data/manual/${id}.json`, null);
-  if (!manual?.items?.length) return null;
+  let files = [];
+  try { files = (await readdir('data/manual')).filter((f) => f.toLowerCase().startsWith(id) && f.toLowerCase().endsWith('.json')); } catch {}
+  let manual = null;
+  for (const f of files) {
+    const m = await readJson(`data/manual/${f}`, null);
+    if (m?.items?.length && (!manual || String(m.captured) > String(manual.captured))) manual = m;
+  }
+  if (!manual) return null;
   return { captured: manual.captured, items: manual.items.map((p) => ({ ...p, store: id, img: fullImg(p.img) })) };
 };
 
