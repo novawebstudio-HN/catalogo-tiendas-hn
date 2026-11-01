@@ -5,33 +5,32 @@
     "note": "Su servidor rechaza consultas automáticas desde la nube (HTTP 403), por eso no se actualiza a diario."
   },
   "diunsa": {
-    "ok": false,
-    "updated": "2026-11-01T18:41:08.530Z",
+    "ok": true,
+    "updated": "2026-11-01T18:54:35.528Z",
     "count": 817,
-    "note": "Sin actualizar en la última corrida; se muestran los datos anteriores.",
-    "error": "Diunsa 103 HTTP 502"
+    "note": ""
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-01T18:45:20.443Z",
+    "updated": "2026-11-01T18:55:44.833Z",
     "count": 226,
     "note": "Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio)."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-01T18:45:24.306Z",
+    "updated": "2026-11-01T18:55:51.965Z",
     "count": 243,
     "note": ""
   },
   "ladylee": {
     "ok": true,
-    "updated": "2026-11-01T18:45:35.722Z",
+    "updated": "2026-11-01T18:56:01.568Z",
     "count": 420,
     "note": ""
   },
   "walmart": {
     "ok": true,
-    "updated": "2026-11-01T18:45:40.037Z",
+    "updated": "2026-11-01T18:56:10.529Z",
     "count": 205,
     "note": ""
   }
