@@ -6,20 +6,32 @@
   },
   "diunsa": {
     "ok": true,
-    "updated": "2026-11-01T18:36:30.092Z",
+    "updated": "2026-11-01T18:41:08.530Z",
     "count": 817,
     "note": ""
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-01T18:37:56.538Z",
+    "updated": "2026-11-01T18:42:31.211Z",
     "count": 214,
     "note": "Cobertura parcial: primeros productos de cada categoría (su API de listado es solo para su sitio)."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-01T18:37:57.699Z",
+    "updated": "2026-11-01T18:42:38.594Z",
     "count": 243,
+    "note": ""
+  },
+  "ladylee": {
+    "ok": true,
+    "updated": "2026-11-01T18:42:48.794Z",
+    "count": 420,
+    "note": ""
+  },
+  "walmart": {
+    "ok": true,
+    "updated": "2026-11-01T18:42:59.262Z",
+    "count": 205,
     "note": ""
   }
 }
