@@ -95,6 +95,7 @@ function modelWords(name, brand, extraStop = []) {
   const b = deaccent(brand).toLowerCase();
   const bi = toks.findIndex((t) => { const low = t.toLowerCase().replace(/-$/, ''); return low === b || BRAND_CANON[low] === brand; });
   if (bi >= 0) toks = toks.slice(bi + 1);
+  else { const i = toks.findIndex((t) => t.toLowerCase().startsWith(`${b}-`)); if (i >= 0) { toks = toks.slice(i); toks[0] = toks[0].slice(b.length + 1); } }
   const out = [];
   for (const t of toks) {
     const low = t.toLowerCase();
