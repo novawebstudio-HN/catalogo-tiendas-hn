@@ -111,7 +111,8 @@ export function group(items) {
       .map((p) => ({ s: p.store, p: p.price, r: Math.max(p.regular || p.price, p.price), u: p.url, a: p.available ? 1 : 0 }))
       .sort((a, b) => (b.a - a.a) || (a.p - b.p));
     const head = ps.find((p) => p.img) || ps[0];
-    const model = ps.map((p) => p.models[0]).filter(Boolean).sort((a, b) => a.length - b.length)[0] || '';
+    const cands = ps.flatMap((p) => p.models);
+    const model = cands.filter((m) => m.length >= 7).sort((a, b) => a.length - b.length)[0] || cands[0] || '';
     return {
       id: `${ps[0].store}-${ps[0].sku || ps[0].url}`.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 60),
       c: ps[0].cat, b: ps.find((p) => p.brand)?.brand || '', n: ps[0].name.replace(/\s+/g, ' ').trim(),
