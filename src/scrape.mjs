@@ -66,6 +66,8 @@ for (const [id, fn] of Object.entries(SCRAPERS)) {
     status[id] = { ok: true, updated: new Date().toISOString(), count: items.length, note: NOTES[id] || '' };
     console.log(`✓ ${id}: ${items.length} productos en ${((Date.now() - t0) / 1000).toFixed(0)}s`);
   } catch (e) {
+    // Detalle de errores de red (certificados, conexión cortada, etc.) para diagnosticar.
+    if (e.cause) e.message = `${e.message} (${e.cause.code || ''} ${e.cause.message || ''})`.trim();
     // Captura manual (data/manual/<tienda>.json): se usa cuando la tienda bloquea la consulta automática.
     const m = await loadManual(id);
     if (m) {

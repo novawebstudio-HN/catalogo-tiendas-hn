@@ -23,7 +23,12 @@ export async function scrapeAcosa({ fetch, sleep = (ms) => new Promise((r) => se
     for (let page = 1; page <= 20; page++) {
       const res = await fetch(`${SITE}/API/wc/store/v1/products?category=${id}&per_page=100&page=${page}`);
       if (!res.ok) throw new Error(`Acosa ${id} HTTP ${res.status}`);
-      const list = await res.json();
+      const body = await res.text();
+      if (!/^\s*\[/.test(body)) {
+        const title = body.match(/<title>([^<]*)<\/title>/i)?.[1] || body.slice(0, 120).replace(/\s+/g, ' ');
+        throw new Error(`Acosa ${id}: respuesta no JSON (${res.status}, ${res.headers.get('content-type')}, url final ${res.url}): ${title}`);
+      }
+      const list = JSON.parse(body);
       for (const p of list) {
         if (seen.has(p.id)) continue;
         seen.add(p.id);
