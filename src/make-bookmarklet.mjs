@@ -4,7 +4,7 @@
 // tienda. Así los botones no hay que reinstalarlos cuando cambian los extractores.
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 
-const PAGES = 'https://novawebstudio-hn.github.io/catalogo-tiendas-hn';
+const PAGES = 'https://vitrinahn.shop';
 const TARGETS = [
   { id: 'jetstereo', file: 'src/stores/jetstereo.mjs', fn: 'scrapeJetstereo', host: 'jetstereo\\.com$', site: 'www.jetstereo.com', cred: 'omit' },
   { id: 'acosa', file: 'src/stores/acosa.mjs', fn: 'scrapeAcosa', host: 'acosa\\.com\\.hn$', site: 'acosa.com.hn', cred: 'same-origin' },
@@ -89,7 +89,7 @@ button.copy{border:1px solid var(--line);background:#fff;border-radius:8px;paddi
 <ol><li>Abre la carpeta de subida: <br><a class="btn" href="${UPLOAD}" target="_blank" rel="noopener">Subir archivos a GitHub</a></li>
 <li>Arrastra <b>jetstereo.json</b> y <b>acosa.json</b> desde tu carpeta de Descargas. No importa si Chrome les agregó un número, como "jetstereo (1).json".</li>
 <li>Abajo, haz clic en el botón verde <b>Commit changes</b>.</li></ol>
-<p>Listo. En unos 5 minutos los precios nuevos aparecen en <a class="link" href="https://novawebstudio-hn.github.io/catalogo-tiendas-hn/" target="_blank" rel="noopener">Vitrina HN</a>.</p></section>
+<p>Listo. En unos 5 minutos los precios nuevos aparecen en <a class="link" href="https://vitrinahn.shop/" target="_blank" rel="noopener">Vitrina HN</a>.</p></section>
 </main>
 <script>
 const codes = { jetstereo: document.querySelectorAll('.bm')[0].href, acosa: document.querySelectorAll('.bm')[1].href };
