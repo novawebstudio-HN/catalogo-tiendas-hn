@@ -1,5 +1,6 @@
 // Vitrina HN: contador propio de visitas y clics. Anónimo: no usa cookies ni guarda IP ni datos personales.
-// Registra: visita (al cargar), producto (ficha abierta), tienda (clic a "Ver en tienda"), busqueda y compartir.
+// Registra: visita (al cargar), producto (ficha abierta), tienda (clic a "Ver en tienda"), busqueda, compartir,
+// cuotas (vista de cuotas o cambio de plazo) y credito (clic a la solicitud de crédito de una tienda).
 // No cuenta: fuera de vitrinahn.shop, navegadores automatizados ni los navegadores marcados como del dueño.
 // Marcar este navegador como tuyo: abre vitrinahn.shop/?yo=1 (para volver a contarlo: ?yo=0).
 (() => {
@@ -44,5 +45,7 @@
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('a[data-s]');
     if (a) vt('tienda', { tienda: a.dataset.s, producto: a.dataset.k, precio: Number(a.dataset.p), cat: a.dataset.c });
+    const c = e.target.closest && e.target.closest('a[data-cr]');
+    if (c) vt('credito', { tienda: c.dataset.cr, producto: c.dataset.k });
   }, true);
 })();
