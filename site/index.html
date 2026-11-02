@@ -442,18 +442,26 @@ footer .wrap{padding-block:20px 90px}
 .collage span:nth-child(1){left:0;transform:rotate(-8deg);bottom:-4px}
 .collage span:nth-child(2){left:50%;margin-left:-44px;width:88px;height:88px;bottom:6px;z-index:2}
 .collage span:nth-child(3){right:0;transform:rotate(8deg);bottom:-4px}
+.tile .sh{display:none}
 @media (max-width:760px){
-  .home{margin:0 -20px 20px}
-  .home h2{padding:0 20px;font-size:22px}
-  .tiles{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:148px;grid-template-rows:repeat(2,auto);overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:20px;padding:0 20px 4px;gap:10px;scrollbar-width:none}
-  .tiles::-webkit-scrollbar{display:none}
-  .tile{height:168px;padding:13px 13px 0;scroll-snap-align:start;border-radius:16px}
-  .tile .tt{font-size:19px}.tile .ts{font-size:12px}
-  .collage span{width:56px;height:56px;border-radius:12px}
-  .collage span:nth-child(2){width:72px;height:72px;margin-left:-36px;bottom:8px}
+  .home{margin:0 0 20px}
+  .home h2{font-size:21px;margin-bottom:10px}
+  .tiles{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 8px}
+  .tile,.tile.deal{height:auto;padding:0;background:none;box-shadow:none;color:var(--ink);border-radius:0;overflow:visible;align-items:center;text-align:center}
+  .tile::after{display:none}
+  .tile:hover{transform:none;box-shadow:none}
+  .tile .tt{order:2;margin-top:6px;font:600 13px/1.15 Inter,system-ui,sans-serif;letter-spacing:0}
+  .tile .lg,.tile .ts{display:none}
+  .tile .sh{display:inline}
+  .collage{order:1;flex:none;width:100%;aspect-ratio:1;margin:0;border-radius:18px;background:linear-gradient(155deg,#0F2A1F 0%,#0B1F17 55%,#123B2B 100%);overflow:hidden}
+  .tile.deal .collage{background:linear-gradient(155deg,#059669 0%,#047857 60%,#065F46 100%)}
+  .collage span:nth-child(1),.collage span:nth-child(3){display:none}
+  .collage span:nth-child(2){left:16%;right:16%;top:16%;bottom:16%;width:auto;height:auto;margin:0;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+  .collage img{padding:4px}
 }
 @media (prefers-reduced-motion:reduce){.tile{transition:none}.tile:hover{transform:none}}
 </style>
+<script src="t.js" defer></script>
 </head>
 <body>
 <header class="top">
@@ -932,8 +940,9 @@ footer .wrap{padding-block:20px 90px}
   }
   // ---- Portada: tarjetas por categoría (solo en "Todos", sin búsqueda ni filtros) ----
   const HOME_CATS = [
-    ['celulares','Lo más buscado'], ['televisores',''], ['laptops',''], ['tablets',''], ['audifonos',''], ['smartwatches',''],
-    ['consolas',''], ['refrigeradoras',''], ['lavadoras',''], ['aires',''], ['motos',''],
+    ['celulares','Lo más buscado','Celulares'], ['televisores','','TV'], ['laptops','','Laptops'], ['tablets','','Tablets'],
+    ['audifonos','','Audífonos'], ['smartwatches','','Relojes'], ['consolas','','Consolas'], ['refrigeradoras','','Refris'],
+    ['lavadoras','','Lavadoras'], ['aires','','Aires'], ['motos','','Motos'],
   ];
   let homeHtml = '';
   function buildHome(){
@@ -948,7 +957,7 @@ footer .wrap{padding-block:20px 90px}
       }
       return out.map(p => `<span><img src="thumbs/${p.t}.webp" alt="" loading="lazy" decoding="async"></span>`).join('');
     };
-    const tile = (href, title, sub, list, cls = '') => `<a class="tile${cls}" href="${href}"><span class="tt">${esc(title)}</span><span class="ts">${esc(sub)}</span><span class="collage" aria-hidden="true">${pics(list)}</span></a>`;
+    const tile = (href, title, sub, list, cls = '', short = title) => `<a class="tile${cls}" href="${href}" aria-label="${esc(title)}"><span class="tt"><span class="lg">${esc(title)}</span><span class="sh">${esc(short)}</span></span><span class="ts">${esc(sub)}</span><span class="collage" aria-hidden="true">${pics(list)}</span></a>`;
     // Ofertas: el mismo producto con la mayor diferencia entre tiendas.
     const gaps = [];
     for (const p of data.products) {
@@ -959,13 +968,13 @@ footer .wrap{padding-block:20px 90px}
     }
     gaps.sort((a,b) => b[1] - a[1]);
     const tiles = [gaps.length ? tile('#ofertas', 'Ofertas', 'Mismo producto, más barato', gaps.map(x => x[0]), ' deal') : ''];
-    for (const [id, sub] of HOME_CATS) {
+    for (const [id, sub, short] of HOME_CATS) {
       const list = by[id];
       if (!list?.length) continue;
       const n = new Set(list.map(p => p.v || p.key)).size;
       const min = Math.min(...list.flatMap(p => p.o.filter(o => o.a).map(o => o.p)));
       const s = sub || (isFinite(min) ? `Desde L ${fmt.format(Math.round(min))}` : `${n} productos`);
-      tiles.push(tile('#' + id, catName(id), s, list));
+      tiles.push(tile('#' + id, catName(id), s, list, '', short));
     }
     homeHtml = `<h2>Explora por categoría</h2><div class="tiles">${tiles.join('')}</div>`;
   }
@@ -1112,6 +1121,7 @@ footer .wrap{padding-block:20px 90px}
   async function openSheet(p){
     const offers = allOffers(p);
     const best = offers.find(o => o.a) || offers[0];
+    window.vt?.('producto', { producto: p.key, cat: p.c, precio: best?.p });
     const initial = esc((p.b||catName(p.c)).slice(0,1));
     const chips = Object.entries(p._f).map(([,v]) => v).concat(p.o.length > 1 ? [`En ${p.o.length} tiendas`] : []);
     const spread = offers.filter(o=>o.a).length > 1 ? Math.max(...offers.filter(o=>o.a).map(o=>o.p)) - best.p : 0;
@@ -1145,7 +1155,7 @@ footer .wrap{padding-block:20px 90px}
             <td class="num"><strong>${plain(o.p)}</strong>${o!==best && o.a && best.a ? `<span class="sub2">+${plain(o.p - best.p)}</span>` : ''}</td>
             <td class="num hide-s">${o.r > o.p ? `<s>${plain(o.r)}</s> <span class="sub2">−${Math.round(discount(o)*100)}%</span>` : '—'}</td>
             <td class="hide-s">${o.a ? 'Sí' : '<span class="muted">Agotado</span>'}</td>
-            <td class="num"><a class="go" href="${esc(o.u)}" target="_blank" rel="noopener"><span class="hide-s">Ver en tienda</span><span class="only-s">Ver</span> ›</a></td></tr>`).join('')}
+            <td class="num"><a class="go" href="${esc(o.u)}" target="_blank" rel="noopener" data-s="${esc(o.s)}" data-k="${esc(p.key)}" data-p="${o.p}" data-c="${esc(p.c)}"><span class="hide-s">Ver en tienda</span><span class="only-s">Ver</span> ›</a></td></tr>`).join('')}
           </tbody></table></div>
           <p class="refnote">Precios referenciales tomados de cada tienda. El precio válido es el que muestra la tienda al comprar.</p>
         </section>
@@ -1158,6 +1168,7 @@ footer .wrap{padding-block:20px 90px}
     const url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'p/' + productSlug(p) + '/';
     const txt = `${p.n} — desde ${plain(best.p)} en ${storeName(best.s)}${p.o.length > 1 ? ` (comparado en ${p.o.length} tiendas)` : ''}. Míralo en Vitrina HN: ${url}`;
     $('#shWa', sheet).href = 'https://wa.me/?text=' + encodeURIComponent(txt);
+    $('#shWa', sheet).addEventListener('click', () => window.vt?.('compartir', { producto: p.key, cat: p.c }));
     $('#shCopy', sheet).onclick = async () => { try { await navigator.clipboard.writeText(url); toast('Enlace copiado'); } catch { prompt('Copia este enlace:', url); } };
     $('#shFav', sheet).onclick = () => { toggleFav(p); const on = isFav(p); $('#shFav', sheet).setAttribute('aria-pressed', on); $('#shFav span', sheet).textContent = on ? 'Guardado' : 'Guardar'; };
     $('#shCmp', sheet).onclick = () => { toggleCmp(p); $('#shCmp', sheet).textContent = inCmp(p) ? 'Quitar de comparar' : 'Comparar'; };
@@ -1285,7 +1296,8 @@ footer .wrap{padding-block:20px 90px}
   window.addEventListener('hashchange', route);
 
   // ---- Eventos ----
-  let tmr; $('#q').addEventListener('input', (e) => { clearTimeout(tmr); tmr = setTimeout(()=>{ state.q = e.target.value; applyQuery(); if (state.view !== 'catalog') { state.view = 'catalog'; history.replaceState(null, '', viewHash()); } refresh(); }, 160); });
+  let tmr; $('#q').addEventListener('input', (e) => { clearTimeout(tmr); tmr = setTimeout(()=>{ state.q = e.target.value; applyQuery(); if (state.view !== 'catalog') { state.view = 'catalog'; history.replaceState(null, '', viewHash()); } refresh(); }, 160); clearTimeout(qTmr); qTmr = setTimeout(() => { const q = e.target.value.trim().toLowerCase(); if (q.length >= 3 && q !== lastQ) { lastQ = q; window.vt?.('busqueda', { q }); } }, 1500); });
+  let qTmr, lastQ = '';
   $('#tabs').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (!b) return; const id = b.dataset.c; if (state.view === 'catalog' && id === state.cat) return; resetFilters(); state.view = 'catalog'; state.cat = id; history.replaceState(null, '', viewHash()); refresh(); b.scrollIntoView({inline:'nearest', block:'nearest'}); });
   $('#filters').addEventListener('input', (e) => { const f = e.target.closest('[data-pfind]'); if (!f) return; (state.pfind ||= {})[f.dataset.pfind] = f.value; applyPfind(f.dataset.pfind, f.value); });
   $('#filters').addEventListener('change', (e) => { const i = e.target.closest('input[data-g]'); if (!i) return; toggle(i.dataset.g, i.value, i.type === 'radio' ? i.value !== '' : i.checked); refresh(); });
