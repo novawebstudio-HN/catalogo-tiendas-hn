@@ -142,7 +142,7 @@ const brandSlug = (b) => slugify(b);
 // ---- Categorías y marca por categoría ----
 const brandPages = [];
 for (const c of cats) {
-  const list = products.filter((p) => p.c === c.id).sort((a, b) => (b.o.length - a.o.length) || (bestOf(a).p - bestOf(b).p));
+  const list = products.filter((p) => p.c === c.id); // orden del catálogo: marcas conocidas y en varias tiendas primero
   const stores = [...new Set(list.flatMap((p) => p.o.map((o) => o.s)))];
   const minP = Math.min(...list.map((p) => bestOf(p).p));
   const byBrand = list.reduce((m, p) => { if (p.b) (m[p.b] ||= []).push(p); return m; }, {});
