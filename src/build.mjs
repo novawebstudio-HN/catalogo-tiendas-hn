@@ -325,6 +325,8 @@ function bestName(ps) {
   return fallback;
 }
 
+const IMG_RANK = ['jetstereo', 'walmart', 'elektra', 'curacao', 'radioshack', 'tropigas', 'ladylee', 'gallo', 'acosa', 'sycom', 'gamestation', 'diunsa'];
+
 export function group(items) {
   const parent = items.map((_, i) => i);
   const members = items.map((_, i) => [i]);
@@ -408,7 +410,10 @@ export function group(items) {
       .map((p) => ({ s: p.store, k: offerKey(p), p: p.price, r: Math.max(p.regular || p.price, p.price), u: p.url, a: p.available ? 1 : 0, ...(p.plan ? { q: { ...p.plan, t: String(p.plan.t).replace(/^meses\s+/, '') } } : {}) }))
       .sort((a, b) => (b.a - a.a) || (a.p - b.p));
     // Fotos candidatas de todas las tiendas del grupo; thumbs.mjs usa la primera que funcione.
-    const pics = [...new Set(ps.flatMap((p) => [p.img, ...(p.alts || [])]).filter(Boolean))].slice(0, 8);
+    // Se prefieren las fotos de las tiendas que suelen usar la foto oficial del color correcto; Diunsa a veces
+    // repite una foto genérica o de otro modelo para todos los colores.
+    const byImg = [...ps].sort((a, b) => IMG_RANK.indexOf(a.store) - IMG_RANK.indexOf(b.store));
+    const pics = [...new Set(byImg.flatMap((p) => [p.img, ...(p.alts || [])]).filter(Boolean))].slice(0, 8);
     // Modelo a mostrar: el código completo más repetido entre las tiendas (sin sufijo de región).
     const freq = {};
     for (const p of ps) for (const c of new Set((p.full || p.cores).map((c) => c.replace(REGION_SUFFIX, '')))) freq[c] = (freq[c] || 0) + 1;
@@ -434,10 +439,69 @@ export function group(items) {
   });
 }
 
+// Orden "Más relevantes": marcas conocidas y productos que se venden en varias tiendas primero, sin que sea solo
+// lo más caro, y alternando marcas para que el inicio no sea todo de una misma.
+const POPULAR = {
+  celulares: ['Samsung', 'Apple', 'Xiaomi', 'Honor', 'Motorola', 'Redmi', 'Tecno', 'Infinix', 'Huawei', 'Oppo'],
+  tablets: ['Apple', 'Samsung', 'Lenovo', 'Xiaomi', 'Honor', 'Huawei'],
+  laptops: ['HP', 'Lenovo', 'Dell', 'Apple', 'Asus', 'Acer', 'MSI'],
+  monitores: ['Samsung', 'LG', 'Dell', 'HP', 'Asus', 'Lenovo', 'AOC'],
+  impresoras: ['Epson', 'HP', 'Canon', 'Brother'],
+  smartwatches: ['Apple', 'Samsung', 'Huawei', 'Xiaomi', 'Amazfit', 'Garmin', 'Honor'],
+  televisores: ['Samsung', 'LG', 'Sony', 'TCL', 'Hisense', 'Xiaomi', 'Philips'],
+  audio: ['JBL', 'Sony', 'LG', 'Samsung', 'Bose', 'Marshall', 'Ultimate Ears'],
+  audifonos: ['Apple', 'Samsung', 'Sony', 'JBL', 'Beats', 'Bose', 'Xiaomi', 'Skullcandy'],
+  consolas: ['Sony', 'Nintendo', 'Xbox', 'Microsoft'],
+  videojuegos: ['Sony', 'Nintendo', 'Xbox', 'Microsoft'],
+  refrigeradoras: ['LG', 'Samsung', 'Whirlpool', 'Mabe', 'Frigidaire', 'Electrolux', 'Indurama', 'Hisense'],
+  lavadoras: ['LG', 'Samsung', 'Whirlpool', 'Mabe', 'Frigidaire', 'Electrolux'],
+  estufas: ['Mabe', 'Whirlpool', 'Frigidaire', 'Electrolux', 'LG', 'Samsung', 'Indurama'],
+  microondas: ['LG', 'Samsung', 'Oster', 'Panasonic', 'Whirlpool', 'Mabe', 'Black+Decker'],
+  aires: ['LG', 'Samsung', 'Carrier', 'Mabe', 'Frigidaire', 'Midea', 'Daewoo', 'Hisense'],
+  camas: ['Serta', 'Sealy', 'Simmons', 'Spring Air', 'Restonic', 'Therapedic'],
+  freidoras: ['Ninja', 'Oster', 'Philips', 'Black+Decker', 'Cosori', 'Hamilton Beach'],
+  licuadoras: ['Oster', 'Ninja', 'Nutribullet', 'Black+Decker', 'Hamilton Beach', 'Kitchenaid'],
+  motos: ['Honda', 'Yamaha', 'Suzuki', 'Bajaj', 'Italika', 'Genesis'],
+  accesorios: ['Apple', 'Samsung', 'Anker', 'Belkin', 'Ugreen', 'Baseus', 'Xiaomi'],
+};
+// En "Todo", primero lo que más se busca.
+const CAT_BONUS = { celulares: 3, televisores: 2.5, laptops: 2, consolas: 2, refrigeradoras: 1.5, aires: 1.5, audifonos: 1, tablets: 1, lavadoras: 1, smartwatches: 0.5, videojuegos: -2, accesorios: -2 };
+export function popularOrder(products) {
+  const bySorted = {};
+  for (const p of products) (bySorted[p.c] ||= []).push(p.o.length ? Math.min(...p.o.map((o) => o.p)) : 0);
+  const median = Object.fromEntries(Object.entries(bySorted).map(([c, v]) => { v.sort((a, b) => a - b); return [c, v[Math.floor(v.length / 2)] || 1]; }));
+  const score = (p) => {
+    const list = POPULAR[p.c] || [];
+    const i = list.findIndex((b) => brandKey(b) === brandKey(p.b));
+    const brand = i < 0 ? 0 : 8 - Math.min(i, 6);
+    const stores = Math.min(p.o.length, 6) * 2.2;
+    const price = Math.min(...p.o.map((o) => o.p));
+    const far = Math.abs(Math.log(price / median[p.c])); // ni lo más barato ni lo más caro de la categoría
+    const avail = p.o.some((o) => o.a) ? 0 : -6;
+    return brand + stores - far * 2.5 + avail + (p.i ? 0.5 : -3) + (CAT_BONUS[p.c] || 0);
+  };
+  const scored = products.map((p) => [p, score(p)]).sort((a, b) => b[1] - a[1]);
+  // Alterna marcas: cada repetición seguida de la misma marca en la misma categoría resta puntos.
+  const out = []; const seen = {};
+  let pool = scored;
+  while (pool.length) {
+    let bestIdx = 0, bestVal = -Infinity;
+    for (let i = 0; i < Math.min(pool.length, 40); i++) {
+      const [p, sc] = pool[i]; const k = `${p.c}|${brandKey(p.b)}`;
+      const v = sc - (seen[k] || 0) * 1.6;
+      if (v > bestVal) { bestVal = v; bestIdx = i; }
+    }
+    const [p] = pool.splice(bestIdx, 1)[0];
+    const k = `${p.c}|${brandKey(p.b)}`; seen[k] = (seen[k] || 0) + 1;
+    out.push(p);
+  }
+  return out;
+}
+
 export function buildCatalog(rawByStore, status) {
   const all = clean(Object.values(rawByStore).flat());
   const used = new Set(all.map((p) => p.cat));
-  const products = group(all).sort((a, b) => (b.o.length - a.o.length) || a.c.localeCompare(b.c) || a.n.localeCompare(b.n));
+  const products = popularOrder(group(all));
   // Familias: mismo nombre salvo el color (y, en celulares, tablets y laptops, salvo la capacidad).
   // Cada combinación color+capacidad aparece una sola vez y los precios deben ser parecidos.
   const fam = {};

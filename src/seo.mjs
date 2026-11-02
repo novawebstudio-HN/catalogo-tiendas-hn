@@ -1,5 +1,5 @@
-// Páginas estáticas para buscadores (Google no indexa las rutas con #): una por categoría y una por
-// producto, más sitemap.xml y robots.txt. Se generan al publicar, a partir de site/catalog.json, y no se
+// Páginas estáticas para buscadores (Google no indexa las rutas con #): categorías, marca por categoría,
+// modelos (todas las capacidades y colores), productos, "dónde está más barato", sitemap.xml y robots.txt. Se generan al publicar, a partir de site/catalog.json, y no se
 // guardan en el repositorio. Cada página es útil por sí sola y enlaza al comparador interactivo.
 // Uso: SITE_URL=https://vitrinahn.shop node src/seo.mjs
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
@@ -76,67 +76,176 @@ ${jsonld ? `<script type="application/ld+json">${JSON.stringify(jsonld).replace(
 </body></html>`;
 }
 
-function card(p, up) {
-  const b = bestOf(p);
-  return `<li><a href="${up}p/${productSlug(p)}/">${p.t ? `<img src="${up}${thumb(p)}" alt="${esc(p.n)}" loading="lazy" width="200" height="200">` : ''}<span class="n">${esc(p.n)}</span><span class="p">${money(b.p)}</span><span class="s">${p.o.length > 1 ? `En ${p.o.length} tiendas · más barato en ${esc(storeName(b.s))}` : `En ${esc(storeName(b.s))}`}</span></a></li>`;
+
+// ---- Agrupación por modelo: celulares y tablets por el nombre del modelo; el resto por familia de variantes ----
+const MODEL_CATS = new Set(['celulares', 'tablets']);
+const modelName = (p) => (MODEL_CATS.has(p.c) && p.n.includes(' · ') ? p.n.split(' · ')[0] : (p.v ? p.n.split(' · ')[0] : ''));
+const groups = new Map();
+for (const p of products) {
+  const key = MODEL_CATS.has(p.c) && p.n.includes(' · ') ? `${p.c}|${modelName(p)}` : (p.v ? `v|${p.v}` : '');
+  if (!key) continue;
+  if (!groups.has(key)) groups.set(key, []);
+  groups.get(key).push(p);
 }
+const modelOf = new Map(); // producto -> { name, slug, items }
+for (const [key, items] of groups) {
+  if (items.length < 2) continue;
+  const name = modelName(items[0]);
+  if (!name || name.length < 4) continue;
+  const m = { key, name, slug: `${slugify(name)}-${fnv(key)}`, items, c: items[0].c, b: items.find((x) => x.b)?.b || '' };
+  for (const p of items) modelOf.set(p, m);
+}
+const models = [...new Set(modelOf.values())];
+const prodUrl = (p, up) => (modelOf.has(p) ? `${up}m/${modelOf.get(p).slug}/` : `${up}p/${productSlug(p)}/`);
+const variantLabel = (p, m) => p.n.slice(m.name.length).replace(/^\s*·\s*/, '') || p.n;
+
+function card(p, up, label) {
+  const b = bestOf(p);
+  return `<li><a href="${up}p/${productSlug(p)}/">${p.t ? `<img src="${up}${thumb(p)}" alt="${esc(p.n)}" loading="lazy" width="200" height="200">` : ''}<span class="n">${esc(label || p.n)}</span><span class="p">${money(b.p)}</span><span class="s">${p.o.length > 1 ? `En ${p.o.length} tiendas · más barato en ${esc(storeName(b.s))}` : `En ${esc(storeName(b.s))}`}</span></a></li>`;
+}
+function modelCard(m, up) {
+  const all = m.items.flatMap((p) => p.o.map((o) => ({ ...o, p0: p })));
+  const best = m.items.map((p) => [p, bestOf(p)]).sort((a, b) => a[1].p - b[1].p)[0];
+  const stores = new Set(all.map((o) => o.s)).size;
+  const img = m.items.find((p) => p.t);
+  return `<li><a href="${up}m/${m.slug}/">${img ? `<img src="${up}${thumb(img)}" alt="${esc(m.name)}" loading="lazy" width="200" height="200">` : ''}<span class="n">${esc(m.name)}</span><span class="p">Desde ${money(best[1].p)}</span><span class="s">${m.items.length} versiones · ${stores} tienda${stores > 1 ? 's' : ''}</span></a></li>`;
+}
+// Tarjetas de una lista: un modelo aparece una sola vez.
+function cardsFor(list, up, max) {
+  const seen = new Set(); const out = [];
+  for (const p of list) {
+    const m = modelOf.get(p);
+    if (m) { if (seen.has(m)) continue; seen.add(m); out.push(modelCard(m, up)); } else out.push(card(p, up));
+    if (out.length >= max) break;
+  }
+  return { html: out.join(''), shown: out.length, total: new Set(list.map((p) => modelOf.get(p) || p)).size };
+}
+// Qué tienda es más barata, entre los productos que están en 2 o más tiendas.
+function cheapestStores(list) {
+  const multi = list.filter((p) => p.o.filter((o) => o.a).length > 1);
+  const wins = {}, present = {};
+  for (const p of multi) { const b = bestOf(p); wins[b.s] = (wins[b.s] || 0) + 1; for (const s of new Set(p.o.map((o) => o.s))) present[s] = (present[s] || 0) + 1; }
+  return { n: multi.length, rows: Object.keys(present).map((s) => ({ s, wins: wins[s] || 0, present: present[s] })).sort((a, b) => (b.wins - a.wins) || (b.present - a.present)) };
+}
+const faq = (pairs) => `<h2>Preguntas frecuentes</h2>${pairs.map(([q, a]) => `<h3 style="font-size:16.5px;margin:18px 0 4px">${esc(q)}</h3><p style="margin:0">${a}</p>`).join('')}`;
+const faqLd = (pairs) => ({ '@type': 'FAQPage', mainEntity: pairs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a.replace(/<[^>]+>/g, '') } })) });
+const crumbLd = (items) => ({ '@type': 'BreadcrumbList', itemListElement: items.map(([name, url], i) => ({ '@type': 'ListItem', position: i + 1, name, item: url })) });
 
 // Limpia lo generado en la corrida anterior.
 for (const c of CATEGORIES) await rm(`site/${c.id}`, { recursive: true, force: true });
-await rm('site/p', { recursive: true, force: true });
-
+for (const d of ['p', 'm', 'mas-barato']) await rm(`site/${d}`, { recursive: true, force: true });
 await writeFile('site/seo.css', CSS);
 const urls = [{ loc: `${SITE}/`, pri: '1.0' }];
+const write = async (path, html, pri) => { await mkdir(`site/${path}`, { recursive: true }); await writeFile(`site/${path}index.html`, html); if (pri) urls.push({ loc: `${SITE}/${path}`, pri }); };
+const brandSlug = (b) => slugify(b);
 
-// ---- Categorías ----
+// ---- Categorías y marca por categoría ----
+const brandPages = [];
 for (const c of cats) {
   const list = products.filter((p) => p.c === c.id).sort((a, b) => (b.o.length - a.o.length) || (bestOf(a).p - bestOf(b).p));
-  const multi = list.filter((p) => p.o.length > 1).length;
   const stores = [...new Set(list.flatMap((p) => p.o.map((o) => o.s)))];
   const minP = Math.min(...list.map((p) => bestOf(p).p));
-  const brands = Object.entries(list.reduce((m, p) => { if (p.b) m[p.b] = (m[p.b] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([b]) => b);
+  const byBrand = list.reduce((m, p) => { if (p.b) (m[p.b] ||= []).push(p); return m; }, {});
+  const brands = Object.entries(byBrand).filter(([, l]) => new Set(l.map((p) => modelOf.get(p) || p)).size >= 4).sort((a, b) => b[1].length - a[1].length);
+  const cs = cheapestStores(list);
   const name = c.name.toLowerCase();
-  const title = `${c.name} en Honduras: compara precios en ${stores.length} tiendas | Vitrina HN`;
-  const desc = `Compara ${list.length.toLocaleString('en-US')} ${name} en ${stores.map(storeName).slice(0, 6).join(', ')} y más. Desde ${money(minP)}. ${brands.slice(0, 4).join(', ')}. Precios actualizados a diario.`;
-  const top = list.slice(0, 120);
+  const top = cs.rows[0];
+  const pairs = [
+    [`¿Dónde están más baratos los ${name} en Honduras?`, cs.n ? `Entre los ${cs.n} ${name} que se venden en 2 o más tiendas, <strong>${esc(storeName(top.s))}</strong> tuvo el precio más bajo en ${top.wins} (${Math.round(100 * top.wins / cs.n)}%), según los precios del ${esc(updatedText)}. Depende del producto: revisa la tabla de cada uno.` : `Revisa cada producto: mostramos el precio en cada tienda.`],
+    [`¿Cuánto cuestan los ${name} en Honduras?`, `Desde ${money(minP)}. Comparamos ${list.length.toLocaleString('en-US')} productos de ${stores.length} tiendas.`],
+    [`¿Qué tiendas comparan?`, esc(stores.map(storeName).join(', ')) + '.'],
+  ];
+  const cards = cardsFor(list, '../', 120);
+  const title = `${c.name}: precios en Honduras y dónde comprar más barato | Vitrina HN`;
+  const desc = `¿Dónde están más baratos los ${name} en Honduras? Compara ${list.length.toLocaleString('en-US')} productos en ${stores.map(storeName).slice(0, 5).join(', ')} y más. Desde ${money(minP)}. Actualizado a diario.`;
   const body = `<p class="crumb"><a href="../">Inicio</a> › ${esc(c.name)}</p>
-<h1>${esc(c.name)} en Honduras: precios comparados</h1>
-<p class="lead">${list.length.toLocaleString('en-US')} productos de ${stores.length} tiendas (${esc(stores.map(storeName).join(', '))}). ${multi} se venden en 2 o más tiendas, para que veas dónde sale más barato. Actualizado el ${esc(updatedText)}.</p>
-${brands.length ? `<p class="chips">${brands.map((b) => `<a href="../#${c.id}">${esc(b)}</a>`).join('')}</p>` : ''}
-<ul class="grid">${top.map((p) => card(p, '../')).join('')}</ul>
-${list.length > top.length ? `<p class="note">Mostrando ${top.length} de ${list.length.toLocaleString('en-US')}. <a href="../#${c.id}">Ver todos con filtros en el comparador</a>.</p>` : ''}`;
-  const jsonld = {
-    '@context': 'https://schema.org', '@type': 'CollectionPage', name: title, url: `${SITE}/${c.id}/`,
-    breadcrumb: { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Inicio', item: `${SITE}/` }, { '@type': 'ListItem', position: 2, name: c.name, item: `${SITE}/${c.id}/` }] },
-  };
-  await mkdir(`site/${c.id}`, { recursive: true });
-  await writeFile(`site/${c.id}/index.html`, page({ path: `${c.id}/`, title, desc, body, jsonld, depth: 1 }));
-  urls.push({ loc: `${SITE}/${c.id}/`, pri: '0.8' });
+<h1>${esc(c.name)}: precios en Honduras y dónde comprar más barato</h1>
+<p class="lead">${list.length.toLocaleString('en-US')} productos de ${stores.length} tiendas, con el precio de cada una. Actualizado el ${esc(updatedText)}.</p>
+${brands.length ? `<p class="chips">${brands.map(([b]) => `<a href="${brandSlug(b)}/">${esc(c.name)} ${esc(b)}</a>`).join('')}</p>` : ''}
+<ul class="grid">${cards.html}</ul>
+${cards.total > cards.shown ? `<p class="note">Mostrando ${cards.shown} de ${cards.total.toLocaleString('en-US')}. <a href="../#${c.id}">Ver todos con filtros en el comparador</a>.</p>` : ''}
+${cs.n >= 3 ? `<h2>¿Qué tienda es más barata en ${esc(name)}?</h2><p class="lead">Entre los ${cs.n} ${esc(name)} que se venden en 2 o más tiendas:</p><table><thead><tr><th>Tienda</th><th>Más barata en</th><th class="h">Productos comparados</th></tr></thead><tbody>${cs.rows.slice(0, 12).map((r) => `<tr><td>${esc(storeName(r.s))}</td><td class="num">${r.wins} (${Math.round(100 * r.wins / cs.n)}%)</td><td class="num h">${r.present}</td></tr>`).join('')}</tbody></table>` : ''}
+${faq(pairs)}`;
+  const jsonld = { '@context': 'https://schema.org', '@graph': [{ '@type': 'CollectionPage', name: title, url: `${SITE}/${c.id}/` }, crumbLd([['Inicio', `${SITE}/`], [c.name, `${SITE}/${c.id}/`]]), faqLd(pairs)] };
+  await write(`${c.id}/`, page({ path: `${c.id}/`, title, desc, body, jsonld, depth: 1 }), '0.8');
+
+  for (const [b, bl] of brands) {
+    const bcs = cheapestStores(bl);
+    const bmin = Math.min(...bl.map((p) => bestOf(p).p));
+    const bstores = [...new Set(bl.flatMap((p) => p.o.map((o) => o.s)))];
+    const bcards = cardsFor(bl, '../../', 120);
+    const t = `${c.name} ${b} en Honduras: precios y dónde está más barato | Vitrina HN`;
+    const d = `Compara ${bl.length} ${name} ${b} en ${bstores.map(storeName).slice(0, 5).join(', ')}${bstores.length > 5 ? ' y más' : ''}. Desde ${money(bmin)}. Precios actualizados el ${updatedText}.`;
+    const bpairs = [[`¿Dónde están más baratos los ${name} ${b} en Honduras?`, bcs.n ? `<strong>${esc(storeName(bcs.rows[0].s))}</strong> tuvo el precio más bajo en ${bcs.rows[0].wins} de ${bcs.n} productos ${esc(b)} que se venden en varias tiendas (${esc(updatedText)}).` : `Revisa cada producto: mostramos el precio en cada tienda.`]];
+    const bbody = `<p class="crumb"><a href="../../">Inicio</a> › <a href="../">${esc(c.name)}</a> › ${esc(b)}</p>
+<h1>${esc(c.name)} ${esc(b)} en Honduras: precios comparados</h1>
+<p class="lead">${bl.length} productos ${esc(b)} en ${bstores.length} tiendas (${esc(bstores.map(storeName).join(', '))}). Desde ${money(bmin)}.</p>
+<ul class="grid">${bcards.html}</ul>
+${faq(bpairs)}`;
+    const bjson = { '@context': 'https://schema.org', '@graph': [{ '@type': 'CollectionPage', name: t, url: `${SITE}/${c.id}/${brandSlug(b)}/` }, crumbLd([['Inicio', `${SITE}/`], [c.name, `${SITE}/${c.id}/`], [b, `${SITE}/${c.id}/${brandSlug(b)}/`]]), faqLd(bpairs)] };
+    await write(`${c.id}/${brandSlug(b)}/`, page({ path: `${c.id}/${brandSlug(b)}/`, title: t, desc: d, body: bbody, jsonld: bjson, depth: 2 }), '0.7');
+    brandPages.push(1);
+  }
+}
+
+// ---- Modelos: todas las capacidades y colores en una página ("iPhone 17 Pro Max precio Honduras") ----
+for (const m of models) {
+  const rows = m.items.map((p) => ({ p, b: bestOf(p) })).sort((a, b) => ((a.p.cs || 0) - (b.p.cs || 0)) || (a.b.p - b.b.p));
+  const best = [...rows].sort((a, b) => a.b.p - b.b.p)[0];
+  const hiAll = Math.max(...m.items.flatMap((p) => p.o.filter((o) => o.a).map((o) => o.p)), best.b.p);
+  const stores = [...new Set(m.items.flatMap((p) => p.o.map((o) => o.s)))];
+  const caps = [...new Set(m.items.map((p) => p.cp).filter(Boolean))];
+  const img = m.items.find((p) => p.t);
+  const title = `${m.name} precio en Honduras: ¿dónde está más barato? | Vitrina HN`;
+  const desc = `${m.name} en Honduras desde ${money(best.b.p)} en ${storeName(best.b.s)}. Compara ${m.items.length} versiones${caps.length > 1 ? ` (${caps.slice(0, 3).join(', ')})` : ''} en ${stores.map(storeName).slice(0, 5).join(', ')}${stores.length > 5 ? ' y más' : ''}.`;
+  const pairs = [
+    [`¿Dónde está más barato el ${m.name} en Honduras?`, `En <strong>${esc(storeName(best.b.s))}</strong>, a ${money(best.b.p)} (${esc(variantLabel(best.p, m))}), según los precios del ${esc(updatedText)}.`],
+    [`¿Cuánto cuesta el ${m.name} en Honduras?`, `Entre ${money(best.b.p)} y ${money(hiAll)}, según la tienda${caps.length > 1 ? ', la capacidad' : ''} y el color.`],
+    [`¿En qué tiendas se vende?`, esc(stores.map(storeName).join(', ')) + '.'],
+  ];
+  const body = `<p class="crumb"><a href="../../">Inicio</a> › <a href="../../${m.c}/">${esc(catName(m.c))}</a>${m.b ? ` › <a href="../../${m.c}/${brandSlug(m.b)}/">${esc(m.b)}</a>` : ''}</p>
+<div class="prod"><div>${img ? `<img src="../../${thumb(img)}" alt="${esc(m.name)}" width="440" height="440">` : ''}</div>
+<div><p class="crumb">${esc(m.b || catName(m.c))}</p>
+<h1>${esc(m.name)}: precio en Honduras</h1>
+<p class="price">Desde ${money(best.b.p)}</p><p class="where">Más barato en ${esc(storeName(best.b.s))} · ${esc(variantLabel(best.p, m))}</p>
+<p><a class="cta" href="../../#p/${encodeURIComponent(pkey(best.p))}">Comparar y ver historial</a></p></div></div>
+<h2>Precio de cada versión del ${esc(m.name)}</h2>
+<table><thead><tr><th>Versión</th><th>Precio más bajo</th><th>Tienda</th><th class="h">Tiendas</th></tr></thead><tbody>${rows.map(({ p, b }) => `<tr class="${p === best.p ? 'best' : ''}"><td><a href="../../p/${productSlug(p)}/">${esc(variantLabel(p, m))}</a></td><td class="num"><strong>${money(b.p)}</strong></td><td>${esc(storeName(b.s))}</td><td class="num h">${p.o.length}</td></tr>`).join('')}</tbody></table>
+<p class="note">Precios referenciales tomados de cada tienda el ${esc(updatedText)}. El precio válido es el que muestra la tienda al comprar.</p>
+${faq(pairs)}`;
+  const jsonld = { '@context': 'https://schema.org', '@graph': [
+    { '@type': 'Product', name: m.name, ...(m.b ? { brand: { '@type': 'Brand', name: m.b } } : {}), ...(img ? { image: `${SITE}/${thumb(img)}` } : {}), category: catName(m.c), url: `${SITE}/m/${m.slug}/`,
+      offers: { '@type': 'AggregateOffer', priceCurrency: 'HNL', lowPrice: best.b.p, highPrice: hiAll, offerCount: m.items.reduce((n, p) => n + p.o.length, 0), availability: 'https://schema.org/InStock' } },
+    crumbLd([['Inicio', `${SITE}/`], [catName(m.c), `${SITE}/${m.c}/`], [m.name, `${SITE}/m/${m.slug}/`]]), faqLd(pairs)] };
+  await write(`m/${m.slug}/`, page({ path: `m/${m.slug}/`, title, desc, image: img ? thumb(img) : '', body, jsonld, depth: 2 }), '0.7');
 }
 
 // ---- Productos ----
 let n = 0;
 for (const p of products) {
   const slug = productSlug(p);
+  const m = modelOf.get(p);
   const offers = [...p.o].sort((a, b) => (b.a - a.a) || (a.p - b.p));
   const b = bestOf(p);
   const hi = Math.max(...offers.filter((o) => o.a).map((o) => o.p), b.p);
-  const where = offers.length > 1 ? `más barato en ${storeName(b.s)}` : `en ${storeName(b.s)}`;
-  const title = `${p.n}: precio en Honduras desde ${money(b.p)} | Vitrina HN`;
-  const desc = offers.length > 1
-    ? `${p.n} desde ${money(b.p)} en ${storeName(b.s)}. Compara el precio en ${offers.map((o) => storeName(o.s)).join(', ')}${hi > b.p ? `: ahorra hasta ${money(hi - b.p)}` : ''}.`
-    : `${p.n} a ${money(b.p)} en ${storeName(b.s)}. Precio actualizado el ${updatedText} y comparado con las tiendas de Honduras.`;
+  const multi = offers.length > 1;
+  const title = multi ? `${p.n}: dónde está más barato en Honduras (${money(b.p)}) | Vitrina HN` : `${p.n}: precio en Honduras ${money(b.p)} | Vitrina HN`;
+  const desc = multi
+    ? `¿Dónde está más barato el ${p.n}? Hoy en ${storeName(b.s)} a ${money(b.p)}. Compara ${offers.map((o) => storeName(o.s)).join(', ')}${hi > b.p ? `: ahorra hasta ${money(hi - b.p)}` : ''}.`
+    : `${p.n} a ${money(b.p)} en ${storeName(b.s)}. Precio actualizado el ${updatedText}.`;
   const rows = offers.map((o) => `<tr class="${o === b ? 'best' : ''}"><td>${esc(storeName(o.s))}</td><td class="num"><strong>${money(o.p)}</strong></td><td class="num h">${o.r > o.p ? `<s>${money(o.r)}</s>` : '—'}</td><td class="h">${o.a ? 'Disponible' : 'Agotado'}</td><td><a href="${esc(o.u)}" rel="nofollow noopener" target="_blank">Ver en tienda ›</a></td></tr>`).join('');
-  const related = products.filter((x) => x !== p && x.c === p.c && x.b === p.b).sort((a, x) => Math.abs(bestOf(a).p - b.p) - Math.abs(bestOf(x).p - b.p)).slice(0, 8);
-  const body = `<p class="crumb"><a href="../../">Inicio</a> › <a href="../../${p.c}/">${esc(catName(p.c))}</a>${p.b ? ` › ${esc(p.b)}` : ''}</p>
+  const siblings = m ? m.items.filter((x) => x !== p) : [];
+  const related = products.filter((x) => x !== p && x.c === p.c && x.b === p.b && !siblings.includes(x)).sort((a, x) => Math.abs(bestOf(a).p - b.p) - Math.abs(bestOf(x).p - b.p)).slice(0, 8);
+  const body = `<p class="crumb"><a href="../../">Inicio</a> › <a href="../../${p.c}/">${esc(catName(p.c))}</a>${m ? ` › <a href="../../m/${m.slug}/">${esc(m.name)}</a>` : ''}</p>
 <div class="prod"><div>${p.t ? `<img src="../../${thumb(p)}" alt="${esc(p.n)}" width="440" height="440">` : ''}</div>
 <div><p class="crumb">${esc(p.b || catName(p.c))}${p.m ? ` · Modelo ${esc(p.m)}` : ''}</p>
 <h1>${esc(p.n)}</h1>
-<p class="price">${money(b.p)}</p><p class="where">${esc(where.charAt(0).toUpperCase() + where.slice(1))}${hi > b.p ? ` · ahorras hasta ${money(hi - b.p)} frente a la tienda más cara` : ''}</p>
+<p class="price">${money(b.p)}</p><p class="where">${multi ? 'Más barato en' : 'En'} ${esc(storeName(b.s))}${hi > b.p ? ` · ahorras hasta ${money(hi - b.p)} frente a la tienda más cara` : ''}</p>
 <p><a class="cta" href="../../#p/${encodeURIComponent(pkey(p))}">Ver historial y comparar</a></p></div></div>
-<h2>Precio de ${esc(p.n)} en cada tienda</h2>
+<h2>Precio en cada tienda</h2>
 <table><thead><tr><th>Tienda</th><th>Precio</th><th class="h">Antes</th><th class="h">Disponibilidad</th><th></th></tr></thead><tbody>${rows}</tbody></table>
 <p class="note">Precios referenciales tomados de cada tienda el ${esc(updatedText)}. El precio válido es el que muestra la tienda al comprar.</p>
+${siblings.length ? `<h2>Otras versiones del ${esc(m.name)}</h2><ul class="grid">${siblings.slice(0, 12).map((x) => card(x, '../../', variantLabel(x, m))).join('')}</ul><p class="note"><a href="../../m/${m.slug}/">Ver todas las versiones del ${esc(m.name)}</a></p>` : ''}
 ${related.length ? `<h2>Otros ${esc(catName(p.c).toLowerCase())} ${esc(p.b)}</h2><ul class="grid">${related.map((x) => card(x, '../../')).join('')}</ul>` : ''}`;
   const jsonld = {
     '@context': 'https://schema.org', '@type': 'Product', name: p.n, ...(p.b ? { brand: { '@type': 'Brand', name: p.b } } : {}),
@@ -144,10 +253,21 @@ ${related.length ? `<h2>Otros ${esc(catName(p.c).toLowerCase())} ${esc(p.b)}</h2
     offers: { '@type': 'AggregateOffer', priceCurrency: 'HNL', lowPrice: b.p, highPrice: hi, offerCount: offers.length,
       availability: offers.some((o) => o.a) ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' },
   };
-  await mkdir(`site/p/${slug}`, { recursive: true });
-  await writeFile(`site/p/${slug}/index.html`, page({ path: `p/${slug}/`, title, desc, image: p.t ? thumb(p) : '', body, jsonld, depth: 2 }));
-  urls.push({ loc: `${SITE}/p/${slug}/`, pri: offers.length > 1 ? '0.6' : '0.4' });
+  await write(`p/${slug}/`, page({ path: `p/${slug}/`, title, desc, image: p.t ? thumb(p) : '', body, jsonld, depth: 2 }), multi ? '0.6' : '0.4');
   n++;
+}
+
+// ---- "Dónde está más barato": las mayores diferencias de precio entre tiendas ----
+{
+  const gaps = products.map((p) => { const av = p.o.filter((o) => o.a); if (av.length < 2) return null; const lo = Math.min(...av.map((o) => o.p)), hi = Math.max(...av.map((o) => o.p)); return { p, lo, hi, gap: hi - lo }; })
+    .filter((x) => x && x.gap >= 200 && x.hi / x.lo < 2.2).sort((a, b) => b.gap - a.gap).slice(0, 80);
+  const title = '¿Dónde está más barato? Diferencias de precio entre tiendas de Honduras | Vitrina HN';
+  const desc = `El mismo producto puede costar miles de lempiras menos en otra tienda. Las ${gaps.length} mayores diferencias de precio entre Diunsa, Jetstereo, La Curacao, Walmart, Elektra y más, actualizadas el ${updatedText}.`;
+  const body = `<p class="crumb"><a href="../">Inicio</a> › Dónde está más barato</p>
+<h1>¿Dónde está más barato? Las mayores diferencias de precio en Honduras</h1>
+<p class="lead">El mismo producto, en la tienda más barata y en la más cara. Actualizado el ${esc(updatedText)}.</p>
+<table><thead><tr><th>Producto</th><th>Más barato</th><th class="h">Más caro</th><th>Ahorras</th></tr></thead><tbody>${gaps.map(({ p, lo, hi, gap }) => { const b = bestOf(p); return `<tr><td><a href="../p/${productSlug(p)}/">${esc(p.n)}</a></td><td class="num">${money(lo)}<br><span class="s" style="color:var(--muted);font-size:13px">${esc(storeName(b.s))}</span></td><td class="num h">${money(hi)}</td><td class="num"><strong>${money(gap)}</strong></td></tr>`; }).join('')}</tbody></table>`;
+  await write('mas-barato/', page({ path: 'mas-barato/', title, desc, body, jsonld: { '@context': 'https://schema.org', '@type': 'CollectionPage', name: title, url: `${SITE}/mas-barato/` }, depth: 1 }), '0.9');
 }
 
 await writeFile('site/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
@@ -156,4 +276,4 @@ ${urls.map((u) => `<url><loc>${u.loc}</loc><lastmod>${today}</lastmod><priority>
 </urlset>
 `);
 await writeFile('site/robots.txt', `User-agent: *\nAllow: /\nDisallow: /captura/\n\nSitemap: ${SITE}/sitemap.xml\n`);
-console.log(`SEO: ${cats.length} categorías, ${n} productos, sitemap con ${urls.length} URLs (${SITE}).`);
+console.log(`SEO: ${cats.length} categorías, ${brandPages.length} marcas, ${models.length} modelos, ${n} productos; sitemap con ${urls.length} URLs (${SITE}).`);
