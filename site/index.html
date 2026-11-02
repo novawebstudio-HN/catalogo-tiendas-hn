@@ -423,6 +423,10 @@ footer .wrap{padding-block:20px 90px}
   .toolbar h2{width:auto;font-size:20px}
 }
 @media (max-width:420px){.tag{margin:8px 10px 0}.save{margin-left:10px}}
+.skel{height:330px;border-radius:16px;background:linear-gradient(100deg,#F1F5F3 30%,#E6EDE9 50%,#F1F5F3 70%) 0 0/250% 100%;animation:skel 1.3s linear infinite}
+@keyframes skel{to{background-position:-250% 0}}
+@media (max-width:760px){.skel{height:270px}}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
 /* Portada: tarjetas por categoría */
 .home{margin:2px 0 26px}
 .home h2{font:700 24px/1.1 "Barlow Condensed",sans-serif;margin:0 0 12px}
@@ -453,10 +457,12 @@ footer .wrap{padding-block:20px 90px}
   .tile .tt{order:2;margin-top:6px;font:600 13px/1.15 Inter,system-ui,sans-serif;letter-spacing:0}
   .tile .lg,.tile .ts{display:none}
   .tile .sh{display:inline}
-  .collage{order:1;flex:none;width:100%;aspect-ratio:1;margin:0;border-radius:18px;background:linear-gradient(155deg,#0F2A1F 0%,#0B1F17 55%,#123B2B 100%);overflow:hidden}
-  .tile.deal .collage{background:linear-gradient(155deg,#059669 0%,#047857 60%,#065F46 100%)}
+  .collage{order:1;flex:none;width:100%;aspect-ratio:1;margin:0;border-radius:16px;background:#fff;border:1px solid var(--line-2);overflow:hidden}
+  .tile.deal .collage{border:2px solid var(--act);background:var(--act-soft)}
+  .tile.deal .tt{color:var(--act)}
   .collage span:nth-child(1),.collage span:nth-child(3){display:none}
-  .collage span:nth-child(2){left:16%;right:16%;top:16%;bottom:16%;width:auto;height:auto;margin:0;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,.3)}
+  .collage span:nth-child(2){inset:0;width:auto;height:auto;margin:0;border-radius:0;box-shadow:none;background:transparent}
+  .collage img{mix-blend-mode:multiply}
   .collage img{padding:4px}
 }
 @media (prefers-reduced-motion:reduce){.tile{transition:none}.tile:hover{transform:none}}
@@ -506,7 +512,7 @@ footer .wrap{padding-block:20px 90px}
     </div>
     <p class="didyou" id="didyou" hidden></p>
     <div class="pills" id="pills" hidden></div>
-    <div class="grid" id="grid"></div>
+    <div class="grid" id="grid"><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div><div class="skel" aria-hidden="true"></div></div>
     <button class="more" id="more" hidden>Ver más productos</button>
     <div class="deals" id="deals" hidden></div>
   </main>
@@ -529,9 +535,27 @@ footer .wrap{padding-block:20px 90px}
 <script>
 (async function(){
   const $ = (s, r=document) => r.querySelector(s);
+  // Catálogo: se muestra al instante la copia guardada en el navegador y se revisa si hay una más nueva.
+  // Si la copia tiene más de 18 horas se espera la nueva (hasta 6 s); si no, se avisa cuando haya precios nuevos.
   let data;
-  try { data = await (await fetch('catalog.json', {cache:'no-cache'})).json(); }
-  catch (e) { $('#grid').innerHTML = '<div class="empty"><strong>No se pudo cargar el catálogo</strong>Recarga la página. Si sigue igual, el archivo catalog.json no está publicado.</div>'; return; }
+  const CAT = 'catalog.json', cacheOpen = () => (self.caches ? caches.open('vh-cat') : Promise.reject());
+  const fresh = fetch(CAT, {cache:'no-cache'}).then(async (r) => {
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const copy = r.clone(); cacheOpen().then(c => c.put(CAT, copy)).catch(() => {});
+    return r.json();
+  });
+  fresh.catch(() => {});
+  try { const r = await cacheOpen().then(c => c.match(CAT)); if (r) data = await r.json(); } catch {}
+  if (data && Date.now() - new Date(data.updated) > 18 * 3600e3) {
+    data = await Promise.race([fresh, new Promise(r => setTimeout(r, 6000))]).catch(() => null) || data;
+  } else if (data) {
+    const old = data.updated;
+    fresh.then(d => { if (d.updated !== old) setTimeout(() => toast('Hay precios nuevos', { label:'Actualizar', run: () => location.reload() }), 0); }).catch(() => {});
+  }
+  if (!data) {
+    try { data = await fresh; }
+    catch (e) { $('#grid').innerHTML = '<div class="empty"><strong>No se pudo cargar el catálogo</strong>Revisa tu conexión y recarga la página.</div>'; return; }
+  }
 
   const STORE_IDS = Object.keys(data.stores).filter(id => data.stores[id].count > 0);
   const storeName = (id) => data.stores[id]?.name || id;
@@ -1176,7 +1200,7 @@ footer .wrap{padding-block:20px 90px}
     const det = (await loadDetails(p.c))[p.id] || {};
     if (!sheet.open || $('#shTitle', sheet)?.textContent !== p.n) return;
     // Galería
-    const pics = [...new Set([imgSrc(p), ...(det.g || []).filter(u => u !== p.i)].filter(Boolean))].slice(0, 8);
+    const pics = [...new Set([imgSrc(p), ...(det.g || []).filter((u, j) => u !== p.i && !(p.t && j === (p.gi || 0)))].filter(Boolean))].slice(0, 8);
     if (pics.length > 1) {
       $('#galTh', sheet).innerHTML = pics.map((u,i) => `<button aria-current="${i===0}" data-pic="${esc(u)}" aria-label="Foto ${i+1}">${imgTag(u, initial, 'loading="lazy"')}</button>`).join('');
       $('#galTh', sheet).onclick = (e) => { const b = e.target.closest('[data-pic]'); if (!b) return; $('#galMain', sheet).innerHTML = imgTag(b.dataset.pic, initial); $('#galTh', sheet).querySelectorAll('button').forEach(x => x.setAttribute('aria-current', x === b)); };

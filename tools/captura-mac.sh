@@ -19,8 +19,11 @@ if [ $estado -ne 0 ]; then avisar "La captura falló: $resumen"; exit 1; fi
 git add data/manual/*.json
 if git diff --cached --quiet; then avisar "Captura sin cambios: $resumen"; exit 0; fi
 git commit --quiet -m "Captura desde Mac $(date '+%Y-%m-%d %H:%M')"
-if git push --quiet origin main; then
-  avisar "Precios subidos: $resumen"
-else
-  avisar "Se capturó pero no se pudo subir a GitHub."; exit 1
-fi
+# GitHub pudo recibir otros cambios mientras corría la captura: se integran y se reintenta.
+for intento in 1 2 3; do
+  if git pull --rebase --autostash --quiet origin main && git push --quiet origin main; then
+    avisar "Precios subidos: $resumen"; exit 0
+  fi
+  sleep 20
+done
+avisar "Se capturó pero no se pudo subir a GitHub."; exit 1

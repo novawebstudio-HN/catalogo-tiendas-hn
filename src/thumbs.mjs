@@ -59,7 +59,11 @@ const worker = async () => {
 };
 await Promise.all(Array.from({ length: 4 }, worker));
 
-for (const p of catalog.products) delete p.ii;
+// Con miniatura, la foto original no hace falta en el catálogo (se aligera la carga): basta su posición en la galería.
+for (const p of catalog.products) {
+  if (p.t) { const gi = (p.ii || []).indexOf(p.i); if (gi > 0) p.gi = gi; delete p.i; }
+  delete p.ii;
+}
 await writeFile('site/catalog.json', JSON.stringify(catalog));
 
 const used = new Set(catalog.products.map((p) => p.t).filter(Boolean));

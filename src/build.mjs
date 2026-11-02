@@ -431,7 +431,7 @@ export function group(items) {
     for (let i = specs.length - 1; i >= 0; i--) { const [k, v] = specs[i]; if (!k || !v || k.length > 32 || v.length > 90 || (/[.!]$/.test(v) && v.length > 40)) specs.splice(i, 1); }
     const product = {
       id: `${ps[0].store}-${ps[0].sku || ps[0].url}`.replace(/[^a-zA-Z0-9-]/g, '').slice(0, 60),
-      c: ps[0].cat, b: ps.find((p) => p.brand)?.brand || '', n: bestName(ps), on: [...new Set(ps.map((p) => p.name.replace(/\s+/g, ' ').trim()))].join(' | ').slice(0, 240),
+      c: ps[0].cat, b: ps.find((p) => p.brand)?.brand || '', n: bestName(ps), on: [...new Set(ps.map((p) => p.name.replace(/\s+/g, ' ').trim()))].join(' | ').slice(0, 180),
       m: model, i: pics[0] || '', ii: pics, o: offers,
     };
     Object.defineProperty(product, 'det', { value: { d: desc, s: specs, g: pics }, enumerable: false });
