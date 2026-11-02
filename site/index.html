@@ -1145,7 +1145,7 @@ footer .wrap{padding-block:20px 90px}
   async function openSheet(p){
     const offers = allOffers(p);
     const best = offers.find(o => o.a) || offers[0];
-    window.vt?.('producto', { producto: p.key, cat: p.c, precio: best?.p });
+    window.vt?.('producto', { producto: p.key, cat: p.c, precio: best?.p, nombre: p.n });
     const initial = esc((p.b||catName(p.c)).slice(0,1));
     const chips = Object.entries(p._f).map(([,v]) => v).concat(p.o.length > 1 ? [`En ${p.o.length} tiendas`] : []);
     const spread = offers.filter(o=>o.a).length > 1 ? Math.max(...offers.filter(o=>o.a).map(o=>o.p)) - best.p : 0;
@@ -1179,7 +1179,7 @@ footer .wrap{padding-block:20px 90px}
             <td class="num"><strong>${plain(o.p)}</strong>${o!==best && o.a && best.a ? `<span class="sub2">+${plain(o.p - best.p)}</span>` : ''}</td>
             <td class="num hide-s">${o.r > o.p ? `<s>${plain(o.r)}</s> <span class="sub2">−${Math.round(discount(o)*100)}%</span>` : '—'}</td>
             <td class="hide-s">${o.a ? 'Sí' : '<span class="muted">Agotado</span>'}</td>
-            <td class="num"><a class="go" href="${esc(o.u)}" target="_blank" rel="noopener" data-s="${esc(o.s)}" data-k="${esc(p.key)}" data-p="${o.p}" data-c="${esc(p.c)}"><span class="hide-s">Ver en tienda</span><span class="only-s">Ver</span> ›</a></td></tr>`).join('')}
+            <td class="num"><a class="go" href="${esc(o.u)}" target="_blank" rel="noopener" data-s="${esc(o.s)}" data-k="${esc(p.key)}" data-p="${o.p}" data-c="${esc(p.c)}" data-n="${esc(p.n)}"><span class="hide-s">Ver en tienda</span><span class="only-s">Ver</span> ›</a></td></tr>`).join('')}
           </tbody></table></div>
           <p class="refnote">Precios referenciales tomados de cada tienda. El precio válido es el que muestra la tienda al comprar.</p>
         </section>

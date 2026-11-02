@@ -27,7 +27,7 @@
     const body = {
       tipo, ses, disp, ruta: cut(location.pathname + location.hash, 200),
       tienda: cut(d.tienda, 30), producto: cut(d.producto, 160), cat: cut(d.cat, 40),
-      precio: typeof d.precio === 'number' && isFinite(d.precio) ? d.precio : null, q: cut(d.q, 80), ref: cut(d.ref, 120),
+      precio: typeof d.precio === 'number' && isFinite(d.precio) ? d.precio : null, q: cut(d.q, 80), ref: cut(d.ref, 120), nombre: cut(d.nombre, 120),
     };
     try {
       fetch(URL_SB, { method: 'POST', keepalive: true, headers: { apikey: KEY, 'Content-Type': 'application/json', Prefer: 'return=minimal' }, body: JSON.stringify(body) }).catch(() => {});
@@ -43,6 +43,6 @@
   // Clics a tiendas: cualquier enlace con data-s (tienda); data-k producto, data-p precio, data-c categoría.
   document.addEventListener('click', (e) => {
     const a = e.target.closest && e.target.closest('a[data-s]');
-    if (a) vt('tienda', { tienda: a.dataset.s, producto: a.dataset.k, precio: Number(a.dataset.p), cat: a.dataset.c });
+    if (a) vt('tienda', { tienda: a.dataset.s, producto: a.dataset.k, precio: Number(a.dataset.p), cat: a.dataset.c, nombre: a.dataset.n });
   }, true);
 })();

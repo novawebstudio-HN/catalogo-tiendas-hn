@@ -234,7 +234,7 @@ for (const p of products) {
   const desc = multi
     ? `¿Dónde está más barato el ${p.n}? Hoy en ${storeName(b.s)} a ${money(b.p)}. Compara ${offers.map((o) => storeName(o.s)).join(', ')}${hi > b.p ? `: ahorra hasta ${money(hi - b.p)}` : ''}.`
     : `${p.n} a ${money(b.p)} en ${storeName(b.s)}. Precio actualizado el ${updatedText}.`;
-  const rows = offers.map((o) => `<tr class="${o === b ? 'best' : ''}"><td>${esc(storeName(o.s))}</td><td class="num"><strong>${money(o.p)}</strong></td><td class="num h">${o.r > o.p ? `<s>${money(o.r)}</s>` : '—'}</td><td class="h">${o.a ? 'Disponible' : 'Agotado'}</td><td><a href="${esc(o.u)}" rel="nofollow noopener" target="_blank" data-s="${esc(o.s)}" data-k="${esc(pkey(p))}" data-p="${o.p}" data-c="${esc(p.c)}">Ver en tienda ›</a></td></tr>`).join('');
+  const rows = offers.map((o) => `<tr class="${o === b ? 'best' : ''}"><td>${esc(storeName(o.s))}</td><td class="num"><strong>${money(o.p)}</strong></td><td class="num h">${o.r > o.p ? `<s>${money(o.r)}</s>` : '—'}</td><td class="h">${o.a ? 'Disponible' : 'Agotado'}</td><td><a href="${esc(o.u)}" rel="nofollow noopener" target="_blank" data-s="${esc(o.s)}" data-k="${esc(pkey(p))}" data-p="${o.p}" data-c="${esc(p.c)}" data-n="${esc(p.n)}">Ver en tienda ›</a></td></tr>`).join('');
   const siblings = m ? m.items.filter((x) => x !== p) : [];
   const related = products.filter((x) => x !== p && x.c === p.c && x.b === p.b && !siblings.includes(x)).sort((a, x) => Math.abs(bestOf(a).p - b.p) - Math.abs(bestOf(x).p - b.p)).slice(0, 8);
   const body = `<p class="crumb"><a href="../../">Inicio</a> › <a href="../../${p.c}/">${esc(catName(p.c))}</a>${m ? ` › <a href="../../m/${m.slug}/">${esc(m.name)}</a>` : ''}</p>
