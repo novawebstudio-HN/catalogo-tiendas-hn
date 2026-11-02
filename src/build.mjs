@@ -9,12 +9,12 @@ export const offerKey = (p) => `${p.store}:${String(p.sku || createHash('sha1').
 
 const deaccent = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '');
 
-const BRAND_ALIASES = { playstation: 'sony', 'sony interactive': 'sony', 'sony playstation': 'sony', xbox: 'microsoft', 'general electric': 'ge', 'black and decker': 'black+decker', 'black & decker': 'black+decker', 'black + decker': 'black+decker', 'b&d': 'black+decker', 'bd': 'black+decker', 'sin marca': '' };
+const BRAND_ALIASES = { playstation: 'sony', 'sony interactive': 'sony', 'sony playstation': 'sony', xbox: 'microsoft', 'general electric': 'ge', 'black and decker': 'black+decker', 'black & decker': 'black+decker', 'black + decker': 'black+decker', 'b&d': 'black+decker', 'bd': 'black+decker', redmi: 'xiaomi', poco: 'xiaomi', 'sin marca': '' };
 export const brandKey = (b) => {
   const k = deaccent(b).toLowerCase().trim();
   return (BRAND_ALIASES[k] ?? k).replace(/[^a-z0-9+]/g, '');
 };
-const DISPLAY_ALIASES = { iphone: 'Apple', ipad: 'Apple', playstation: 'Sony', 'sony interactive': 'Sony', xbox: 'Xbox', 'general electric': 'GE', 'black and decker': 'Black+Decker', 'black & decker': 'Black+Decker', 'samsung electronics': 'Samsung' };
+const DISPLAY_ALIASES = { iphone: 'Apple', ipad: 'Apple', playstation: 'Sony', 'sony interactive': 'Sony', xbox: 'Xbox', 'general electric': 'GE', 'black and decker': 'Black+Decker', 'black & decker': 'Black+Decker', 'samsung electronics': 'Samsung', redmi: 'Xiaomi', poco: 'Xiaomi' };
 const titleBrand = (b) => {
   const s0 = String(b || '').trim();
   const s = DISPLAY_ALIASES[deaccent(s0).toLowerCase()] || s0;
@@ -300,7 +300,7 @@ export function clean(items) {
     if (p.price < minPrice(p.cat)) continue;
     let brand = titleBrand(p.brand);
     const nb = brandFromName(p.name);
-    if (nb && (!brand || (!deaccent(p.name).toLowerCase().includes(deaccent(brand).toLowerCase()) && brandKey(nb) !== brandKey(brand)))) brand = nb;
+    if (nb && (!brand || (!deaccent(p.name).toLowerCase().includes(deaccent(brand).toLowerCase()) && brandKey(nb) !== brandKey(brand)))) brand = titleBrand(nb);
     // Consolas, juegos y controles: la marca sale de la plataforma si la tienda no la dice.
     if (!brand && ['consolas', 'videojuegos'].includes(p.cat)) brand = /switch|nintendo|joy-?con|amiibo/i.test(name) ? 'Nintendo' : /ps5|ps4|playstation|dualsense|dualshock/i.test(name) ? 'Sony' : /xbox/i.test(name) ? 'Xbox' : '';
     if (!brand) {
