@@ -12,7 +12,7 @@ const TARGETS = {
   jetstereo: { file: 'src/stores/jetstereo.mjs', fn: 'scrapeJetstereo', url: 'https://www.jetstereo.com/', cred: 'omit' },
   acosa: { file: 'src/stores/acosa.mjs', fn: 'scrapeAcosa', url: 'https://acosa.com.hn/', cred: 'same-origin' },
 };
-const CHALLENGE = /just a moment|verif(y|ica)|captcha|attention required|access denied|bxverify/i;
+const CHALLENGE = /just a moment|un momento|verif(y|ica)|captcha|attention required|access denied|bxverify/i;
 
 const wanted = process.argv.slice(2).filter((a) => TARGETS[a]);
 const ids = wanted.length ? wanted : Object.keys(TARGETS);
@@ -29,9 +29,16 @@ try {
     try {
       const res = await page.goto(t.url, { waitUntil: 'domcontentloaded', timeout: 60000 });
       await page.waitForTimeout(4000);
-      const title = await page.title();
-      if (!res || res.status() >= 400 || CHALLENGE.test(title) || CHALLENGE.test(page.url())) {
-        throw new Error(`la tienda pidió verificación o bloqueó la visita (HTTP ${res?.status()}, "${title}"); no se intenta pasarla`);
+      // Algunas tiendas muestran unos segundos una página de "Un momento…" que se quita sola. Se espera hasta
+      // 45 s sin tocar nada; si sigue ahí (o pide marcar una casilla), se detiene: no se intenta pasarla.
+      const blocked = async () => CHALLENGE.test(await page.title()) || CHALLENGE.test(page.url());
+      let ok = res && res.status() < 400 && !(await blocked());
+      for (let s = 0; !ok && s < 45; s += 3) {
+        await page.waitForTimeout(3000);
+        ok = !(await blocked()) && (await page.evaluate(() => document.readyState)) !== 'loading';
+      }
+      if (!ok) {
+        throw new Error(`la tienda pidió verificación o bloqueó la visita (HTTP ${res?.status()}, "${await page.title()}"); no se intenta pasarla. Se reintenta en la próxima corrida`);
       }
       const mod = (await readFile(t.file, 'utf8')).replace(/^import .*$/gm, '').replace(/^export /gm, '');
       const code = `(async () => { ${mod}
