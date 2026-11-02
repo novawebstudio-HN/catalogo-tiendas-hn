@@ -199,11 +199,11 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 .sh-head .crumb{color:var(--muted);font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .iconbtn{width:40px;height:40px;border:0;border-radius:10px;background:none;cursor:pointer;display:grid;place-items:center;flex:0 0 auto}
 .iconbtn:hover{background:var(--soft)}
-.sh-body{padding:22px 24px 30px;display:grid;gap:28px}
+.sh-body{padding:22px 24px 30px;display:grid;grid-template-columns:minmax(0,1fr);gap:28px}
 .sh-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:30px;align-items:start}
 .sh-top > div{min-width:0}
-.gal-main{aspect-ratio:1/1;border:1px solid var(--line);border-radius:12px;display:grid;place-items:center;padding:22px;background:#fff}
-.gal-main img{max-width:100%;max-height:100%;object-fit:contain}
+.gal-main{aspect-ratio:1/1;border:1px solid var(--line);border-radius:12px;display:grid;grid-template-columns:minmax(0,1fr);place-items:center;padding:22px;background:#fff;overflow:hidden;min-width:0}
+.gal-main img{max-width:100%;max-height:100%;width:auto;height:auto;min-width:0;object-fit:contain}
 .gal-th{display:flex;gap:8px;margin-top:10px;overflow-x:auto;padding-bottom:2px}
 .gal-th button{width:62px;height:62px;border:1.5px solid var(--line);border-radius:8px;background:#fff;padding:4px;cursor:pointer;flex:0 0 auto}
 .gal-th button[aria-current="true"]{border-color:var(--ink)}
@@ -232,6 +232,8 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 .otable tr.best td{background:#FFFBEA}
 .otable a.go{display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line-2);text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap}
 .otable a.go:hover{border-color:var(--ink)}
+.only-s{display:none}
+@media (max-width:760px){.only-s{display:inline}.otable .sub2.only-s{display:block}}
 .chart{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px;background:#fff}
 .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:13.5px;color:var(--muted)}
 .legend span{display:inline-flex;align-items:center;gap:6px}
@@ -292,6 +294,9 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
   .specs{grid-template-columns:minmax(0,1fr)}
   .specs dt{border-bottom:0;padding-bottom:2px;background:none;font-size:13px}
   .otable .hide-s{display:none}
+  .otable .stn{white-space:nowrap}
+  .otable th,.otable td{padding:10px 6px}
+  .otable a.go{padding:0 10px}
   .updated{width:100%;order:3}
 }
 @media (max-width:420px){
@@ -856,6 +861,7 @@ footer .wrap{padding-block:20px 90px}
     $('#deals').hidden = !deals; $('#grid').hidden = deals; $('#toolbar').hidden = deals; $('#pills').hidden = true; $('#fbar').hidden = solo;
     renderTabs();
     if (deals) { $('#more').hidden = true; $('#didyou').hidden = true; renderDeals(); return; }
+    $('#deals').innerHTML = ''; // no dejar tarjetas de Ofertas escondidas en la página
     state.shown = 48; current = computeList();
     if (!solo) renderFilters();
     renderPills(); renderGrid(false); renderDidYou();
@@ -1008,12 +1014,12 @@ footer .wrap{padding-block:20px 90px}
         </div>
         <section class="sh-sec">
           <h3>Precio en cada tienda</h3>
-          <div class="tscroll"><table class="otable"><thead><tr><th>Tienda</th><th>Precio</th><th class="hide-s">Antes</th><th>Disponible</th><th></th></tr></thead><tbody>
-          ${offers.map((o,i) => `<tr class="${o===best?'best':''}"><td><span class="stn"><span class="sw" style="background:var(--s-${o.s})"></span>${esc(storeName(o.s))}</span>${o.q ? `<span class="sub2">${o.q.n} cuotas de ${plain(o.p/o.q.n)} ${esc(o.q.t)}</span>` : ''}</td>
+          <div class="tscroll"><table class="otable"><thead><tr><th>Tienda</th><th>Precio</th><th class="hide-s">Antes</th><th class="hide-s">Disponible</th><th></th></tr></thead><tbody>
+          ${offers.map((o,i) => `<tr class="${o===best?'best':''}${o.a?'':' outrow'}"><td><span class="stn"><span class="sw" style="background:var(--s-${o.s})"></span>${esc(storeName(o.s))}</span>${o.q ? `<span class="sub2">${o.q.n} cuotas de ${plain(o.p/o.q.n)}<span class="hide-s"> ${esc(o.q.t)}</span></span>` : ''}${o.a ? '' : '<span class="sub2 only-s">Agotado</span>'}</td>
             <td class="num"><strong>${plain(o.p)}</strong>${o!==best && o.a && best.a ? `<span class="sub2">+${plain(o.p - best.p)}</span>` : ''}</td>
             <td class="num hide-s">${o.r > o.p ? `<s>${plain(o.r)}</s> <span class="sub2">−${Math.round(discount(o)*100)}%</span>` : '—'}</td>
-            <td>${o.a ? 'Sí' : '<span class="muted">Agotado</span>'}</td>
-            <td><a class="go" href="${esc(o.u)}" target="_blank" rel="noopener">Ver en tienda ›</a></td></tr>`).join('')}
+            <td class="hide-s">${o.a ? 'Sí' : '<span class="muted">Agotado</span>'}</td>
+            <td class="num"><a class="go" href="${esc(o.u)}" target="_blank" rel="noopener"><span class="hide-s">Ver en tienda</span><span class="only-s">Ver</span> ›</a></td></tr>`).join('')}
           </tbody></table></div>
         </section>
         <section class="sh-sec" id="shHist"></section>
