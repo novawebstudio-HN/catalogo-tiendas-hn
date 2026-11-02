@@ -177,6 +177,10 @@ aside.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 68px);max-hei
 footer{border-top:1px solid var(--line);color:var(--muted);font-size:14px}
 footer .wrap{padding-block:24px 90px}
 footer p{max-width:75ch;margin:0}
+footer .legal{margin-top:8px;font-size:13px}
+footer .flinks{margin-top:10px;font-size:13.5px}
+footer .flinks a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
+footer .flinks a:hover{color:var(--act)}
 
 /* Ofertas reales */
 .deals{display:grid;gap:34px}
@@ -233,6 +237,7 @@ dialog.sheet::backdrop{background:rgba(20,27,35,.45)}
 .otable a.go{display:inline-flex;align-items:center;gap:4px;height:34px;padding:0 12px;border-radius:8px;border:1px solid var(--line-2);text-decoration:none;font-weight:600;font-size:14px;white-space:nowrap}
 .otable a.go:hover{border-color:var(--ink)}
 .only-s{display:none}
+.refnote{font-size:13px;color:var(--muted);margin:10px 0 0}
 @media (max-width:760px){.only-s{display:inline}.otable .sub2.only-s{display:block}}
 .chart{width:100%;height:auto;display:block;border:1px solid var(--line);border-radius:10px;background:#fff}
 .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:13.5px;color:var(--muted)}
@@ -449,7 +454,11 @@ footer .wrap{padding-block:20px 90px}
 </div>
 
 <footer>
-  <div class="wrap"><p><span id="updated"></span> · Vitrina HN no está afiliada a ninguna de las tiendas.</p></div>
+  <div class="wrap">
+    <p><span id="updated"></span></p>
+    <p class="legal">Vitrina HN es un sitio independiente y no está afiliado a ninguna de las tiendas. Los precios son referenciales: el precio válido es el que muestra la tienda al comprar. Marcas y fotos pertenecen a sus dueños.</p>
+    <p class="flinks"><a href="aviso-legal.html">Aviso legal</a> · <a href="aviso-legal.html#contacto">Contacto</a> · <a href="mailto:info@vitrina.hn">info@vitrina.hn</a></p>
+  </div>
 </footer>
 
 <dialog class="sheet" id="sheet" aria-labelledby="shTitle"></dialog>
@@ -1021,6 +1030,7 @@ footer .wrap{padding-block:20px 90px}
             <td class="hide-s">${o.a ? 'Sí' : '<span class="muted">Agotado</span>'}</td>
             <td class="num"><a class="go" href="${esc(o.u)}" target="_blank" rel="noopener"><span class="hide-s">Ver en tienda</span><span class="only-s">Ver</span> ›</a></td></tr>`).join('')}
           </tbody></table></div>
+          <p class="refnote">Precios referenciales tomados de cada tienda. El precio válido es el que muestra la tienda al comprar.</p>
         </section>
         <section class="sh-sec" id="shHist"></section>
         <section class="sh-sec" id="shSpecs" hidden></section>
