@@ -57,6 +57,10 @@ jobs:
           git commit -m "Catálogo actualizado $(date -u +'%Y-%m-%d %H:%M') UTC"
           git pull --rebase -X theirs origin main   # si chocan archivos generados, gana el catálogo de esta corrida
           git push
+      - name: Páginas para buscadores (categorías, productos, sitemap)
+        env:
+          SITE_URL: https://vitrinahn.shop
+        run: node src/seo.mjs
       - name: Preparar la página
         uses: actions/upload-pages-artifact@v3
         with:

@@ -4,17 +4,21 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#FFFFFF">
-<title>Vitrina HN</title>
-<meta name="description" content="Compara precios de las tiendas grandes de Honduras en un solo lugar: celulares, televisores, línea blanca, consolas, motos y más, con historial de precios.">
+<title>Vitrina HN: compara precios de tiendas en Honduras</title>
+<meta name="description" content="¿Dónde sale más barato? Compara precios de celulares, televisores, laptops, refrigeradoras, aires, consolas y más en Diunsa, Jetstereo, La Curacao, Walmart, Elektra, Lady Lee y otras tiendas de Honduras. Actualizado a diario.">
+<link rel="canonical" href="https://vitrinahn.shop/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"Vitrina HN","alternateName":"Vitrina Honduras","url":"https://vitrinahn.shop/","inLanguage":"es-HN","description":"Comparador de precios de tiendas de Honduras","potentialAction":{"@type":"SearchAction","target":"https://vitrinahn.shop/?q={search_term_string}","query-input":"required name=search_term_string"}}</script>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="site.webmanifest">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Vitrina HN">
-<meta property="og:title" content="Vitrina HN · ¿Dónde sale más barato?">
+<meta property="og:title" content="Vitrina HN · ¿Dónde sale más barato en Honduras?">
+<meta property="og:url" content="https://vitrinahn.shop/">
+<meta property="og:locale" content="es_HN">
 <meta property="og:description" content="Compara precios de las tiendas grandes de Honduras en un solo lugar.">
-<meta property="og:image" content="https://novawebstudio-hn.github.io/catalogo-tiendas-hn/og.png">
+<meta property="og:image" content="https://vitrinahn.shop/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
@@ -179,6 +183,9 @@ footer .wrap{padding-block:24px 90px}
 footer p{max-width:75ch;margin:0}
 footer .legal{margin-top:8px;font-size:13px}
 footer .flinks{margin-top:10px;font-size:13.5px}
+footer .fcats{margin-top:10px;font-size:13px;line-height:1.9}
+footer .fcats a{color:var(--muted);text-decoration:none}
+footer .fcats a:hover{color:var(--act);text-decoration:underline}
 footer .flinks a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
 footer .flinks a:hover{color:var(--act)}
 
@@ -457,6 +464,7 @@ footer .wrap{padding-block:20px 90px}
   <div class="wrap">
     <p><span id="updated"></span></p>
     <p class="legal">Vitrina HN es un sitio independiente y no está afiliado a ninguna de las tiendas. Los precios son referenciales: el precio válido es el que muestra la tienda al comprar. Marcas y fotos pertenecen a sus dueños.</p>
+    <nav class="fcats" aria-label="Categorías"><a href="celulares/">Celulares</a> · <a href="laptops/">Laptops</a> · <a href="tablets/">Tablets</a> · <a href="televisores/">Televisores</a> · <a href="monitores/">Monitores</a> · <a href="impresoras/">Impresoras</a> · <a href="smartwatches/">Relojes inteligentes</a> · <a href="audifonos/">Audífonos</a> · <a href="audio/">Bocinas y audio</a> · <a href="consolas/">Consolas</a> · <a href="videojuegos/">Juegos y controles</a> · <a href="refrigeradoras/">Refrigeradoras</a> · <a href="lavadoras/">Lavadoras</a> · <a href="estufas/">Estufas</a> · <a href="microondas/">Microondas</a> · <a href="aires/">Aires acondicionados</a> · <a href="camas/">Camas</a> · <a href="freidoras/">Freidoras de aire</a> · <a href="licuadoras/">Licuadoras y cafeteras</a> · <a href="motos/">Motos</a> · <a href="accesorios/">Cargadores y cables</a></nav>
     <p class="flinks"><a href="aviso-legal.html">Aviso legal</a> · <a href="aviso-legal.html#contacto">Contacto</a> · <a href="mailto:info@vitrina.hn">info@vitrina.hn</a></p>
   </div>
 </footer>
@@ -758,6 +766,10 @@ footer .wrap{padding-block:20px 90px}
   const imgSrc = (p) => p.t ? `thumbs/${p.t}.webp` : p.i;
   const imgTag = (src, initial, extra='') => src ? `<img src="${esc(src)}" alt="" ${extra} decoding="async" referrerpolicy="no-referrer" onerror="this.outerHTML='<span class=&quot;ph&quot;>${initial}</span>'">` : `<span class="ph">${initial}</span>`;
   const plink = (p) => '#p/' + encodeURIComponent(p.key);
+  // Igual que src/seo.mjs: nombre + huella corta del id.
+  const fnv = (s) => { let h = 0x811c9dc5; for (const c of String(s)) { h ^= c.codePointAt(0); h = Math.imul(h, 0x01000193) >>> 0; } return h.toString(36); };
+  const slugify = (s) => String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/["”″]/g, '-pulgadas').replace(/\+/g, '-plus').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 80).replace(/-+$/, '');
+  const productSlug = (p) => `${slugify(p.n)}-${fnv(p.id)}`;
 
   // Colores: muestra de color por nombre.
   const SWATCH = { 'Negro':'#16181b','Blanco':'#ffffff','Blanco estelar':'#f4efe6','Gris':'#9aa1a9','Grafito':'#4a4f55','Plata':'#c9cdd2','Azul':'#2563eb','Azul marino':'#1e3a8a','Azul cobalto':'#1d4ed8','Celeste':'#7dd3fc','Índigo':'#4338ca','Zafiro':'#1e40af','Rojo':'#dc2626','Rojo volcánico':'#b91c1c','Vino':'#7f1d1d','Rosado':'#f9a8d4','Fucsia':'#db2777','Coral':'#fb7185','Verde':'#16a34a','Menta':'#a7f3d0','Jade':'#10b981','Verde oliva':'#65743a','Oliva':'#65743a','Verde salvia':'#9caf88','Verde azulado':'#0f766e','Morado':'#7c3aed','Violeta':'#8b5cf6','Lila':'#c4b5fd','Lavanda':'#c7b9f0','Dorado':'#d4a72c','Champagne':'#e8d9b5','Bronce':'#a16207','Cobre':'#b45309','Amarillo':'#facc15','Naranja':'#f97316','Café':'#7c4a1e','Beige':'#e7d8c0','Crema':'#f3ead3','Arena':'#d6c4a0','Turquesa':'#2dd4bf','Aqua':'#67e8f9','Titanio':'#b8b2a7','Camuflaje':'#556b2f','Medianoche':'#1f2937','Cósmico':'#5b21b6','Galáctico':'#6d28d9','Neón':'#22d3ee','Acero inoxidable':'#c0c4c8' };
@@ -1037,7 +1049,8 @@ footer .wrap{padding-block:20px 90px}
       </div>`;
     if (!sheet.open) sheet.showModal();
     sheet.scrollTop = 0;
-    const url = location.origin + location.pathname + plink(p);
+    // Enlace para compartir: la página propia del producto (con foto y precio en la vista previa de WhatsApp).
+    const url = location.origin + location.pathname.replace(/[^/]*$/, '') + 'p/' + productSlug(p) + '/';
     const txt = `${p.n} — desde ${plain(best.p)} en ${storeName(best.s)}${p.o.length > 1 ? ` (comparado en ${p.o.length} tiendas)` : ''}. Míralo en Vitrina HN: ${url}`;
     $('#shWa', sheet).href = 'https://wa.me/?text=' + encodeURIComponent(txt);
     $('#shCopy', sheet).onclick = async () => { try { await navigator.clipboard.writeText(url); toast('Enlace copiado'); } catch { prompt('Copia este enlace:', url); } };
@@ -1197,6 +1210,9 @@ footer .wrap{padding-block:20px 90px}
 
   // ---- Inicio ----
   updateFavCount(); updateCbar();
+  // Búsqueda desde Google (?q=…)
+  const q0 = new URLSearchParams(location.search).get('q');
+  if (q0) { $('#q').value = q0; state.q = q0; applyQuery(); }
   const h0 = decodeURIComponent(location.hash.slice(1));
   if (h0 === 'ofertas') state.view = 'deals';
   else if (h0 === 'favoritos') state.view = 'favs';
