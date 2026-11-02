@@ -427,19 +427,6 @@ footer .wrap{padding-block:20px 90px}
 @keyframes skel{to{background-position:-250% 0}}
 @media (max-width:760px){.skel{height:270px}}
 @media (prefers-reduced-motion:reduce){.skel{animation:none}}
-.mchips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
-.mchip{border:1px solid var(--line-2);background:#fff;border-radius:999px;padding:6px 12px;font:600 13px Inter,system-ui,sans-serif;color:var(--ink);cursor:pointer}
-.mchip[aria-pressed="true"]{border-color:var(--act);background:var(--act-soft);color:var(--act)}
-.crlinks{margin:8px 0 0;font-size:14px;display:flex;flex-wrap:wrap;gap:6px 14px}
-.crlinks a{color:var(--act);font-weight:600;text-decoration:none}
-.crgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;margin:4px 0 10px}
-.crcard{display:flex;flex-direction:column;gap:4px;border:1px solid var(--line);border-radius:14px;padding:14px 16px;background:#fff}
-.crcard .crst{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
-.crcard .crst .sw{width:10px;height:10px;border-radius:50%}
-.crcard strong{font-size:17px}
-.crcard .crd{font-size:14px;color:var(--muted);flex:1}
-.crcard a{margin-top:6px;color:var(--act);font-weight:700;text-decoration:none}
-@media (max-width:760px){.crgrid{grid-template-columns:1fr 1fr;gap:8px}.crcard{padding:11px 12px}.crcard strong{font-size:15px;line-height:1.2}.crcard .crd{font-size:12.5px;line-height:1.35}.crcard a{font-size:13.5px}}
 /* Portada: tarjetas por categoría */
 .home{margin:2px 0 26px}
 .home h2{font:700 24px/1.1 "Barlow Condensed",sans-serif;margin:0 0 12px}
@@ -536,7 +523,7 @@ footer .wrap{padding-block:20px 90px}
     <p><span id="updated"></span></p>
     <p class="legal">Vitrina HN es un sitio independiente y no está afiliado a ninguna de las tiendas. Los precios son referenciales: el precio válido es el que muestra la tienda al comprar. Marcas y fotos pertenecen a sus dueños.</p>
     <nav class="fcats" aria-label="Categorías"><a href="celulares/">Celulares</a> · <a href="laptops/">Laptops</a> · <a href="tablets/">Tablets</a> · <a href="televisores/">Televisores</a> · <a href="monitores/">Monitores</a> · <a href="impresoras/">Impresoras</a> · <a href="smartwatches/">Relojes inteligentes</a> · <a href="audifonos/">Audífonos</a> · <a href="audio/">Bocinas y audio</a> · <a href="consolas/">Consolas</a> · <a href="videojuegos/">Juegos y controles</a> · <a href="refrigeradoras/">Refrigeradoras</a> · <a href="lavadoras/">Lavadoras</a> · <a href="estufas/">Estufas</a> · <a href="microondas/">Microondas</a> · <a href="aires/">Aires acondicionados</a> · <a href="camas/">Camas</a> · <a href="freidoras/">Freidoras de aire</a> · <a href="licuadoras/">Licuadoras y cafeteras</a> · <a href="motos/">Motos</a> · <a href="accesorios/">Cargadores y cables</a></nav>
-    <p class="flinks"><a href="mas-barato/">¿Dónde está más barato?</a> · <a href="#cuotas">Paga en cuotas</a> · <a href="aviso-legal.html">Aviso legal</a> · <a href="aviso-legal.html#contacto">Contacto</a> · <a href="mailto:info@vitrina.hn">info@vitrina.hn</a></p>
+    <p class="flinks"><a href="mas-barato/">¿Dónde está más barato?</a> · <a href="aviso-legal.html">Aviso legal</a> · <a href="aviso-legal.html#contacto">Contacto</a> · <a href="mailto:info@vitrina.hn">info@vitrina.hn</a></p>
   </div>
 </footer>
 
@@ -864,34 +851,6 @@ footer .wrap{padding-block:20px 90px}
     return out;
   }
   const flagsHtml = (fl) => fl.length ? `<div class="flags">${fl.map(([c, t, tip]) => `<span class="flag ${c}"${tip ? ` title="${esc(tip)}"` : ''}>${esc(t)}</span>`).join('')}</div>` : '';
-  // Crédito y cuotas que cada tienda ofrece (tomado de sus sitios). url: dónde solicitarlo.
-  const CREDITO = {
-    jetstereo: { n:'Crédito Solvenza', d:'Solicitud y compra con crédito en línea.', u:'https://www.jetstereo.com/credito/credito-en-linea', cta:'Solicitar en línea' },
-    gallo: { n:'CrediGallo', d:'Crédito propio de El Gallo más Gallo.', u:'https://www.elgallomasgallo.com.hn/credigallo/solicitudcredito', cta:'Solicitar en línea' },
-    elektra: { n:'Préstamo Banco Azteca', d:'Crédito de Banco Azteca para comprar en Elektra.', u:'https://www.elektra.com.hn/credito/presolicitud', cta:'Presolicitud en línea' },
-    curacao: { n:'Crédito La Curacao', d:'Crédito propio y hasta 12 cuotas con tarjetas participantes.', u:'https://www.lacuracaonline.com/honduras/cuotas_sin_intereses', cta:'Ver cuotas y crédito' },
-    diunsa: { n:'CrediDiunsa', d:'Crédito propio de Diunsa; se solicita en tienda con tu identidad.', u:'https://www.diunsa.hn/', cta:'Ir a Diunsa' },
-    walmart: { n:'Meses sin intereses BAC', d:'Productos seleccionados en cuotas con tarjeta BAC.', u:'https://www.walmart.com.hn/', cta:'Ir a Walmart' },
-  };
-  // Plan con tarjeta que la tienda anuncia para todo su catálogo (si el producto no trae uno propio).
-  const CARD_PLAN = { curacao: { n:12, t:'con tarjetas participantes', upto:true } };
-  const planOf = (o) => o.q ? { n:o.q.n, t:o.q.t } : CARD_PLAN[o.s] || null;
-  const MESES = [3, 6, 12, 18, 24];
-  let cuotaN = 12;
-  function cuotasHtml(p, offers){
-    const av = offers.filter(o => o.a);
-    if (!av.length || av[0].p < 500) return '';
-    const rows = av.map((o, i) => { const pl = planOf(o);
-      const note = pl ? (cuotaN <= pl.n ? `${pl.upto ? 'Hasta ' : ''}${pl.n} cuotas sin intereses ${pl.t}` : `Publica hasta ${pl.n} cuotas sin intereses`) : 'Si tu tarjeta da cuotas sin intereses';
-      return `<tr class="${i===0?'best':''}"><td><span class="stn"><span class="sw" style="background:var(--s-${o.s})"></span>${esc(storeName(o.s))}</span><span class="sub2">${esc(note)}</span></td><td class="num"><strong>${plain(o.p / cuotaN)}</strong><span class="sub2">al mes</span></td></tr>`; }).join('');
-    const cr = [...new Set(av.map(o => o.s))].filter(id => CREDITO[id]);
-    return `<h3>Paga en cuotas</h3>
-      <div class="mchips" role="group" aria-label="Meses">${MESES.map(n => `<button class="mchip" data-meses="${n}" aria-pressed="${n===cuotaN}">${n} meses</button>`).join('')}</div>
-      <div class="tscroll"><table class="otable"><thead><tr><th>Tienda</th><th>Cuota</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="refnote">Cálculo de referencia sin intereses: precio ÷ ${cuotaN} meses. La tienda más barata da la cuota más baja. Con crédito de la tienda se cobran intereses y la cuota es mayor; la cuota final la define el banco o la tienda.</p>
-      ${cr.length ? `<p class="crlinks">Crédito en estas tiendas: ${cr.map(id => `<a href="${esc(CREDITO[id].u)}" target="_blank" rel="noopener" data-cr="${id}" data-k="${esc(p.key)}">${esc(CREDITO[id].n)} ›</a>`).join(' ')}</p>` : ''}
-      <p class="crlinks"><a href="#cuotas">Comparar el crédito de cada tienda</a></p>`;
-  }
   const planText = (o) => o?.q ? `o ${o.q.n} cuotas de ${plain(o.p / o.q.n)} sin intereses en ${storeName(o.s)}` : '';
 
   const imgSrc = (p) => p.t ? `thumbs/${p.t}.webp` : p.i;
@@ -1006,7 +965,7 @@ footer .wrap{padding-block:20px 90px}
   // ---- Portada: tarjetas por categoría (solo en "Todos", sin búsqueda ni filtros) ----
   const HOME_CATS = [
     ['celulares','Lo más buscado','Celulares'], ['televisores','','TV'], ['laptops','','Laptops'], ['tablets','','Tablets'],
-    ['audifonos','','Audífonos'], ['smartwatches','','Relojes'], ['refrigeradoras','','Refris'],
+    ['audifonos','','Audífonos'], ['smartwatches','','Relojes'], ['consolas','','Consolas'], ['refrigeradoras','','Refris'],
     ['lavadoras','','Lavadoras'], ['aires','','Aires'], ['motos','','Motos'],
   ];
   let homeHtml = '';
@@ -1033,7 +992,6 @@ footer .wrap{padding-block:20px 90px}
     }
     gaps.sort((a,b) => b[1] - a[1]);
     const tiles = [gaps.length ? tile('#ofertas', 'Ofertas', 'Mismo producto, más barato', gaps.map(x => x[0]), ' deal') : ''];
-    tiles.push(tile('#cuotas', 'Paga en cuotas', 'Compara la cuota en cada tienda', data.products.filter(p => p.o.some(o => o.a && o.q)), ' deal', 'Cuotas'));
     for (const [id, sub, short] of HOME_CATS) {
       const list = by[id];
       if (!list?.length) continue;
@@ -1056,12 +1014,12 @@ footer .wrap{padding-block:20px 90px}
     $('#navDeals').toggleAttribute('aria-current', false); $('#navFavs').toggleAttribute('aria-current', false);
     if (state.view === 'deals') $('#navDeals').setAttribute('aria-current', 'page');
     if (state.view === 'favs') $('#navFavs').setAttribute('aria-current', 'page');
-    const deals = state.view === 'deals' || state.view === 'cuotas';
+    const deals = state.view === 'deals';
     $('#deals').hidden = !deals; $('#grid').hidden = deals; $('#toolbar').hidden = deals; $('#pills').hidden = true; $('#fbar').hidden = solo;
     renderTabs();
     const home = state.view === 'catalog' && !state.cat && !state.q && !state.brands.size && !state.stores.size && !state.price && !state.multi && state.stock && state.sort === 'rel' && !Object.values(state.facets).some(x => x.size);
     renderHome(home);
-    if (deals) { $('#more').hidden = true; $('#didyou').hidden = true; state.view === 'cuotas' ? renderCuotas() : renderDeals(); return; }
+    if (deals) { $('#more').hidden = true; $('#didyou').hidden = true; renderDeals(); return; }
     $('#deals').innerHTML = ''; // no dejar tarjetas de Ofertas escondidas en la página
     state.shown = 48; current = computeList();
     if (!solo) renderFilters();
@@ -1076,29 +1034,6 @@ footer .wrap{padding-block:20px 90px}
     else if (g === 'multi') state.multi = on;
     else if (g === 'stock') state.stock = on;
     else { const s = state.facets[g] ||= new Set(); on ? s.add(v) : s.delete(v); }
-  }
-
-  // ---- Vista Cuotas: crédito de cada tienda y productos con cuotas sin intereses publicadas ----
-  function renderCuotas(){
-    const withPlan = data.products.filter(p => p.o.some(o => o.a && o.q));
-    const prevView = state.view; state.view = 'catalog';
-    const cards = (list) => `<div class="grid">${list.map(card).join('')}</div>`;
-    const ids = Object.keys(CREDITO).filter(id => data.stores[id]);
-    const html = `
-      <section class="dsec">
-        <h3>Paga en cuotas</h3>
-        <p>Antes de pedir crédito, compara: en cuotas sin intereses la cuota es el precio dividido entre los meses, así que la tienda más barata te da la cuota más baja. Abre cualquier producto y en <b>Paga en cuotas</b> verás cuánto pagarías al mes en cada tienda.</p>
-        <div class="crgrid">${ids.map(id => `<div class="crcard"><span class="crst"><span class="sw" style="background:var(--s-${id})"></span>${esc(storeName(id))}</span><strong>${esc(CREDITO[id].n)}</strong><span class="crd">${esc(CREDITO[id].d)}</span><a href="${esc(CREDITO[id].u)}" target="_blank" rel="noopener" data-cr="${id}">${esc(CREDITO[id].cta)} ›</a></div>`).join('')}</div>
-        <p class="refnote">Información tomada de los sitios de cada tienda. Vitrina HN no ofrece crédito ni recibe solicitudes: cada enlace lleva al sitio oficial de la tienda.</p>
-      </section>
-      ${withPlan.length ? `<section class="dsec">
-        <h3>Con cuotas sin intereses publicadas</h3>
-        <p>Productos que la tienda anuncia en cuotas sin intereses con tarjeta.</p>
-        ${cards(withPlan.slice(0, 24))}
-      </section>` : ''}`;
-    state.view = prevView;
-    $('#deals').innerHTML = html;
-    window.vt?.('cuotas', {});
   }
 
   // ---- Ofertas reales ----
@@ -1248,7 +1183,6 @@ footer .wrap{padding-block:20px 90px}
           </tbody></table></div>
           <p class="refnote">Precios referenciales tomados de cada tienda. El precio válido es el que muestra la tienda al comprar.</p>
         </section>
-        <section class="sh-sec" id="shCuotas">${cuotasHtml(p, offers)}</section>
         <section class="sh-sec" id="shHist"></section>
         <section class="sh-sec" id="shSpecs" hidden></section>
       </div>`;
@@ -1261,8 +1195,6 @@ footer .wrap{padding-block:20px 90px}
     $('#shWa', sheet).addEventListener('click', () => window.vt?.('compartir', { producto: p.key, cat: p.c }));
     $('#shCopy', sheet).onclick = async () => { try { await navigator.clipboard.writeText(url); toast('Enlace copiado'); } catch { prompt('Copia este enlace:', url); } };
     $('#shFav', sheet).onclick = () => { toggleFav(p); const on = isFav(p); $('#shFav', sheet).setAttribute('aria-pressed', on); $('#shFav span', sheet).textContent = on ? 'Guardado' : 'Guardar'; };
-    if (!$('#shCuotas', sheet).innerHTML.trim()) $('#shCuotas', sheet).remove();
-    else $('#shCuotas', sheet).onclick = (e) => { const b = e.target.closest('[data-meses]'); if (!b) return; cuotaN = Number(b.dataset.meses); $('#shCuotas', sheet).innerHTML = cuotasHtml(p, offers); window.vt?.('cuotas', { producto: p.key, cat: p.c, q: cuotaN + ' meses' }); };
     $('#shCmp', sheet).onclick = () => { toggleCmp(p); $('#shCmp', sheet).textContent = inCmp(p) ? 'Quitar de comparar' : 'Comparar'; };
 
     const det = (await loadDetails(p.c))[p.id] || {};
@@ -1370,7 +1302,7 @@ footer .wrap{padding-block:20px 90px}
   }
 
   // ---- Rutas: #categoria, #ofertas, #favoritos, #p/<producto> ----
-  const viewHash = () => state.view === 'deals' ? '#ofertas' : state.view === 'cuotas' ? '#cuotas' : state.view === 'favs' ? '#favoritos' : state.cat ? '#' + state.cat : location.pathname + location.search;
+  const viewHash = () => state.view === 'deals' ? '#ofertas' : state.view === 'favs' ? '#favoritos' : state.cat ? '#' + state.cat : location.pathname + location.search;
   function route(){
     const h = decodeURIComponent(location.hash.slice(1));
     if (h.startsWith('p/')) {
@@ -1381,7 +1313,6 @@ footer .wrap{padding-block:20px 90px}
     if (sheet.open) { sheet.close(); sheetFromNav = false; }
     let view = 'catalog', cat = state.cat;
     if (h === 'ofertas') view = 'deals';
-    else if (h === 'cuotas') view = 'cuotas';
     else if (h === 'favoritos') view = 'favs';
     else cat = data.categories.some(c=>c.id===h) ? h : '';
     if (view !== state.view || cat !== state.cat) { if (cat !== state.cat) resetFilters(); state.view = view; state.cat = view === 'catalog' ? cat : ''; refresh(); }
@@ -1431,7 +1362,6 @@ footer .wrap{padding-block:20px 90px}
   if (q0) { $('#q').value = q0; state.q = q0; applyQuery(); }
   const h0 = decodeURIComponent(location.hash.slice(1));
   if (h0 === 'ofertas') state.view = 'deals';
-  else if (h0 === 'cuotas') state.view = 'cuotas';
   else if (h0 === 'favoritos') state.view = 'favs';
   else if (data.categories.some(c=>c.id===h0)) state.cat = h0;
   refresh();
