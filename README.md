@@ -54,7 +54,7 @@ Dos formas de hacer la captura (las dos usan el mismo código que `src/stores/je
 **A. Botón en el navegador**
 1. Crea un marcador nuevo y pega como URL el contenido de `tools/bookmarklet-jetstereo.txt`.
 2. Abre www.jetstereo.com y haz clic en el marcador. En ~1 minuto se descarga `jetstereo.json`.
-3. Súbelo en GitHub a la carpeta `data/manual/` (*Add file → Upload files*).
+3. Súbelo con doble clic en `tools/subir-captura.command` (toma `jetstereo.json`/`acosa.json` de Descargas, los revisa, los copia a `data/manual/` y hace push). También sirve subirlo a mano en GitHub (*Add file → Upload files*).
 
 **B. Automático desde la Mac (todos los días, Jetstereo y Acosa)**
 1. En Terminal, una sola vez: `bash <(curl -fsSL https://raw.githubusercontent.com/novawebstudio-HN/catalogo-tiendas-hn/main/tools/instalar-mac.sh)`

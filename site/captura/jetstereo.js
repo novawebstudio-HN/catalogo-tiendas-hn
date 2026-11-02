@@ -54,7 +54,7 @@ try{
 const items=await scrapeJetstereo({fetch:(u,o)=>fetch(u,{...(o||{}),credentials:'omit'}),sleep:(ms)=>new Promise(r=>setTimeout(r,ms*2))});
 const blob=new Blob([JSON.stringify({captured:new Date().toISOString(),source:'navegador',items})],{type:'application/json'});
 const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='jetstereo.json';document.body.appendChild(a);a.click();
-box.textContent='Listo: '+items.length+' productos. Sube jetstereo.json a data/manual/ en GitHub.';
+box.textContent='Listo: '+items.length+' productos. Ahora abre subir-captura.command (carpeta vitrina-hn/tools) para subirlo.';
 }catch(e){box.style.background='#B91C1C';box.textContent='Error: '+e.message;}
 setTimeout(()=>box.remove(),15000);
 })();
