@@ -56,12 +56,13 @@ Dos formas de hacer la captura (las dos usan el mismo código que `src/stores/je
 2. Abre www.jetstereo.com y haz clic en el marcador. En ~1 minuto se descarga `jetstereo.json`.
 3. Súbelo en GitHub a la carpeta `data/manual/` (*Add file → Upload files*).
 
-**B. Automático desde la Mac (una vez por semana)**
-1. `git clone` del repo y `npm install` (requiere Node 22).
-2. Prueba manual: `bash tools/jetstereo-mac.sh` (captura, hace commit y push).
-3. Programarlo: edita la ruta en `tools/com.novawebstudio.vitrina-jetstereo.plist`, cópialo a `~/Library/LaunchAgents/` y ejecuta `launchctl load` (instrucciones dentro del archivo).
+**B. Automático desde la Mac (todos los días, Jetstereo y Acosa)**
+1. En Terminal, una sola vez: `bash <(curl -fsSL https://raw.githubusercontent.com/novawebstudio-HN/catalogo-tiendas-hn/main/tools/instalar-mac.sh)`
+2. El instalador clona el repo en `~/vitrina-hn`, conecta GitHub (`gh auth login`), instala Playwright y programa `tools/captura-mac.sh` a las 7:40 p. m. con launchd.
+3. Cada corrida abre Google Chrome con un perfil propio (`~/.vitrina-hn-chrome`), visita la tienda, lee el catálogo, guarda `data/manual/*.json` y hace push. Avisa con una notificación de macOS. Registro: `~/Library/Logs/vitrina-captura.log`.
+4. Para quitarla: `launchctl bootout gui/$(id -u)/com.vitrinahn.captura`.
 
-La captura se identifica como `VitrinaHN/1.0` y va a ritmo pausado. Es una zona gris frente a los términos de Jetstereo: lo ideal sigue siendo pedirles un feed o permiso (`docs/carta-jetstereo.md`).
+La captura es automatización visible (Chrome la anuncia como tal), una vez al día y a ritmo pausado. Si la tienda pide verificación o bloquea, se detiene y no intenta pasarla. Es una zona gris frente a los términos de las tiendas: lo ideal sigue siendo pedirles un feed o permiso (`docs/carta-jetstereo.md`).
 
 ## Correr local
 
