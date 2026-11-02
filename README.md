@@ -58,7 +58,7 @@ Dos formas de hacer la captura (las dos usan el mismo código que `src/stores/je
 
 **B. Automático desde la Mac (todos los días, Jetstereo y Acosa)**
 1. En Terminal, una sola vez: `bash <(curl -fsSL https://raw.githubusercontent.com/novawebstudio-HN/catalogo-tiendas-hn/main/tools/instalar-mac.sh)`
-2. El instalador clona el repo en `~/vitrina-hn`, conecta GitHub (`gh auth login`), instala Playwright y programa `tools/captura-mac.sh` a las 7:40 p. m. con launchd.
+2. El instalador clona el repo en `~/vitrina-hn`, conecta GitHub (`gh auth login`), instala Playwright y programa `tools/captura-mac.sh --auto` con launchd a las 9:15 a. m., a las 7:40 p. m. y al encender la Mac (en modo `--auto` se salta si hubo una captura buena en las últimas 6 h). A mano: `bash ~/vitrina-hn/tools/captura-mac.sh`.
 3. Cada corrida abre Google Chrome con un perfil propio (`~/.vitrina-hn-chrome`), visita la tienda, lee el catálogo, guarda `data/manual/*.json` y hace push. Avisa con una notificación de macOS. Registro: `~/Library/Logs/vitrina-captura.log`.
 4. Para quitarla: `launchctl bootout gui/$(id -u)/com.vitrinahn.captura`.
 

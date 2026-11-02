@@ -8,7 +8,6 @@ export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
 REPO="novawebstudio-HN/catalogo-tiendas-hn"
 DIR="$HOME/vitrina-hn"
 LABEL="com.vitrinahn.captura"
-HORA="${HORA:-19}"; MINUTO="${MINUTO:-40}"   # todos los días a las 7:40 p. m.
 
 paso() { printf '\n\033[1;32m▸ %s\033[0m\n' "$1"; }
 falta() { printf '\n\033[1;31m✗ %s\033[0m\n' "$1"; exit 1; }
@@ -36,7 +35,7 @@ git config user.email >/dev/null || git config user.email "$(gh api user -q '.id
 npm install --no-save --no-audit --no-fund --silent playwright
 chmod +x tools/captura-mac.sh
 
-paso "Programando la captura diaria ($HORA:$(printf %02d "$MINUTO"))"
+paso "Programando la captura: 9:15 a. m., 7:40 p. m. y cada vez que enciendas la Mac"
 PLIST="$HOME/Library/LaunchAgents/$LABEL.plist"
 mkdir -p "$HOME/Library/LaunchAgents"
 cat > "$PLIST" <<EOF
@@ -45,9 +44,13 @@ cat > "$PLIST" <<EOF
 <plist version="1.0">
 <dict>
   <key>Label</key><string>$LABEL</string>
-  <key>ProgramArguments</key><array><string>/bin/bash</string><string>$DIR/tools/captura-mac.sh</string></array>
+  <key>ProgramArguments</key><array><string>/bin/bash</string><string>$DIR/tools/captura-mac.sh</string><string>--auto</string></array>
   <key>EnvironmentVariables</key><dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string></dict>
-  <key>StartCalendarInterval</key><dict><key>Hour</key><integer>$HORA</integer><key>Minute</key><integer>$MINUTO</integer></dict>
+  <key>StartCalendarInterval</key><array>
+    <dict><key>Hour</key><integer>9</integer><key>Minute</key><integer>15</integer></dict>
+    <dict><key>Hour</key><integer>19</integer><key>Minute</key><integer>40</integer></dict>
+  </array>
+  <key>RunAtLoad</key><true/>
   <key>StandardOutPath</key><string>$HOME/Library/Logs/vitrina-captura.log</string>
   <key>StandardErrorPath</key><string>$HOME/Library/Logs/vitrina-captura.log</string>
 </dict>
@@ -56,7 +59,4 @@ EOF
 launchctl bootout "gui/$(id -u)/$LABEL" >/dev/null 2>&1 || true
 launchctl bootstrap "gui/$(id -u)" "$PLIST"
 
-paso "Primera captura ahora (se abre una ventana de Chrome unos minutos; no la cierres)"
-bash tools/captura-mac.sh || true
-
-printf '\n\033[1;32m✓ Listo.\033[0m La captura corre sola todos los días a las %s:%02d si la Mac está encendida\n(si estaba dormida, corre al despertar). Registro: ~/Library/Logs/vitrina-captura.log\n' "$HORA" "$MINUTO"
+printf '\n\033[1;32m✓ Listo.\033[0m La captura corre a las 9:15 a. m. y 7:40 p. m. (si la Mac dormía, al despertar),\ny al encenderla si no hubo captura en las últimas 6 horas. Ahora mismo arranca una (se abre Chrome unos minutos).\nRegistro: ~/Library/Logs/vitrina-captura.log  ·  A mano: bash ~/vitrina-hn/tools/captura-mac.sh\n'
