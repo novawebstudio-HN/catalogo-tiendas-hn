@@ -11,7 +11,7 @@ on:
         default: ''
   push:
     branches: [main]
-    paths: ['src/**', 'data/manual/**', 'site/index.html', 'package.json', '.github/workflows/actualizar.yml']
+    paths: ['src/**', 'data/manual/**', 'site/*.html', 'package.json', '.github/workflows/actualizar.yml']
 
 permissions:
   contents: write
