@@ -35,7 +35,8 @@ export function updateHistory(hist, catalog, today = dayNumber()) {
 }
 
 // Agrega a cada oferta del catálogo: f = primer día con datos, l = precio más bajo de los 30 días
-// anteriores (sin contar hoy), w = precio de hace 7 días.
+// anteriores (sin contar hoy), w = precio de hace 7 días, v = precio anterior y d = día en que cambió
+// (solo si el último cambio fue en los últimos 30 días).
 export function applyStats(hist, catalog, today = dayNumber()) {
   catalog.today = today;
   catalog.epoch = '2026-01-01';
@@ -54,6 +55,9 @@ export function applyStats(hist, catalog, today = dayNumber()) {
       for (const e of h) if (e[0] > start && e[0] < today) min = Math.min(min, e[1]);
       if (Number.isFinite(min)) o.l = min;
       if (o.f <= today - 7) o.w = priceAt(h, today - 7)?.[1];
+      let j = h.length - 1;
+      while (j >= 0 && h[j][1] === o.p) j--;
+      if (j >= 0 && today - h[j + 1][0] <= 30) { o.v = h[j][1]; o.d = h[j + 1][0]; }
     }
   }
 }

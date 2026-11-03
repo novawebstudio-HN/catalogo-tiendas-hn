@@ -535,22 +535,27 @@ footer .wrap{padding-block:20px 90px}
 <script>
 (async function(){
   const $ = (s, r=document) => r.querySelector(s);
-  // Catálogo: se muestra al instante la copia guardada en el navegador y se revisa si hay una más nueva.
-  // Si la copia tiene más de 18 horas se espera la nueva (hasta 6 s); si no, se avisa cuando haya precios nuevos.
+  // Catálogo: se pide siempre la versión del servidor (si no cambió, responde rápido sin bajarla de nuevo).
+  // Si tarda, se muestra al instante la copia guardada en el navegador; cuando llega la nueva, la página se
+  // actualiza sola si la persona aún no empezó a usarla, y si ya la está usando, la nueva queda lista para la próxima visita.
   let data;
   const CAT = 'catalog.json', cacheOpen = () => (self.caches ? caches.open('vh-cat') : Promise.reject());
   const fresh = fetch(CAT, {cache:'no-cache'}).then(async (r) => {
     if (!r.ok) throw new Error('HTTP ' + r.status);
-    const copy = r.clone(); cacheOpen().then(c => c.put(CAT, copy)).catch(() => {});
+    const copy = r.clone(); await cacheOpen().then(c => c.put(CAT, copy)).catch(() => {});
     return r.json();
   });
   fresh.catch(() => {});
-  try { const r = await cacheOpen().then(c => c.match(CAT)); if (r) data = await r.json(); } catch {}
-  if (data && Date.now() - new Date(data.updated) > 18 * 3600e3) {
-    data = await Promise.race([fresh, new Promise(r => setTimeout(r, 6000))]).catch(() => null) || data;
-  } else if (data) {
-    const old = data.updated;
-    fresh.then(d => { if (d.updated !== old) setTimeout(() => toast('Hay precios nuevos', { label:'Actualizar', run: () => location.reload() }), 0); }).catch(() => {});
+  let cached = null;
+  try { const r = await cacheOpen().then(c => c.match(CAT)); if (r) cached = await r.json(); } catch {}
+  const stale = cached && Date.now() - new Date(cached.updated) > 18 * 3600e3;
+  data = cached ? await Promise.race([fresh, new Promise(r => setTimeout(r, stale ? 6000 : 1500))]).catch(() => null) || cached : null;
+  if (data === cached && cached) {
+    let used = false;
+    const mark = () => { used = true; };
+    addEventListener('pointerdown', mark, { once: true, capture: true }); addEventListener('keydown', mark, { once: true, capture: true });
+    addEventListener('scroll', () => { if (scrollY > 150) used = true; }, { passive: true });
+    fresh.then(d => { if (d.updated !== cached.updated && !used && !location.hash.startsWith('#p/')) location.reload(); }).catch(() => {});
   }
   if (!data) {
     try { data = await fresh; }
@@ -735,6 +740,8 @@ footer .wrap{padding-block:20px 90px}
   const discount = (o) => o && o.r > o.p ? (o.r - o.p) / o.r : 0;
   const tracked = (o) => o.f != null ? TODAY - o.f : 0;
   // Bajada real: el precio de hoy es menor que el más bajo de los 30 días anteriores, o que hace 7 días.
+  // Subida reciente: la oferta (en existencia) que más subió en los últimos 14 días.
+  const riseOf = (p) => p.o.filter(o => o.a && o.v != null && o.p > o.v * 1.02 && o.p < o.v * 1.6 && o.p - o.v >= 100 && TODAY - o.d <= 14).sort((a,b) => (b.p - b.v) - (a.p - a.v))[0];
   const dropOf = (o) => { const ref = Math.max(o.l ?? 0, o.w ?? 0); return ref > o.p * 1.02 ? ref - o.p : 0; };
 
   function priceBuckets(list){
@@ -844,8 +851,11 @@ footer .wrap{padding-block:20px 90px}
     if (!best) return out;
     const drop = dropOf(best);
     if (drop) out.push(['', `Bajó ${plain(drop)}`]);
+    else if (best.v > best.p * 1.01 && TODAY - best.d <= 14) out.push(['', `Bajó ${plain(best.v - best.p)}`, `Antes ${plain(best.v)} en ${storeName(best.s)} (cambió el ${dayDate(best.d)}).`]);
     else if (best.l != null && best.p < best.l) out.push(['', 'Precio más bajo en 30 días']);
     if (best.r > best.p * 1.01 && tracked(best) >= 7 && best.l != null && best.p >= best.l) out.push(['warn', 'Sin rebaja real', `Muestra un precio "antes" de ${plain(best.r)}, pero no está más barato que en los últimos ${Math.min(30, tracked(best))} días.`]);
+    const up = riseOf(p);
+    if (up) out.push(['warn', `Subió ${plain(up.p - up.v)} en ${storeName(up.s)}`, `Antes ${plain(up.v)}, ahora ${plain(up.p)} (cambió el ${dayDate(up.d)}).`]);
     const fe = favEntry(p);
     if (fe && best.p < fe.p - 1) out.push(['', `Bajó ${plain(fe.p - best.p)} desde que lo guardaste`]);
     return out;
@@ -1038,7 +1048,7 @@ footer .wrap{padding-block:20px 90px}
 
   // ---- Ofertas reales ----
   function renderDeals(){
-    const drops = [], gaps = [], st = {};
+    const drops = [], rises = [], gaps = [], st = {};
     for (const p of data.products) {
       const av = allOffers(p).filter(o => o.a);
       for (const o of p.o) {
@@ -1048,9 +1058,11 @@ footer .wrap{padding-block:20px 90px}
       }
       const b = av[0];
       if (b && dropOf(b)) drops.push([p, dropOf(b) / (b.p + dropOf(b))]);
+      else if (b && b.v > b.p * 1.02 && TODAY - b.d <= 14) drops.push([p, (b.v - b.p) / b.v]);
+      const up = riseOf(p); if (up) rises.push([p, up.p - up.v]);
       if (av.length >= 2) { const hi = av[av.length-1].p; const pct = (hi - b.p) / hi; if (pct >= 0.12 && hi - b.p >= 300) gaps.push([p, hi - b.p, pct]); }
     }
-    drops.sort((a,b)=>b[1]-a[1]); gaps.sort((a,b)=>b[1]-a[1]);
+    drops.sort((a,b)=>b[1]-a[1]); rises.sort((a,b)=>b[1]-a[1]); gaps.sort((a,b)=>b[1]-a[1]);
     const prevView = state.view; state.view = 'catalog'; const saveStock = state.stock; // las tarjetas usan los filtros por defecto
     const cards = (list) => `<div class="grid">${list.map(card).join('')}</div>`;
     const stores = Object.entries(st).filter(([id]) => data.stores[id]).sort((a,b)=>(b[1].adv/b[1].n)-(a[1].adv/a[1].n));
@@ -1061,6 +1073,11 @@ footer .wrap{padding-block:20px 90px}
         <h3>Bajaron de precio</h3>
         <p>Productos que hoy están más baratos que en los días anteriores.</p>
         ${cards(drops.slice(0, 24).map(x=>x[0]))}
+      </section>` : ''}
+      ${rises.length ? `<section class="dsec">
+        <h3>Subieron de precio</h3>
+        <p>Productos que una tienda subió en los últimos 14 días. Revisa si otra tienda lo tiene más barato.</p>
+        ${cards(rises.slice(0, 24).map(x=>x[0]))}
       </section>` : ''}
       <section class="dsec">
         <h3>Mayor diferencia entre tiendas</h3>
