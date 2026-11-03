@@ -7,71 +7,71 @@
     "note": "Precios de una captura manual desde Honduras."
   },
   "diunsa": {
-    "ok": true,
+    "ok": false,
     "updated": "2026-11-02T21:47:39.168Z",
     "count": 1547,
-    "note": ""
+    "note": "",
+    "error": "The operation was aborted due to timeout"
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-02T21:50:22.636Z",
-    "count": 428,
+    "updated": "2026-11-03T19:37:13.270Z",
+    "count": 423,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-02T21:50:35.765Z",
+    "updated": "2026-11-03T19:37:27.406Z",
     "count": 315,
     "note": ""
   },
   "ladylee": {
     "ok": true,
-    "updated": "2026-11-02T21:51:50.207Z",
-    "count": 941,
+    "updated": "2026-11-03T19:38:53.959Z",
+    "count": 932,
     "note": ""
   },
   "walmart": {
     "ok": true,
-    "updated": "2026-11-02T21:52:15.525Z",
-    "count": 360,
+    "updated": "2026-11-03T19:39:08.722Z",
+    "count": 352,
     "note": ""
   },
   "gallo": {
     "ok": true,
-    "updated": "2026-11-02T21:55:04.431Z",
-    "count": 333,
+    "updated": "2026-11-03T19:44:47.571Z",
+    "count": 329,
     "note": ""
   },
   "radioshack": {
     "ok": true,
-    "updated": "2026-11-02T21:57:09.207Z",
-    "count": 241,
+    "updated": "2026-11-03T19:47:04.327Z",
+    "count": 243,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "tropigas": {
     "ok": true,
-    "updated": "2026-11-02T21:59:55.578Z",
+    "updated": "2026-11-03T19:49:49.820Z",
     "count": 331,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "acosa": {
     "ok": true,
     "manual": true,
-    "updated": "2026-11-02T14:25:22.964Z",
-    "count": 622,
+    "updated": "2026-11-03T15:18:49.509Z",
+    "count": 623,
     "note": "Precios de una captura manual desde Honduras."
   },
   "gamestation": {
-    "ok": false,
-    "updated": "2026-11-01T23:33:43.142Z",
+    "ok": true,
+    "updated": "2026-11-03T19:54:12.069Z",
     "count": 2708,
-    "note": "",
-    "error": "Game Station play4/ps5 HTTP 429"
+    "note": ""
   },
   "sycom": {
     "ok": true,
-    "updated": "2026-11-02T22:01:24.336Z",
-    "count": 431,
+    "updated": "2026-11-03T19:55:33.220Z",
+    "count": 429,
     "note": ""
   }
 }
