@@ -59,7 +59,7 @@ function page({ path, title, desc, image, body, jsonld, depth }) {
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">
 <link rel="canonical" href="${url}">
-<link rel="icon" href="${up}favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="${up}apple-touch-icon.png">
+<link rel="icon" href="${up}favicon.svg" type="image/svg+xml"><link rel="icon" href="${up}favicon-96.png" sizes="96x96" type="image/png"><link rel="icon" href="${up}icon-192.png" sizes="192x192" type="image/png"><link rel="apple-touch-icon" href="${up}apple-touch-icon.png">
 <meta property="og:type" content="website"><meta property="og:site_name" content="Vitrina HN"><meta property="og:locale" content="es_HN">
 <meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(desc)}"><meta property="og:url" content="${url}">
 <meta property="og:image" content="${image ? `${SITE}/${image}` : `${SITE}/og.png`}">
