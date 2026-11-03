@@ -54,7 +54,7 @@ function page({ path, title, desc, image, body, jsonld, depth }) {
   const up = '../'.repeat(depth);
   const url = `${SITE}/${path}`;
   return `<!doctype html>
-<html lang="es"><head>
+<html lang="es-HN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(desc)}">

@@ -37,7 +37,7 @@ setTimeout(()=>box.remove(),15000);
 const href = async (id) => (await readFile(`tools/bookmarklet-${id}.txt`, 'utf8')).replace(/"/g, '%22');
 const UPLOAD = 'https://github.com/novawebstudio-HN/catalogo-tiendas-hn/upload/main/data/manual';
 const kit = `<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="es-HN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Captura de precios</title>
 <style>
 :root{--ink:#0B1F17;--muted:#5D6873;--line:#E6EAEE;--soft:#F5F7F9;--tag:#E8F7F0;--act:#059669}
