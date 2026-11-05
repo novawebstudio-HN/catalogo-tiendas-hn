@@ -8,69 +8,69 @@
   },
   "diunsa": {
     "ok": true,
-    "updated": "2026-11-04T19:52:40.330Z",
-    "count": 1552,
+    "updated": "2026-11-05T20:04:38.379Z",
+    "count": 1553,
     "note": ""
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-04T19:55:44.419Z",
+    "updated": "2026-11-05T20:07:45.486Z",
     "count": 423,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-04T19:56:01.682Z",
-    "count": 315,
+    "updated": "2026-11-05T20:08:04.862Z",
+    "count": 316,
     "note": ""
   },
   "ladylee": {
     "ok": true,
-    "updated": "2026-11-04T19:57:23.036Z",
-    "count": 932,
+    "updated": "2026-11-05T20:09:23.718Z",
+    "count": 930,
     "note": ""
   },
   "walmart": {
     "ok": true,
-    "updated": "2026-11-04T19:57:31.805Z",
-    "count": 348,
+    "updated": "2026-11-05T20:09:44.036Z",
+    "count": 354,
     "note": ""
   },
   "gallo": {
     "ok": true,
-    "updated": "2026-11-04T20:01:09.019Z",
-    "count": 324,
+    "updated": "2026-11-05T20:15:08.000Z",
+    "count": 329,
     "note": ""
   },
   "radioshack": {
     "ok": true,
-    "updated": "2026-11-04T20:03:21.472Z",
+    "updated": "2026-11-05T20:17:10.454Z",
     "count": 243,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "tropigas": {
     "ok": true,
-    "updated": "2026-11-04T20:06:09.683Z",
+    "updated": "2026-11-05T20:19:56.554Z",
     "count": 331,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "acosa": {
     "ok": true,
     "manual": true,
-    "updated": "2026-11-04T01:43:37.693Z",
+    "updated": "2026-11-05T15:18:19.358Z",
     "count": 623,
     "note": "Precios de una captura manual desde Honduras."
   },
   "gamestation": {
     "ok": true,
-    "updated": "2026-11-04T20:11:14.331Z",
+    "updated": "2026-11-05T20:24:40.651Z",
     "count": 2708,
     "note": ""
   },
   "sycom": {
     "ok": true,
-    "updated": "2026-11-04T20:12:42.939Z",
-    "count": 424,
+    "updated": "2026-11-05T20:25:58.180Z",
+    "count": 426,
     "note": ""
   }
 }
