@@ -8,68 +8,70 @@
   },
   "diunsa": {
     "ok": true,
-    "updated": "2026-11-05T20:04:38.379Z",
-    "count": 1553,
+    "updated": "2026-11-06T19:30:43.986Z",
+    "count": 1554,
     "note": ""
   },
   "curacao": {
     "ok": true,
-    "updated": "2026-11-05T20:07:45.486Z",
-    "count": 423,
+    "updated": "2026-11-06T19:33:38.879Z",
+    "count": 10,
     "note": "Cobertura parcial: primeros productos de cada categoría."
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-05T20:08:04.862Z",
+    "updated": "2026-11-06T19:33:53.432Z",
     "count": 316,
     "note": ""
   },
   "ladylee": {
     "ok": true,
-    "updated": "2026-11-05T20:09:23.718Z",
-    "count": 930,
+    "updated": "2026-11-06T19:35:06.648Z",
+    "count": 928,
     "note": ""
   },
   "walmart": {
     "ok": true,
-    "updated": "2026-11-05T20:09:44.036Z",
-    "count": 354,
+    "updated": "2026-11-06T19:35:23.109Z",
+    "count": 352,
     "note": ""
   },
   "gallo": {
     "ok": true,
-    "updated": "2026-11-05T20:15:08.000Z",
-    "count": 329,
+    "updated": "2026-11-06T19:40:37.984Z",
+    "count": 336,
     "note": ""
   },
   "radioshack": {
-    "ok": true,
+    "ok": false,
     "updated": "2026-11-05T20:17:10.454Z",
     "count": 243,
-    "note": "Cobertura parcial: primeros productos de cada categoría."
+    "note": "Cobertura parcial: primeros productos de cada categoría.",
+    "error": "RadioShack sin productos ()"
   },
   "tropigas": {
-    "ok": true,
+    "ok": false,
     "updated": "2026-11-05T20:19:56.554Z",
     "count": 331,
-    "note": "Cobertura parcial: primeros productos de cada categoría."
+    "note": "Cobertura parcial: primeros productos de cada categoría.",
+    "error": "Tropigas sin productos ()"
   },
   "acosa": {
     "ok": true,
     "manual": true,
-    "updated": "2026-11-05T15:18:19.358Z",
-    "count": 623,
+    "updated": "2026-11-06T15:18:08.408Z",
+    "count": 626,
     "note": "Precios de una captura manual desde Honduras."
   },
   "gamestation": {
     "ok": true,
-    "updated": "2026-11-05T20:24:40.651Z",
+    "updated": "2026-11-06T19:49:39.157Z",
     "count": 2708,
     "note": ""
   },
   "sycom": {
     "ok": true,
-    "updated": "2026-11-05T20:25:58.180Z",
+    "updated": "2026-11-06T19:50:54.920Z",
     "count": 426,
     "note": ""
   }
