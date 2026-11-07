@@ -7,39 +7,41 @@
     "note": "Precios de una captura manual desde Honduras."
   },
   "diunsa": {
-    "ok": true,
+    "ok": false,
     "updated": "2026-11-06T19:30:43.986Z",
     "count": 1554,
-    "note": ""
+    "note": "",
+    "error": "Diunsa 103  HTTP 400"
   },
   "curacao": {
-    "ok": true,
+    "ok": false,
     "updated": "2026-11-06T19:33:38.879Z",
     "count": 10,
-    "note": "Cobertura parcial: primeros productos de cada categoría."
+    "note": "Cobertura parcial: primeros productos de cada categoría.",
+    "error": "La Curacao sin productos ()"
   },
   "elektra": {
     "ok": true,
-    "updated": "2026-11-06T19:33:53.432Z",
+    "updated": "2026-11-07T17:49:36.802Z",
     "count": 316,
     "note": ""
   },
   "ladylee": {
     "ok": true,
-    "updated": "2026-11-06T19:35:06.648Z",
+    "updated": "2026-11-07T17:50:46.709Z",
     "count": 928,
     "note": ""
   },
   "walmart": {
     "ok": true,
-    "updated": "2026-11-06T19:35:23.109Z",
-    "count": 352,
+    "updated": "2026-11-07T17:51:08.043Z",
+    "count": 344,
     "note": ""
   },
   "gallo": {
     "ok": true,
-    "updated": "2026-11-06T19:40:37.984Z",
-    "count": 336,
+    "updated": "2026-11-07T17:55:58.820Z",
+    "count": 332,
     "note": ""
   },
   "radioshack": {
@@ -59,20 +61,20 @@
   "acosa": {
     "ok": true,
     "manual": true,
-    "updated": "2026-11-06T15:18:08.408Z",
-    "count": 626,
+    "updated": "2026-11-07T01:46:41.070Z",
+    "count": 636,
     "note": "Precios de una captura manual desde Honduras."
   },
   "gamestation": {
     "ok": true,
-    "updated": "2026-11-06T19:49:39.157Z",
+    "updated": "2026-11-07T18:04:33.620Z",
     "count": 2708,
     "note": ""
   },
   "sycom": {
     "ok": true,
-    "updated": "2026-11-06T19:50:54.920Z",
-    "count": 426,
+    "updated": "2026-11-07T18:05:57.762Z",
+    "count": 439,
     "note": ""
   }
 }
